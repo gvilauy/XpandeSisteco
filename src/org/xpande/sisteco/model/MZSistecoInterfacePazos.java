@@ -1,8 +1,11 @@
 package org.xpande.sisteco.model;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.Adempiere;
 import org.compiere.impexp.ImpFormat;
+import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
+import org.compiere.util.DB;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,7 +44,8 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
         try {
 
-            ImpFormat formatoImpLineaVenta = ImpFormat.load ("Sisteco_Pazos_LineaVenta");
+            ImpFormat formatoImpLineaVenta = ImpFormat.load("Sisteco_Pazos_LineaVenta");
+            ImpFormat formatoImpCabezal = ImpFormat.load("Sisteco_Pazos_CabezalTicket");
 
             this.setIsBatchProcessed(isBatchProcessed);
             this.setStartDate(new Timestamp(System.currentTimeMillis()));
@@ -51,17 +55,54 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             fReader = new FileReader(archivoPazos);
             bReader = new BufferedReader(fReader);
 
+            int contLineas = 0;
+            int zSistecoTkCVtaID = 0;
+            String action = "";
+
             // Leo lineas del archivo
             String lineaArchivo = bReader.readLine();
 
             while (lineaArchivo != null){
 
-                if (!this.IsLineaArchivoCabezal(lineaArchivo)){
+                contLineas++;
 
-                    String lineSplit[] = lineaArchivo.split("\\|");
+                String nodos[] = lineaArchivo.split("\\|");
 
-                    if (lineSplit[2].toString().trim().equalsIgnoreCase("1")){
-                        formatoImpLineaVenta.updateDB(getCtx(), lineaArchivo, get_TrxName());
+                if (this.IsLineaArchivoCabezal(lineaArchivo)){
+
+                    zSistecoTkCVtaID = formatoImpCabezal.updateDB(lineaArchivo, getCtx(), get_TrxName());
+
+                    if (zSistecoTkCVtaID <= 0){
+                        throw new AdempiereException("Error al insertar linea cabezal " + contLineas + " : " + lineaArchivo);
+                    }
+                    else{
+
+                        // Seteo ID del proceso de interface en el cabezal
+                        action = " update " +  I_Z_Sisteco_TK_CVta.Table_Name +
+                                " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() +
+                                " where " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID;
+                        DB.executeUpdateEx(action, get_TrxName());
+
+                    }
+                }
+                else{
+
+                    ImpFormat formatoImpLinea = formatoImpLineaVenta;
+                    MTable tablaFormato = new MTable(getCtx(), formatoImpLinea.getAD_Table_ID(), null);
+
+                    if (nodos[2].toString().trim().equalsIgnoreCase("1")){
+
+                        int ID = formatoImpLineaVenta.updateDB(lineaArchivo, getCtx(), get_TrxName());
+
+                        if (ID <= 0){
+                            throw new AdempiereException("Falla en linea " + contLineas + " : " + lineaArchivo);
+                        }
+
+                        // Seteo ID de cabezal en tabla de linea
+                        action = " update " +  tablaFormato.getTableName() +
+                                " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID +
+                                " where " + tablaFormato.getTableName() + "_ID = " + ID;
+                        DB.executeUpdateEx(action, get_TrxName());
                     }
                 }
 
