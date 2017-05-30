@@ -3,6 +3,8 @@ package org.xpande.sisteco.model;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.Adempiere;
 import org.compiere.impexp.ImpFormat;
+import org.compiere.impexp.MImpFormat;
+import org.compiere.model.MEXPFormat;
 import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -12,6 +14,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -23,6 +27,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
     //Logger
     private CLogger log = CLogger.getCLogger (getClass());
+
+    // Modelo de configuración del proceso de Interface
+    private MZSistecoConfig sistecoConfig = null;
 
     public MZSistecoInterfacePazos(Properties ctx, int Z_SistecoInterfacePazos_ID, String trxName) {
         super(ctx, Z_SistecoInterfacePazos_ID, trxName);
@@ -42,13 +49,20 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         FileReader fReader = null;
         BufferedReader bReader = null;
 
-        try {
+        HashMap<String, ImpFormat> hashFormatosImp = new HashMap<String, ImpFormat>();
 
-            ImpFormat formatoImpLineaVenta = ImpFormat.load("Sisteco_Pazos_LineaVenta");
-            ImpFormat formatoImpCabezal = ImpFormat.load("Sisteco_Pazos_CabezalTicket");
+        try {
 
             this.setIsBatchProcessed(isBatchProcessed);
             this.setStartDate(new Timestamp(System.currentTimeMillis()));
+
+            // Instancio modelo de configuración del proceso de Interface
+            if (this.sistecoConfig == null) this.sistecoConfig = MZSistecoConfig.getDefault(getCtx(), null);
+
+            // Obtengo formatos de importación desde configuración del proceso de Interface
+            ImpFormat formatoImpLineaVenta = ImpFormat.load("Sisteco_Pazos_LineaVenta");
+            ImpFormat formatoImpCabezal = ImpFormat.load("Sisteco_Pazos_CabezalTicket");
+            hashFormatosImp = this.getFormatosImp();
 
             // Abro archivo
             File archivoPazos = new File(this.getFileName());
@@ -130,6 +144,36 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 }
             }
         }
+    }
+
+    /***
+     * Xpande. Created by Gabriel Vila on 6/1/17
+     * Obtiene y retorna formatos de impresión desde la configuración del proceso de Interface
+     * @return
+     */
+    private HashMap<String, ImpFormat> getFormatosImp() {
+
+        HashMap<String, ImpFormat> hashValues = new HashMap<String, ImpFormat>();
+
+        try{
+
+            List<MZSistecoTipoLineaPazos> tipos = this.sistecoConfig.getTipoLineasPazos();
+
+            for (MZSistecoTipoLineaPazos tipoLinea: tipos) {
+                if (tipoLinea.getAD_ImpFormat_ID() > 0){
+
+                    MImpFormat mimp = (MImpFormat) tipoLinea.getAD_ImpFormat();
+                    ImpFormat impFormat = ImpFormat.load(mimp.getName().trim());
+
+                    hashValues.put(tipoLinea.getValue().trim(), impFormat);
+                }
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return hashValues;
     }
 
     /***
