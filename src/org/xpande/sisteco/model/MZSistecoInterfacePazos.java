@@ -39,12 +39,54 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         super(ctx, rs, trxName);
     }
 
+
     /***
      * Xpande. Created by Gabriel Vila on 5/27/17.
      * Ejecuta interface Pazos de Sisteco considerando el archivo seleccionado.
      * @param isBatchProcessed : True si el proceso se corre de manera Batch, False si lo corre el usuario de manera manual.
      */
     public void execute(boolean isBatchProcessed) {
+
+        try{
+
+            this.setIsBatchProcessed(isBatchProcessed);
+
+            // Timpo de inicio de proceso
+            this.setStartDate(new Timestamp(System.currentTimeMillis()));
+
+            // Limpio descripcion anterior
+            if ((this.getDescription() != null) && (!this.getDescription().trim().equalsIgnoreCase(""))){
+                DB.executeUpdateEx( "update z_sistecointerfacepazos set description ='' where z_sistecointerfacepazos_id =" + this.get_ID(), null);
+            }
+
+            // Instancio modelo de configuración del proceso de Interface
+            if (this.sistecoConfig == null) this.sistecoConfig = MZSistecoConfig.getDefault(getCtx(), null);
+
+            // Obengo información leyendo el archivo seleccionado
+            this.getDataFromFile();
+
+            // Actualizo campos necesarios
+            this.updateData();
+
+            // Sumarizo información cargada
+            this.setTotals();
+
+            // Tiempo final de proceso
+            this.setEndDate(new Timestamp(System.currentTimeMillis()));
+
+            this.saveEx();
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+    }
+
+    /***
+     * Lee archivo a procesar y va guardando información en base de datos.
+     * Xpande. Created by Gabriel Vila on 6/5/17.
+     */
+    private void getDataFromFile() {
 
         FileReader fReader = null;
         BufferedReader bReader = null;
@@ -55,13 +97,6 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         String lineaArchivo = null;
 
         try {
-
-            this.setIsBatchProcessed(isBatchProcessed);
-            this.setDescription("");
-            this.setStartDate(new Timestamp(System.currentTimeMillis()));
-
-            // Instancio modelo de configuración del proceso de Interface
-            if (this.sistecoConfig == null) this.sistecoConfig = MZSistecoConfig.getDefault(getCtx(), null);
 
             // Obtengo formatos de importación desde configuración del proceso de Interface
             //ImpFormat formatoImpLineaVenta = ImpFormat.load("Sisteco_Pazos_LineaVenta");
@@ -97,8 +132,8 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
                         // Seteo ID del proceso de interface en el cabezal
                         action = " update " + I_Z_Sisteco_TK_CVta.Table_Name +
-                                 " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + //", " +
-                                 //" datetrx = (select to_timestamp(st_timestampticket, 'YYYYMMDDHH24MISS')) " +
+                                 " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + ", " +
+                                 " datetrx = (select to_timestamp(st_timestampticket, 'YYYYMMDDHH24MISS')) " +
                                  " where " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID;
                         DB.executeUpdateEx(action, get_TrxName());
 
@@ -129,8 +164,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                         // Seteo ID de cabezal y demas campos en tabla de linea
                         action = " update " + tablaFormato.getTableName() +
                                 " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID + ", " +
-                                " st_positionfile ='" + String.valueOf(contLineas) + "' " +
-                                //" datetrx = (select to_timestamp(to_char('" + cabezalTicket.getDateTrx() + "', 'YYYYMMDD') || st_timestamplinea, 'YYYYMMDDHH24MISS')) " +
+                                " st_positionfile ='" + String.valueOf(contLineas) + "', " +
+                                X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + ", " +
+                                " datetrx = (select to_timestamp(to_char('" + cabezalTicket.getDateTrx() + "', 'YYYYMMDD') || st_timestamplinea, 'YYYYMMDDHH24MISS')) " +
                                 " where " + tablaFormato.getTableName() + "_ID = " + ID;
                         DB.executeUpdateEx(action, get_TrxName());
 
@@ -150,8 +186,6 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 lineaArchivo = bReader.readLine();
             }
 
-            this.setEndDate(new Timestamp(System.currentTimeMillis()));
-            this.saveEx();
         }
         catch (Exception e){
             if (lineaArchivo == null){
@@ -231,6 +265,176 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         }
 
         return false;
+    }
+
+
+    /***
+     * Se actualizan aquellos campos necesarios en las tablas de sisteco en adempiere.
+     * Xpande. Created by Gabriel Vila on 6/5/17.
+     */
+    private void updateData() {
+
+        String action = "";
+
+        try{
+
+            // Actualizo producto en tabla de lineas de venta
+            action = " update Z_Sisteco_TK_LVta set m_product_id = prod.m_product_id " +
+                    " from m_product prod " +
+                    " where Z_Sisteco_TK_LVta.st_codigoarticulo = prod.value " +
+                    " and Z_Sisteco_TK_LVta.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LVta.st_codigoarticulo is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            action = " update Z_Sisteco_TK_LVta set m_product_id = prod.m_product_id " +
+                    " from Z_productoupc pupc " +
+                    " where Z_Sisteco_TK_LVta.st_codigoarticulooriginal = pupc.upc " +
+                    " and Z_Sisteco_TK_LVta.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LVta.st_codigoarticulo is null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo producto en tabla de devoluciones de items
+            action = " update Z_Sisteco_TK_LDev set m_product_id = prod.m_product_id " +
+                    " from m_product prod " +
+                    " where Z_Sisteco_TK_LDev.st_codigoartsubf = prod.value " +
+                    " and Z_Sisteco_TK_LDev.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LDev.st_codigoartsubf is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            action = " update Z_Sisteco_TK_LDev set m_product_id = prod.m_product_id " +
+                    " from Z_productoupc pupc " +
+                    " where Z_Sisteco_TK_LDev.st_codigoarticulooriginal = pupc.upc " +
+                    " and Z_Sisteco_TK_LDev.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LDev.st_codigoartsubf is null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo producto en tabla de cancelaciones de items
+            action = " update Z_Sisteco_TK_LCancela set m_product_id = prod.m_product_id " +
+                    " from m_product prod " +
+                    " where Z_Sisteco_TK_LCancela.st_codigoartsubf = prod.value " +
+                    " and Z_Sisteco_TK_LCancela.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LCancela.st_codigoartsubf is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de retiro
+            action = " update Z_Sisteco_TK_LRetiro set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_LRetiro.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_LRetiro.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LRetiro.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de fondeo
+            action = " update Z_Sisteco_TK_LFondeo set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_LFondeo.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_LFondeo.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LFondeo.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de venta con tarjeta
+            action = " update Z_Sisteco_TK_VtaTarjeta set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_VtaTarjeta.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_VtaTarjeta.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_VtaTarjeta.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de venta con luncheon
+            action = " update Z_Sisteco_TK_VtaLuncheon set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_VtaLuncheon.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_VtaLuncheon.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_VtaLuncheon.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de venta con ticket alimentacion
+            action = " update Z_Sisteco_TK_VtaAlim set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_VtaAlim.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_VtaAlim.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_VtaAlim.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de venta con efectivo
+            action = " update Z_Sisteco_TK_VtaEfectivo set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_VtaEfectivo.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_VtaEfectivo.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_VtaEfectivo.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de venta cuenta corriente
+            action = " update Z_Sisteco_TK_VtaCtaCte set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_VtaCtaCte.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_VtaCtaCte.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_VtaCtaCte.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo codigo de servicio para lineas de pago de servicio
+            action = " update Z_Sisteco_TK_PagoServicio set z_sistecotiposerviciopazos_id = ts.z_sistecotiposerviciopazos_id " +
+                    " from z_sistecotiposerviciopazos ts " +
+                    " where Z_Sisteco_TK_PagoServicio.st_codigoservicio = ts.value " +
+                    " and Z_Sisteco_TK_PagoServicio.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_PagoServicio.st_codigoservicio is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de pago con cheque
+            action = " update Z_Sisteco_TK_PagoCheque set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_PagoCheque.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_PagoCheque.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_PagoCheque.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            action = " update Z_Sisteco_TK_PagoCheque set c_bpartner_id = bp.c_bpartner_id " +
+                    " from c_bpartner bp " +
+                    " where Z_Sisteco_TK_PagoCheque.st_idcliente = bp.value " +
+                    " and Z_Sisteco_TK_PagoCheque.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_PagoCheque.st_idcliente is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de pago tacre
+            action = " update Z_Sisteco_TK_PagoTacre set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_PagoTacre.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_PagoTacre.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_PagoTacre.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo medio de pago para lineas de redondeo
+            action = " update Z_Sisteco_TK_LineaRedondeo set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_LineaRedondeo.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_LineaRedondeo.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LineaRedondeo.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Actualizo codigo de servicio para lineas de devolucion de pago de servicio
+            action = " update Z_Sisteco_TK_DevPagoServ set z_sistecotiposerviciopazos_id = ts.z_sistecotiposerviciopazos_id " +
+                    " from z_sistecotiposerviciopazos ts " +
+                    " where Z_Sisteco_TK_DevPagoServ.st_codigoservicio = ts.value " +
+                    " and Z_Sisteco_TK_DevPagoServ.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_DevPagoServ.st_codigoservicio is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+    }
+
+    private void setTotals() {
+
+        try{
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
     }
 
 }
