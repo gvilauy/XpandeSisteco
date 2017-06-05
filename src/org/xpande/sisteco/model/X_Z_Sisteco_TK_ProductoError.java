@@ -21,10 +21,10 @@ import java.sql.ResultSet;
 import java.util.Properties;
 import org.compiere.model.*;
 
-/** Generated Model for Z_Sisteco_TK_LineaError
+/** Generated Model for Z_Sisteco_TK_ProductoError
  *  @author Adempiere (generated) 
  *  @version Release 3.9.0 - $Id$ */
-public class X_Z_Sisteco_TK_LineaError extends PO implements I_Z_Sisteco_TK_LineaError, I_Persistent 
+public class X_Z_Sisteco_TK_ProductoError extends PO implements I_Z_Sisteco_TK_ProductoError, I_Persistent 
 {
 
 	/**
@@ -33,17 +33,22 @@ public class X_Z_Sisteco_TK_LineaError extends PO implements I_Z_Sisteco_TK_Line
 	private static final long serialVersionUID = 20170605L;
 
     /** Standard Constructor */
-    public X_Z_Sisteco_TK_LineaError (Properties ctx, int Z_Sisteco_TK_LineaError_ID, String trxName)
+    public X_Z_Sisteco_TK_ProductoError (Properties ctx, int Z_Sisteco_TK_ProductoError_ID, String trxName)
     {
-      super (ctx, Z_Sisteco_TK_LineaError_ID, trxName);
-      /** if (Z_Sisteco_TK_LineaError_ID == 0)
+      super (ctx, Z_Sisteco_TK_ProductoError_ID, trxName);
+      /** if (Z_Sisteco_TK_ProductoError_ID == 0)
         {
-			setZ_Sisteco_TK_LineaError_ID (0);
+			setColumnName (null);
+			setTableName (null);
+			setValue (null);
+			setZ_SistecoInterfacePazos_ID (0);
+			setZ_Sisteco_TK_CVta_ID (0);
+			setZ_Sisteco_TK_ProductoError_ID (0);
         } */
     }
 
     /** Load Constructor */
-    public X_Z_Sisteco_TK_LineaError (Properties ctx, ResultSet rs, String trxName)
+    public X_Z_Sisteco_TK_ProductoError (Properties ctx, ResultSet rs, String trxName)
     {
       super (ctx, rs, trxName);
     }
@@ -65,68 +70,88 @@ public class X_Z_Sisteco_TK_LineaError extends PO implements I_Z_Sisteco_TK_Line
 
     public String toString()
     {
-      StringBuffer sb = new StringBuffer ("X_Z_Sisteco_TK_LineaError[")
+      StringBuffer sb = new StringBuffer ("X_Z_Sisteco_TK_ProductoError[")
         .append(get_ID()).append("]");
       return sb.toString();
     }
 
-	/** Set File Name.
-		@param FileName 
-		Name of the local file or URL
+	/** Set DB Column Name.
+		@param ColumnName 
+		Name of the column in the database
 	  */
-	public void setFileName (String FileName)
+	public void setColumnName (String ColumnName)
 	{
-		set_Value (COLUMNNAME_FileName, FileName);
+		set_Value (COLUMNNAME_ColumnName, ColumnName);
 	}
 
-	/** Get File Name.
-		@return Name of the local file or URL
+	/** Get DB Column Name.
+		@return Name of the column in the database
 	  */
-	public String getFileName () 
+	public String getColumnName () 
 	{
-		return (String)get_Value(COLUMNNAME_FileName);
+		return (String)get_Value(COLUMNNAME_ColumnName);
 	}
 
-	/** Set ST_LineaArchivo.
-		@param ST_LineaArchivo ST_LineaArchivo	  */
-	public void setST_LineaArchivo (String ST_LineaArchivo)
+	public I_M_Product getM_Product() throws RuntimeException
+    {
+		return (I_M_Product)MTable.get(getCtx(), I_M_Product.Table_Name)
+			.getPO(getM_Product_ID(), get_TrxName());	}
+
+	/** Set Product.
+		@param M_Product_ID 
+		Product, Service, Item
+	  */
+	public void setM_Product_ID (int M_Product_ID)
 	{
-		set_Value (COLUMNNAME_ST_LineaArchivo, ST_LineaArchivo);
+		if (M_Product_ID < 1) 
+			set_Value (COLUMNNAME_M_Product_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_Product_ID, Integer.valueOf(M_Product_ID));
 	}
 
-	/** Get ST_LineaArchivo.
-		@return ST_LineaArchivo	  */
-	public String getST_LineaArchivo () 
+	/** Get Product.
+		@return Product, Service, Item
+	  */
+	public int getM_Product_ID () 
 	{
-		return (String)get_Value(COLUMNNAME_ST_LineaArchivo);
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
-	/** Set ST_PositionFile.
-		@param ST_PositionFile ST_PositionFile	  */
-	public void setST_PositionFile (String ST_PositionFile)
+	/** Set DB Table Name.
+		@param TableName 
+		Name of the table in the database
+	  */
+	public void setTableName (String TableName)
 	{
-		set_Value (COLUMNNAME_ST_PositionFile, ST_PositionFile);
+		set_Value (COLUMNNAME_TableName, TableName);
 	}
 
-	/** Get ST_PositionFile.
-		@return ST_PositionFile	  */
-	public String getST_PositionFile () 
+	/** Get DB Table Name.
+		@return Name of the table in the database
+	  */
+	public String getTableName () 
 	{
-		return (String)get_Value(COLUMNNAME_ST_PositionFile);
+		return (String)get_Value(COLUMNNAME_TableName);
 	}
 
-	/** Set ST_TipoLinea.
-		@param ST_TipoLinea ST_TipoLinea	  */
-	public void setST_TipoLinea (String ST_TipoLinea)
+	/** Set Search Key.
+		@param Value 
+		Search key for the record in the format required - must be unique
+	  */
+	public void setValue (String Value)
 	{
-		set_Value (COLUMNNAME_ST_TipoLinea, ST_TipoLinea);
+		set_Value (COLUMNNAME_Value, Value);
 	}
 
-	/** Get ST_TipoLinea.
-		@return ST_TipoLinea	  */
-	public String getST_TipoLinea () 
+	/** Get Search Key.
+		@return Search key for the record in the format required - must be unique
+	  */
+	public String getValue () 
 	{
-		return (String)get_Value(COLUMNNAME_ST_TipoLinea);
+		return (String)get_Value(COLUMNNAME_Value);
 	}
 
 	public I_Z_SistecoInterfacePazos getZ_SistecoInterfacePazos() throws RuntimeException
@@ -179,21 +204,21 @@ public class X_Z_Sisteco_TK_LineaError extends PO implements I_Z_Sisteco_TK_Line
 		return ii.intValue();
 	}
 
-	/** Set Z_Sisteco_TK_LineaError ID.
-		@param Z_Sisteco_TK_LineaError_ID Z_Sisteco_TK_LineaError ID	  */
-	public void setZ_Sisteco_TK_LineaError_ID (int Z_Sisteco_TK_LineaError_ID)
+	/** Set Z_Sisteco_TK_ProductoError ID.
+		@param Z_Sisteco_TK_ProductoError_ID Z_Sisteco_TK_ProductoError ID	  */
+	public void setZ_Sisteco_TK_ProductoError_ID (int Z_Sisteco_TK_ProductoError_ID)
 	{
-		if (Z_Sisteco_TK_LineaError_ID < 1) 
-			set_ValueNoCheck (COLUMNNAME_Z_Sisteco_TK_LineaError_ID, null);
+		if (Z_Sisteco_TK_ProductoError_ID < 1) 
+			set_ValueNoCheck (COLUMNNAME_Z_Sisteco_TK_ProductoError_ID, null);
 		else 
-			set_ValueNoCheck (COLUMNNAME_Z_Sisteco_TK_LineaError_ID, Integer.valueOf(Z_Sisteco_TK_LineaError_ID));
+			set_ValueNoCheck (COLUMNNAME_Z_Sisteco_TK_ProductoError_ID, Integer.valueOf(Z_Sisteco_TK_ProductoError_ID));
 	}
 
-	/** Get Z_Sisteco_TK_LineaError ID.
-		@return Z_Sisteco_TK_LineaError ID	  */
-	public int getZ_Sisteco_TK_LineaError_ID () 
+	/** Get Z_Sisteco_TK_ProductoError ID.
+		@return Z_Sisteco_TK_ProductoError ID	  */
+	public int getZ_Sisteco_TK_ProductoError_ID () 
 	{
-		Integer ii = (Integer)get_Value(COLUMNNAME_Z_Sisteco_TK_LineaError_ID);
+		Integer ii = (Integer)get_Value(COLUMNNAME_Z_Sisteco_TK_ProductoError_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

@@ -5,15 +5,18 @@ import org.compiere.Adempiere;
 import org.compiere.impexp.ImpFormat;
 import org.compiere.impexp.MImpFormat;
 import org.compiere.model.MEXPFormat;
+import org.compiere.model.MSequence;
 import org.compiere.model.MTable;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.Env;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -68,6 +71,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             // Actualizo campos necesarios
             this.updateData();
 
+            // Log de productos que vinieron en la interface pero no estan definidos en Adempiere
+            this.logNotMatchedProducts();
+
             // Sumarizo información cargada
             this.setTotals();
 
@@ -95,6 +101,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         String mensaje = "";
         MZSistecoTKCVta cabezalTicket = null;
         String lineaArchivo = null;
+        String fechaCabezalTicket = null;
 
         try {
 
@@ -139,7 +146,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
                         // Instancio modelo de este cabezal
                         cabezalTicket = new MZSistecoTKCVta(getCtx(), zSistecoTkCVtaID, get_TrxName());
-
+                        fechaCabezalTicket = new SimpleDateFormat("yyyyMMdd").format(cabezalTicket.getDateTrx());
                     }
                 }
                 // Es una tipo de linea que no es Cabezal
@@ -166,7 +173,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                                 " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID + ", " +
                                 " st_positionfile ='" + String.valueOf(contLineas) + "', " +
                                 X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + ", " +
-                                " datetrx = (select to_timestamp(to_char('" + cabezalTicket.getDateTrx() + "', 'YYYYMMDD') || st_timestamplinea, 'YYYYMMDDHH24MISS')) " +
+                                " datetrx = (select to_timestamp('" + fechaCabezalTicket + " ' || st_timestamplinea, 'YYYYMMDDHH24MISS')) " +
                                 " where " + tablaFormato.getTableName() + "_ID = " + ID;
                         DB.executeUpdateEx(action, get_TrxName());
 
@@ -179,6 +186,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                         lineaError.setST_PositionFile(String.valueOf(contLineas));
                         lineaError.setZ_Sisteco_TK_CVta_ID(zSistecoTkCVtaID);
                         lineaError.setFileName(this.getFileName());
+                        lineaError.setZ_SistecoInterfacePazos_ID(this.get_ID());
                         lineaError.saveEx();
                     }
                 }
@@ -286,7 +294,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " and Z_Sisteco_TK_LVta.st_codigoarticulo is not null ";
             DB.executeUpdateEx(action, get_TrxName());
 
-            action = " update Z_Sisteco_TK_LVta set m_product_id = prod.m_product_id " +
+            action = " update Z_Sisteco_TK_LVta set m_product_id = pupc.m_product_id " +
                     " from Z_productoupc pupc " +
                     " where Z_Sisteco_TK_LVta.st_codigoarticulooriginal = pupc.upc " +
                     " and Z_Sisteco_TK_LVta.z_sistecointerfacepazos_id =" + this.get_ID() +
@@ -301,7 +309,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " and Z_Sisteco_TK_LDev.st_codigoartsubf is not null ";
             DB.executeUpdateEx(action, get_TrxName());
 
-            action = " update Z_Sisteco_TK_LDev set m_product_id = prod.m_product_id " +
+            action = " update Z_Sisteco_TK_LDev set m_product_id = pupc.m_product_id " +
                     " from Z_productoupc pupc " +
                     " where Z_Sisteco_TK_LDev.st_codigoarticulooriginal = pupc.upc " +
                     " and Z_Sisteco_TK_LDev.z_sistecointerfacepazos_id =" + this.get_ID() +
@@ -424,6 +432,55 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             throw new AdempiereException(e);
         }
 
+    }
+
+    /***
+     * Se guarda el detalle de productos que vienen en la interface pero no tienen su contrapartida en Adempiere.
+     * Xpande. Created by Gabriel Vila on 6/5/17.
+     */
+    private void logNotMatchedProducts() {
+
+        String insert = "", sql = "";
+
+        try{
+
+            MSequence sequence = MSequence.get(getCtx(), I_Z_Sisteco_TK_ProductoError.Table_Name, null);
+            insert = " insert into z_sisteco_tk_productoerror (z_sisteco_tk_productoerror_id, ad_client_id, ad_org_id, " +
+                    "created, createdby, updated, updatedby, isactive, z_sistecointerfacepazos_id, z_sisteco_tk_cvta_id, " +
+                    "tablename, columnname, value) ";
+
+
+            // Log de productos no encontrados en lineas de venta
+            sql = " select nextid(" + sequence.get_ID() + ",'N'), " + this.getAD_Client_ID() + ", " + this.getAD_Org_ID() + ", " +
+                    "now(), " + Env.getAD_User_ID(getCtx()) + ", now(), " + Env.getAD_User_ID(getCtx()) + ",'Y', " +
+                    this.get_ID() + ", z_sisteco_tk_cvta_id, 'z_sisteco_tk_lvta', 'st_codigoarticulo', st_codigoarticulo " +
+                    " from z_sisteco_tk_lvta " +
+                    " where z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and m_product_id is null ";
+            DB.executeUpdateEx(insert + sql, get_TrxName());
+
+            // Log de productos no encontrados en lineas de devoluciones de items
+            sql = " select nextid(" + sequence.get_ID() + ",'N'), " + this.getAD_Client_ID() + ", " + this.getAD_Org_ID() + ", " +
+                    "now(), " + Env.getAD_User_ID(getCtx()) + ", now(), " + Env.getAD_User_ID(getCtx()) + ",'Y', " +
+                    this.get_ID() + ", z_sisteco_tk_cvta_id, 'z_sisteco_tk_ldev', 'st_codigoartsubf', st_codigoartsubf " +
+                    " from z_sisteco_tk_ldev " +
+                    " where z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and m_product_id is null ";
+            DB.executeUpdateEx(insert + sql, get_TrxName());
+
+            // Log de productos no encontrados en lineas de cancelaciones de items
+            sql = " select nextid(" + sequence.get_ID() + ",'N'), " + this.getAD_Client_ID() + ", " + this.getAD_Org_ID() + ", " +
+                    "now(), " + Env.getAD_User_ID(getCtx()) + ", now(), " + Env.getAD_User_ID(getCtx()) + ",'Y', " +
+                    this.get_ID() + ", z_sisteco_tk_cvta_id, 'z_sisteco_tk_lcancela', 'st_codigoartsubf', st_codigoartsubf " +
+                    " from z_sisteco_tk_lcancela " +
+                    " where z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and m_product_id is null ";
+            DB.executeUpdateEx(insert + sql, get_TrxName());
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
     }
 
     private void setTotals() {

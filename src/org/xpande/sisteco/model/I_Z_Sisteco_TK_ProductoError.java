@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for Z_Sisteco_TK_LineaError
+/** Generated Interface for Z_Sisteco_TK_ProductoError
  *  @author Adempiere (generated) 
  *  @version Release 3.9.0
  */
-public interface I_Z_Sisteco_TK_LineaError 
+public interface I_Z_Sisteco_TK_ProductoError 
 {
 
-    /** TableName=Z_Sisteco_TK_LineaError */
-    public static final String Table_Name = "Z_Sisteco_TK_LineaError";
+    /** TableName=Z_Sisteco_TK_ProductoError */
+    public static final String Table_Name = "Z_Sisteco_TK_ProductoError";
 
-    /** AD_Table_ID=1000028 */
+    /** AD_Table_ID=1000032 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -63,6 +63,19 @@ public interface I_Z_Sisteco_TK_LineaError
 	  */
 	public int getAD_Org_ID();
 
+    /** Column name ColumnName */
+    public static final String COLUMNNAME_ColumnName = "ColumnName";
+
+	/** Set DB Column Name.
+	  * Name of the column in the database
+	  */
+	public void setColumnName(String ColumnName);
+
+	/** Get DB Column Name.
+	  * Name of the column in the database
+	  */
+	public String getColumnName();
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -79,19 +92,6 @@ public interface I_Z_Sisteco_TK_LineaError
 	  */
 	public int getCreatedBy();
 
-    /** Column name FileName */
-    public static final String COLUMNNAME_FileName = "FileName";
-
-	/** Set File Name.
-	  * Name of the local file or URL
-	  */
-	public void setFileName(String FileName);
-
-	/** Get File Name.
-	  * Name of the local file or URL
-	  */
-	public String getFileName();
-
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -105,32 +105,33 @@ public interface I_Z_Sisteco_TK_LineaError
 	  */
 	public boolean isActive();
 
-    /** Column name ST_LineaArchivo */
-    public static final String COLUMNNAME_ST_LineaArchivo = "ST_LineaArchivo";
+    /** Column name M_Product_ID */
+    public static final String COLUMNNAME_M_Product_ID = "M_Product_ID";
 
-	/** Set ST_LineaArchivo	  */
-	public void setST_LineaArchivo(String ST_LineaArchivo);
+	/** Set Product.
+	  * Product, Service, Item
+	  */
+	public void setM_Product_ID(int M_Product_ID);
 
-	/** Get ST_LineaArchivo	  */
-	public String getST_LineaArchivo();
+	/** Get Product.
+	  * Product, Service, Item
+	  */
+	public int getM_Product_ID();
 
-    /** Column name ST_PositionFile */
-    public static final String COLUMNNAME_ST_PositionFile = "ST_PositionFile";
+	public I_M_Product getM_Product() throws RuntimeException;
 
-	/** Set ST_PositionFile	  */
-	public void setST_PositionFile(String ST_PositionFile);
+    /** Column name TableName */
+    public static final String COLUMNNAME_TableName = "TableName";
 
-	/** Get ST_PositionFile	  */
-	public String getST_PositionFile();
+	/** Set DB Table Name.
+	  * Name of the table in the database
+	  */
+	public void setTableName(String TableName);
 
-    /** Column name ST_TipoLinea */
-    public static final String COLUMNNAME_ST_TipoLinea = "ST_TipoLinea";
-
-	/** Set ST_TipoLinea	  */
-	public void setST_TipoLinea(String ST_TipoLinea);
-
-	/** Get ST_TipoLinea	  */
-	public String getST_TipoLinea();
+	/** Get DB Table Name.
+	  * Name of the table in the database
+	  */
+	public String getTableName();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
@@ -147,6 +148,19 @@ public interface I_Z_Sisteco_TK_LineaError
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name Value */
+    public static final String COLUMNNAME_Value = "Value";
+
+	/** Set Search Key.
+	  * Search key for the record in the format required - must be unique
+	  */
+	public void setValue(String Value);
+
+	/** Get Search Key.
+	  * Search key for the record in the format required - must be unique
+	  */
+	public String getValue();
 
     /** Column name Z_SistecoInterfacePazos_ID */
     public static final String COLUMNNAME_Z_SistecoInterfacePazos_ID = "Z_SistecoInterfacePazos_ID";
@@ -170,12 +184,12 @@ public interface I_Z_Sisteco_TK_LineaError
 
 	public I_Z_Sisteco_TK_CVta getZ_Sisteco_TK_CVta() throws RuntimeException;
 
-    /** Column name Z_Sisteco_TK_LineaError_ID */
-    public static final String COLUMNNAME_Z_Sisteco_TK_LineaError_ID = "Z_Sisteco_TK_LineaError_ID";
+    /** Column name Z_Sisteco_TK_ProductoError_ID */
+    public static final String COLUMNNAME_Z_Sisteco_TK_ProductoError_ID = "Z_Sisteco_TK_ProductoError_ID";
 
-	/** Set Z_Sisteco_TK_LineaError ID	  */
-	public void setZ_Sisteco_TK_LineaError_ID(int Z_Sisteco_TK_LineaError_ID);
+	/** Set Z_Sisteco_TK_ProductoError ID	  */
+	public void setZ_Sisteco_TK_ProductoError_ID(int Z_Sisteco_TK_ProductoError_ID);
 
-	/** Get Z_Sisteco_TK_LineaError ID	  */
-	public int getZ_Sisteco_TK_LineaError_ID();
+	/** Get Z_Sisteco_TK_ProductoError ID	  */
+	public int getZ_Sisteco_TK_ProductoError_ID();
 }
