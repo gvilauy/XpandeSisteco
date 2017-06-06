@@ -175,6 +175,33 @@ public interface I_Z_SistecoInterfacePazos
 	  */
 	public Timestamp getStartDate();
 
+    /** Column name ST_ContadorCabezales */
+    public static final String COLUMNNAME_ST_ContadorCabezales = "ST_ContadorCabezales";
+
+	/** Set ST_ContadorCabezales	  */
+	public void setST_ContadorCabezales(int ST_ContadorCabezales);
+
+	/** Get ST_ContadorCabezales	  */
+	public int getST_ContadorCabezales();
+
+    /** Column name ST_ContadorLineas */
+    public static final String COLUMNNAME_ST_ContadorLineas = "ST_ContadorLineas";
+
+	/** Set ST_ContadorLineas	  */
+	public void setST_ContadorLineas(int ST_ContadorLineas);
+
+	/** Get ST_ContadorLineas	  */
+	public int getST_ContadorLineas();
+
+    /** Column name ST_ContadorTotal */
+    public static final String COLUMNNAME_ST_ContadorTotal = "ST_ContadorTotal";
+
+	/** Set ST_ContadorTotal	  */
+	public void setST_ContadorTotal(int ST_ContadorTotal);
+
+	/** Get ST_ContadorTotal	  */
+	public int getST_ContadorTotal();
+
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
 

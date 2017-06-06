@@ -31,7 +31,7 @@ public class X_Z_SistecoInterfacePazos extends PO implements I_Z_SistecoInterfac
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170527L;
+	private static final long serialVersionUID = 20170606L;
 
     /** Standard Constructor */
     public X_Z_SistecoInterfacePazos (Properties ctx, int Z_SistecoInterfacePazos_ID, String trxName)
@@ -201,6 +201,57 @@ public class X_Z_SistecoInterfacePazos extends PO implements I_Z_SistecoInterfac
 	public Timestamp getStartDate () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_StartDate);
+	}
+
+	/** Set ST_ContadorCabezales.
+		@param ST_ContadorCabezales ST_ContadorCabezales	  */
+	public void setST_ContadorCabezales (int ST_ContadorCabezales)
+	{
+		set_Value (COLUMNNAME_ST_ContadorCabezales, Integer.valueOf(ST_ContadorCabezales));
+	}
+
+	/** Get ST_ContadorCabezales.
+		@return ST_ContadorCabezales	  */
+	public int getST_ContadorCabezales () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ST_ContadorCabezales);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set ST_ContadorLineas.
+		@param ST_ContadorLineas ST_ContadorLineas	  */
+	public void setST_ContadorLineas (int ST_ContadorLineas)
+	{
+		set_Value (COLUMNNAME_ST_ContadorLineas, Integer.valueOf(ST_ContadorLineas));
+	}
+
+	/** Get ST_ContadorLineas.
+		@return ST_ContadorLineas	  */
+	public int getST_ContadorLineas () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ST_ContadorLineas);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set ST_ContadorTotal.
+		@param ST_ContadorTotal ST_ContadorTotal	  */
+	public void setST_ContadorTotal (int ST_ContadorTotal)
+	{
+		set_Value (COLUMNNAME_ST_ContadorTotal, Integer.valueOf(ST_ContadorTotal));
+	}
+
+	/** Get ST_ContadorTotal.
+		@return ST_ContadorTotal	  */
+	public int getST_ContadorTotal () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ST_ContadorTotal);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Z_SistecoInterfacePazos ID.

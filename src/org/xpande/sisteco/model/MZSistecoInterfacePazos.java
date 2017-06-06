@@ -14,6 +14,8 @@ import org.compiere.util.Env;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -33,6 +35,10 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
     // Modelo de configuración del proceso de Interface
     private MZSistecoConfig sistecoConfig = null;
+
+    // Contadores
+    private int contadorCabezales = 0;
+    private int contadorLineas = 0;
 
     public MZSistecoInterfacePazos(Properties ctx, int Z_SistecoInterfacePazos_ID, String trxName) {
         super(ctx, Z_SistecoInterfacePazos_ID, trxName);
@@ -148,6 +154,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                         cabezalTicket = new MZSistecoTKCVta(getCtx(), zSistecoTkCVtaID, get_TrxName());
                         fechaCabezalTicket = new SimpleDateFormat("yyyyMMdd").format(cabezalTicket.getDateTrx());
                     }
+                    this.contadorCabezales++;
                 }
                 // Es una tipo de linea que no es Cabezal
                 else {
@@ -189,6 +196,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                         lineaError.setZ_SistecoInterfacePazos_ID(this.get_ID());
                         lineaError.saveEx();
                     }
+                    this.contadorLineas++;
                 }
 
                 lineaArchivo = bReader.readLine();
@@ -483,9 +491,44 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         }
     }
 
+
+    /***
+     * Setea totales resultado de la interface de un archivo Pazos de Sisteco.
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     */
     private void setTotals() {
 
         try{
+
+            this.setST_ContadorCabezales(this.contadorCabezales);
+            this.setST_ContadorLineas(this.contadorLineas);
+            this.setST_ContadorTotal(this.contadorCabezales + this.contadorLineas);
+            this.saveEx();
+            
+            MZSistecoPazosTotal stTotales = new MZSistecoPazosTotal(getCtx(), 0, get_TrxName());
+            stTotales.setST_TotalVtaEfectivo(this.getTotalVtaEfectivo());
+            stTotales.setST_TotalVtaEfectivoUSD(this.getTotalVtaEfectivoUSD());
+            stTotales.setST_TotalVtaCheque(this.getTotalVtaCheque());
+            stTotales.setST_TotalVtaChequeUSD(this.getTotalVtaChequeUSD());
+            stTotales.setST_TotalVtaTarjeta(this.getTotalVtaTarjeta());
+            stTotales.setST_TotalVtaTarjetaUSD(this.getTotalVtaTarjetaUSD());
+            stTotales.setST_TotalVtaTarjetaManual(this.getTotalVtaTarjetaManual());
+            stTotales.setST_TotalVtaTarjetaCuota(this.getTotalVtaTarjetaCuota());
+            stTotales.setST_TotalDevEnvases(this.getTotalDevEnvases());
+            stTotales.setST_TotalEdenred(this.getTotalEdenred());
+            stTotales.setST_TotalFacturas(this.getTotalFacturas());
+            stTotales.setST_TotalFondeo(this.getTotalFondeo());
+            stTotales.setST_TotalFondeoUSD(this.getTotalFondeoUSD());
+            stTotales.setST_TotalRetiros(this.getTotalRetiros());
+            stTotales.setST_TotalServicios(this.getTotalServicios());
+            stTotales.setST_TotalVtaClientes(this.getTotalVtaClientes());
+            stTotales.setST_TotalVtaCredito(this.getTotalVtaCredito());
+            stTotales.setST_TotalVtaCreditoUSD(this.getTotalVtaCreditoUSD());
+            stTotales.setST_TotalVtaLuncheon(this.getTotalVtaLuncheon());
+            stTotales.setST_TotalVtaSodexo(this.getTotalVtaSodexo());
+
+            stTotales.setZ_SistecoInterfacePazos_ID(this.get_ID());
+            stTotales.saveEx();
 
         }
         catch (Exception e){
@@ -493,5 +536,928 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         }
 
     }
+
+    /***
+     * Obtiene y retorna total de ventas con Sodexo.
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaSodexo() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0) - coalesce(a.st_cambio,0)),0) as monto " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'" +
+                    " and a.st_codigomediopago='10'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de ventas con Luncheon
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaLuncheon() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0)),0) as monto " +
+                    " from z_sisteco_tk_vtaluncheon a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de ventas credito en dolares.
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaCreditoUSD() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0)),0) as monto  " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='2'" +
+                    " and a.st_codigomediopago='9'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de ventas credito en pesos.
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaCredito() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0) - coalesce(a.st_cambio,0)),0) as monto  " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'" +
+                    " and a.st_codigomediopago='9'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de ventas en cuenta corriente
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaClientes() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0) - coalesce(a.st_cambio,0)),0) as monto " +
+                    " from z_sisteco_tk_vtactacte a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de servicios (pagos menos devoluciones)
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalServicios() {
+
+        BigDecimal value = Env.ZERO;
+
+        try{
+
+            BigDecimal pagoServicios = this.getTotalPagoServicios();
+            BigDecimal devolucionServicios = this.getTotalDevolucionServicios();
+
+            value = pagoServicios.subtract(devolucionServicios);
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de pagos de servicios
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalPagoServicios() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_monto,0)),0) as monto " +
+                    " from z_sisteco_tk_pagoservicio a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de devoluciones de pagos de servicios
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalDevolucionServicios() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_monto,0)),0) as monto " +
+                    " from z_sisteco_tk_devpagoserv a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de retiros en efectivo en moneda pesos
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalRetiros() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_montoretiro,0)),0) as monto " +
+                    " from z_sisteco_tk_lretiro a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'" +
+                    " and a.st_codigomediopago ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de fondeos en dolares
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalFondeoUSD() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_montofondeo,0)),0) as monto " +
+                    " from z_sisteco_tk_lfondeo a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='2'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de fondeos en pesos
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalFondeo() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_montofondeo,0)),0) as monto " +
+                    " from z_sisteco_tk_lfondeo a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+
+    /***
+     * Obtiene y retorna total de ventas en facturas
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalFacturas() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalfactura,0)),0) as monto  " +
+                    " from z_sisteco_tk_lfactura a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and cab.st_tipolinea ='11'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total con Edenred
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalEdenred() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_importepago,0)),0) as monto " +
+                    " from z_sisteco_tk_vouchertacre a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='00'" +
+                    " and a.st_tipovaucher ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de devoluciones de envases
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalDevEnvases() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0) - coalesce(a.st_cambio,0)),0) as monto  " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'" +
+                    " and a.st_codigomediopago='13'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de ventas tarjeta credito pesos que no sea primer cuota
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaTarjetaCuota() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0)),0) as monto " +
+                    " from z_sisteco_tk_vtatarjeta a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'" +
+                    " and a.st_cuotastarjetacredito !='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+
+    /***
+     * Obtiene y retorna total de ventas tarjeta manual
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaTarjetaManual() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0) - coalesce(a.st_cambio,0)),0) as monto  " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'" +
+                    " and a.st_codigomediopago='14'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+
+    /***
+     * Obtiene y retorna total de ventas tarjeta primer cuota en dolares
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaTarjetaUSD() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0)),0) as monto " +
+                    " from z_sisteco_tk_vtatarjeta a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='2'" +
+                    " and a.st_cuotastarjetacredito ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+
+    /***
+     * Obtiene y retorna total de ventas tarjeta primer cuota en pesos
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaTarjeta() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0)),0) as monto " +
+                    " from z_sisteco_tk_vtatarjeta a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'" +
+                    " and a.st_cuotastarjetacredito ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+
+    /***
+     * Obtiene y retorna total de ventas con cheques en dolares
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaChequeUSD() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0)),0) as monto  " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='2'" +
+                    " and a.st_codigomediopago='3'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de ventas con cheques en pesos
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaCheque() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0) - coalesce(a.st_cambio,0)),0) as monto  " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'" +
+                    " and a.st_codigomediopago='3'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+
+    /***
+     * Obtiene y retorna total de ventas con efectivo en dolares
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaEfectivoUSD() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0)),0) as monto  " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='2'" +
+                    " and a.st_codigomediopago='1'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+        	rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+
+    /***
+     * Obtiene y retorna total de ventas con efectivo en dolares
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaEfectivo() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalentregado,0) - coalesce(a.st_cambio,0)),0) as monto  " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'" +
+                    " and a.st_codigomediopago='1'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+
+                BigDecimal valueCambio = this.getTotalVtaEfectivoCambio();
+                value = value.subtract(valueCambio);
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+
+    /***
+     * Obtiene y retorna total de cambio con efectivo
+     * Xpande. Created by Gabriel Vila on 6/6/17.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaEfectivoCambio() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_cambio,0)),0) as monto  " +
+                    " from z_sisteco_tk_vtaefectivo a " +
+                    " inner join z_sisteco_tk_cvta cab on a.z_sisteco_tk_cvta_id = cab.z_sisteco_tk_cvta_id " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='2'" +
+                    " and a.st_codigomediopago='1'" +
+                    " and cab.st_estadoticket ='F'" +
+                    " and cab.st_tipolinea in ('1','3')";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+    }
+
 
 }
