@@ -9,5 +9,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="XpandeCustomization" />
     <orderEntry type="module" module-name="adempiere" />
+    <orderEntry type="module" module-name="XpandeCore" />
+    <orderEntry type="module" module-name="XpandeRetail" />
   </component>
 </module>

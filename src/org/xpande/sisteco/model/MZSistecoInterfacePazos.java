@@ -112,7 +112,6 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         try {
 
             // Obtengo formatos de importación desde configuración del proceso de Interface
-            //ImpFormat formatoImpLineaVenta = ImpFormat.load("Sisteco_Pazos_LineaVenta");
             ImpFormat formatoImpCabezal = ImpFormat.load("Sisteco_Pazos_CabezalTicket");
             hashFormatosImp = this.getFormatosImp();
 
