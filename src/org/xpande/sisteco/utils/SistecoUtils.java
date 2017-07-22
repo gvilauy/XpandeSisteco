@@ -64,15 +64,56 @@ public final class SistecoUtils {
 
                 productoAtribSisteco.saveEx();
             }
-
-
-
         }
         catch (Exception e){
             throw new AdempiereException(e);
         }
-
     }
+
+
+    /***
+     * Refresca asociación de atributos de producto requeridos por Sisteco a un determinado producto recibido.
+     * Xpande. Created by Gabriel Vila on 7/21/17.
+     * @param ctx
+     * @param product
+     * @param trxName
+     */
+    public static void refreshProductAttributes(Properties ctx, MProduct product, String trxName){
+
+        try{
+            // Obtiene y recorre asociacion de atributos al producto recibido
+            List<MZProductoAtribSisteco> lineas = SistecoUtils.getAtributosByProduct(ctx, product.get_ID(), trxName);
+            for (MZProductoAtribSisteco productoAtribSisteco: lineas) {
+
+                MZSistecoAtributoProd sistecoAtributoProd = (MZSistecoAtributoProd) productoAtribSisteco.getZ_SistecoAtributoProd();
+
+                // Seteo atributo segun el producto tenga asociado otro producto tandem
+                if (sistecoAtributoProd.isAtributoTandem()){
+                    if (product.get_ValueAsInt("M_Product_Tandem_ID") > 0){
+                        productoAtribSisteco.setIsSelected(true);
+                    }
+                    else{
+                        productoAtribSisteco.setIsSelected(false);
+                    }
+                }
+
+                // Seteo atributo segun unidad de medida del producto
+                if (product.getC_UOM_ID() > 0){
+                    // Si tengo seteo de atributo segun unidad de medida
+                    MZSistecoAtributoProdUOM atributoProdUOM = sistecoAtributoProd.getUOMSet(product.getC_UOM_ID());
+                    if ((atributoProdUOM != null) && (atributoProdUOM.get_ID() > 0)){
+                        // Seteo atributo segun flag de unidad de medida
+                        productoAtribSisteco.setIsSelected(atributoProdUOM.isSelected());
+                    }
+                }
+                productoAtribSisteco.saveEx();
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+    }
+
 
     /***
      * Obtiene valor Hexadecimal de array de bits con los valores de los atributos asociados a un determinado producto.
