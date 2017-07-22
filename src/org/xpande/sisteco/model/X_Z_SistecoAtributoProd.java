@@ -39,6 +39,10 @@ public class X_Z_SistecoAtributoProd extends PO implements I_Z_SistecoAtributoPr
       super (ctx, Z_SistecoAtributoProd_ID, trxName);
       /** if (Z_SistecoAtributoProd_ID == 0)
         {
+			setIsAtributoTandem (false);
+// N
+			setIsSelected (false);
+// N
 			setName (null);
 			setSeqNo (0);
 			setValue (null);
@@ -90,6 +94,51 @@ public class X_Z_SistecoAtributoProd extends PO implements I_Z_SistecoAtributoPr
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** Set IsAtributoTandem.
+		@param IsAtributoTandem 
+		En un atributo Tandem para Proveedor de POS Sisteco
+	  */
+	public void setIsAtributoTandem (boolean IsAtributoTandem)
+	{
+		set_Value (COLUMNNAME_IsAtributoTandem, Boolean.valueOf(IsAtributoTandem));
+	}
+
+	/** Get IsAtributoTandem.
+		@return En un atributo Tandem para Proveedor de POS Sisteco
+	  */
+	public boolean isAtributoTandem () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsAtributoTandem);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set Selected.
+		@param IsSelected Selected	  */
+	public void setIsSelected (boolean IsSelected)
+	{
+		set_Value (COLUMNNAME_IsSelected, Boolean.valueOf(IsSelected));
+	}
+
+	/** Get Selected.
+		@return Selected	  */
+	public boolean isSelected () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsSelected);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Name.

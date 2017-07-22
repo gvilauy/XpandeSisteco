@@ -21,17 +21,17 @@ import java.sql.Timestamp;
 import org.compiere.model.*;
 import org.compiere.util.KeyNamePair;
 
-/** Generated Interface for Z_SistecoAtributoProd
+/** Generated Interface for Z_SistecoAtributoProdUOM
  *  @author Adempiere (generated) 
  *  @version Release 3.9.0
  */
-public interface I_Z_SistecoAtributoProd 
+public interface I_Z_SistecoAtributoProdUOM 
 {
 
-    /** TableName=Z_SistecoAtributoProd */
-    public static final String Table_Name = "Z_SistecoAtributoProd";
+    /** TableName=Z_SistecoAtributoProdUOM */
+    public static final String Table_Name = "Z_SistecoAtributoProdUOM";
 
-    /** AD_Table_ID=1000084 */
+    /** AD_Table_ID=1000085 */
     public static final int Table_ID = MTable.getTable_ID(Table_Name);
 
     KeyNamePair Model = new KeyNamePair(Table_ID, Table_Name);
@@ -79,18 +79,20 @@ public interface I_Z_SistecoAtributoProd
 	  */
 	public int getCreatedBy();
 
-    /** Column name Description */
-    public static final String COLUMNNAME_Description = "Description";
+    /** Column name C_UOM_ID */
+    public static final String COLUMNNAME_C_UOM_ID = "C_UOM_ID";
 
-	/** Set Description.
-	  * Optional short description of the record
+	/** Set UOM.
+	  * Unit of Measure
 	  */
-	public void setDescription(String Description);
+	public void setC_UOM_ID(int C_UOM_ID);
 
-	/** Get Description.
-	  * Optional short description of the record
+	/** Get UOM.
+	  * Unit of Measure
 	  */
-	public String getDescription();
+	public int getC_UOM_ID();
+
+	public I_C_UOM getC_UOM() throws RuntimeException;
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -105,19 +107,6 @@ public interface I_Z_SistecoAtributoProd
 	  */
 	public boolean isActive();
 
-    /** Column name IsAtributoTandem */
-    public static final String COLUMNNAME_IsAtributoTandem = "IsAtributoTandem";
-
-	/** Set IsAtributoTandem.
-	  * En un atributo Tandem para Proveedor de POS Sisteco
-	  */
-	public void setIsAtributoTandem(boolean IsAtributoTandem);
-
-	/** Get IsAtributoTandem.
-	  * En un atributo Tandem para Proveedor de POS Sisteco
-	  */
-	public boolean isAtributoTandem();
-
     /** Column name IsSelected */
     public static final String COLUMNNAME_IsSelected = "IsSelected";
 
@@ -126,34 +115,6 @@ public interface I_Z_SistecoAtributoProd
 
 	/** Get Selected	  */
 	public boolean isSelected();
-
-    /** Column name Name */
-    public static final String COLUMNNAME_Name = "Name";
-
-	/** Set Name.
-	  * Alphanumeric identifier of the entity
-	  */
-	public void setName(String Name);
-
-	/** Get Name.
-	  * Alphanumeric identifier of the entity
-	  */
-	public String getName();
-
-    /** Column name SeqNo */
-    public static final String COLUMNNAME_SeqNo = "SeqNo";
-
-	/** Set Sequence.
-	  * Method of ordering records;
- lowest number comes first
-	  */
-	public void setSeqNo(int SeqNo);
-
-	/** Get Sequence.
-	  * Method of ordering records;
- lowest number comes first
-	  */
-	public int getSeqNo();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
@@ -171,19 +132,6 @@ public interface I_Z_SistecoAtributoProd
 	  */
 	public int getUpdatedBy();
 
-    /** Column name Value */
-    public static final String COLUMNNAME_Value = "Value";
-
-	/** Set Search Key.
-	  * Search key for the record in the format required - must be unique
-	  */
-	public void setValue(String Value);
-
-	/** Get Search Key.
-	  * Search key for the record in the format required - must be unique
-	  */
-	public String getValue();
-
     /** Column name Z_SistecoAtributoProd_ID */
     public static final String COLUMNNAME_Z_SistecoAtributoProd_ID = "Z_SistecoAtributoProd_ID";
 
@@ -193,14 +141,14 @@ public interface I_Z_SistecoAtributoProd
 	/** Get Z_SistecoAtributoProd ID	  */
 	public int getZ_SistecoAtributoProd_ID();
 
-    /** Column name Z_SistecoConfig_ID */
-    public static final String COLUMNNAME_Z_SistecoConfig_ID = "Z_SistecoConfig_ID";
+	public I_Z_SistecoAtributoProd getZ_SistecoAtributoProd() throws RuntimeException;
 
-	/** Set Z_SistecoConfig ID	  */
-	public void setZ_SistecoConfig_ID(int Z_SistecoConfig_ID);
+    /** Column name Z_SistecoAtributoProdUOM_ID */
+    public static final String COLUMNNAME_Z_SistecoAtributoProdUOM_ID = "Z_SistecoAtributoProdUOM_ID";
 
-	/** Get Z_SistecoConfig ID	  */
-	public int getZ_SistecoConfig_ID();
+	/** Set Z_SistecoAtributoProdUOM ID	  */
+	public void setZ_SistecoAtributoProdUOM_ID(int Z_SistecoAtributoProdUOM_ID);
 
-	public I_Z_SistecoConfig getZ_SistecoConfig() throws RuntimeException;
+	/** Get Z_SistecoAtributoProdUOM ID	  */
+	public int getZ_SistecoAtributoProdUOM_ID();
 }

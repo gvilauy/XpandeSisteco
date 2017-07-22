@@ -49,4 +49,19 @@ public class MZSistecoConfig extends X_Z_SistecoConfig {
         return lines;
 
     }
+
+    /***
+     * Obtiene y retorna lista de atributos de sisteco para sus productos, ordenados por secuencia.
+     * Xpande. Created by Gabriel Vila on 7/21/17.
+     * @return
+     */
+    public List<MZSistecoAtributoProd> getAtributosProducto(){
+
+        String whereClause = X_Z_SistecoAtributoProd.COLUMNNAME_Z_SistecoConfig_ID + " =" + this.get_ID();
+
+        List<MZSistecoAtributoProd> lines = new Query(getCtx(), I_Z_SistecoAtributoProd.Table_Name, whereClause, get_TrxName()).setOnlyActiveRecords(true)
+                .setOrderBy(" SeqNo").list();
+
+        return lines;
+    }
 }

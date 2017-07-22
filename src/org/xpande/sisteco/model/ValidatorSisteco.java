@@ -4,6 +4,7 @@ import org.compiere.model.*;
 import org.compiere.util.DB;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.model.MZProductoUPC;
+import org.xpande.sisteco.utils.SistecoUtils;
 
 import java.util.List;
 
@@ -93,8 +94,19 @@ public class ValidatorSisteco implements ModelValidator {
                 sistecoInterfaceOut.setRecord_ID(model.get_ID());
                 sistecoInterfaceOut.saveEx();
 
+                // Asociación de atributos que requiere Sisteco al nuevo producto
+                SistecoUtils.setProductAttributes(model.getCtx(), model, model.get_TrxName());
+
+                // Obtengo y guardo valor Hexadecimal segun seteos de atributos para el producto recibido.
+                String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(model.getCtx(), model, model.get_TrxName());
+                String action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
+                            " where m_product_id =" + model.get_ID();
+                DB.executeUpdateEx(action, model.get_TrxName());
+
             }
             else if (type == ModelValidator.TYPE_AFTER_CHANGE){
+
+
 
                 MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), model.get_TrxName());
                 if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
