@@ -30,7 +30,7 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170601L;
+	private static final long serialVersionUID = 20170724L;
 
     /** Standard Constructor */
     public X_Z_SistecoConfig (Properties ctx, int Z_SistecoConfig_ID, String trxName)
@@ -69,6 +69,91 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	/** Set ArchivoBatch.
+		@param ArchivoBatch 
+		Nombre del archivo Batch de interface de salida de Sisteco
+	  */
+	public void setArchivoBatch (String ArchivoBatch)
+	{
+		set_Value (COLUMNNAME_ArchivoBatch, ArchivoBatch);
+	}
+
+	/** Get ArchivoBatch.
+		@return Nombre del archivo Batch de interface de salida de Sisteco
+	  */
+	public String getArchivoBatch () 
+	{
+		return (String)get_Value(COLUMNNAME_ArchivoBatch);
+	}
+
+	/** Set ArchivoBatchError.
+		@param ArchivoBatchError 
+		Nombre de archivo Batch de errores de interface de salida de Sisteco
+	  */
+	public void setArchivoBatchError (String ArchivoBatchError)
+	{
+		set_Value (COLUMNNAME_ArchivoBatchError, ArchivoBatchError);
+	}
+
+	/** Get ArchivoBatchError.
+		@return Nombre de archivo Batch de errores de interface de salida de Sisteco
+	  */
+	public String getArchivoBatchError () 
+	{
+		return (String)get_Value(COLUMNNAME_ArchivoBatchError);
+	}
+
+	/** Set ArchivoCountBatch.
+		@param ArchivoCountBatch 
+		Nombre del archivo CountBatch de interface de salida de Sisteco
+	  */
+	public void setArchivoCountBatch (String ArchivoCountBatch)
+	{
+		set_Value (COLUMNNAME_ArchivoCountBatch, ArchivoCountBatch);
+	}
+
+	/** Get ArchivoCountBatch.
+		@return Nombre del archivo CountBatch de interface de salida de Sisteco
+	  */
+	public String getArchivoCountBatch () 
+	{
+		return (String)get_Value(COLUMNNAME_ArchivoCountBatch);
+	}
+
+	/** Set ArchivoCountOnline.
+		@param ArchivoCountOnline 
+		Nombre del archivo CountOnline de interface de salida de Sisteco
+	  */
+	public void setArchivoCountOnline (String ArchivoCountOnline)
+	{
+		set_Value (COLUMNNAME_ArchivoCountOnline, ArchivoCountOnline);
+	}
+
+	/** Get ArchivoCountOnline.
+		@return Nombre del archivo CountOnline de interface de salida de Sisteco
+	  */
+	public String getArchivoCountOnline () 
+	{
+		return (String)get_Value(COLUMNNAME_ArchivoCountOnline);
+	}
+
+	/** Set ArchivoOnline.
+		@param ArchivoOnline 
+		Nombre del archivo Online de interface de salida de Sisteco
+	  */
+	public void setArchivoOnline (String ArchivoOnline)
+	{
+		set_Value (COLUMNNAME_ArchivoOnline, ArchivoOnline);
+	}
+
+	/** Get ArchivoOnline.
+		@return Nombre del archivo Online de interface de salida de Sisteco
+	  */
+	public String getArchivoOnline () 
+	{
+		return (String)get_Value(COLUMNNAME_ArchivoOnline);
+	}
 
 	/** Set PrefijoArchivoPazos.
 		@param PrefijoArchivoPazos PrefijoArchivoPazos	  */
@@ -112,6 +197,23 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 		return (String)get_Value(COLUMNNAME_RutaHistoricoPazos);
 	}
 
+	/** Set RutaInterfaceOut.
+		@param RutaInterfaceOut 
+		Ruta donde se crean los archivos de interface de salida para Sisteco
+	  */
+	public void setRutaInterfaceOut (String RutaInterfaceOut)
+	{
+		set_Value (COLUMNNAME_RutaInterfaceOut, RutaInterfaceOut);
+	}
+
+	/** Get RutaInterfaceOut.
+		@return Ruta donde se crean los archivos de interface de salida para Sisteco
+	  */
+	public String getRutaInterfaceOut () 
+	{
+		return (String)get_Value(COLUMNNAME_RutaInterfaceOut);
+	}
+
 	/** Set RutaOrigenPazos.
 		@param RutaOrigenPazos RutaOrigenPazos	  */
 	public void setRutaOrigenPazos (String RutaOrigenPazos)
@@ -124,6 +226,23 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	public String getRutaOrigenPazos () 
 	{
 		return (String)get_Value(COLUMNNAME_RutaOrigenPazos);
+	}
+
+	/** Set SeparadorArchivoOut.
+		@param SeparadorArchivoOut 
+		Separador de campos del archivo de interface de salida de Sisteco
+	  */
+	public void setSeparadorArchivoOut (String SeparadorArchivoOut)
+	{
+		set_Value (COLUMNNAME_SeparadorArchivoOut, SeparadorArchivoOut);
+	}
+
+	/** Get SeparadorArchivoOut.
+		@return Separador de campos del archivo de interface de salida de Sisteco
+	  */
+	public String getSeparadorArchivoOut () 
+	{
+		return (String)get_Value(COLUMNNAME_SeparadorArchivoOut);
 	}
 
 	/** Set Z_SistecoConfig ID.

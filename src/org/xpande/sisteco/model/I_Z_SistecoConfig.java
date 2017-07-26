@@ -63,6 +63,71 @@ public interface I_Z_SistecoConfig
 	  */
 	public int getAD_Org_ID();
 
+    /** Column name ArchivoBatch */
+    public static final String COLUMNNAME_ArchivoBatch = "ArchivoBatch";
+
+	/** Set ArchivoBatch.
+	  * Nombre del archivo Batch de interface de salida de Sisteco
+	  */
+	public void setArchivoBatch(String ArchivoBatch);
+
+	/** Get ArchivoBatch.
+	  * Nombre del archivo Batch de interface de salida de Sisteco
+	  */
+	public String getArchivoBatch();
+
+    /** Column name ArchivoBatchError */
+    public static final String COLUMNNAME_ArchivoBatchError = "ArchivoBatchError";
+
+	/** Set ArchivoBatchError.
+	  * Nombre de archivo Batch de errores de interface de salida de Sisteco
+	  */
+	public void setArchivoBatchError(String ArchivoBatchError);
+
+	/** Get ArchivoBatchError.
+	  * Nombre de archivo Batch de errores de interface de salida de Sisteco
+	  */
+	public String getArchivoBatchError();
+
+    /** Column name ArchivoCountBatch */
+    public static final String COLUMNNAME_ArchivoCountBatch = "ArchivoCountBatch";
+
+	/** Set ArchivoCountBatch.
+	  * Nombre del archivo CountBatch de interface de salida de Sisteco
+	  */
+	public void setArchivoCountBatch(String ArchivoCountBatch);
+
+	/** Get ArchivoCountBatch.
+	  * Nombre del archivo CountBatch de interface de salida de Sisteco
+	  */
+	public String getArchivoCountBatch();
+
+    /** Column name ArchivoCountOnline */
+    public static final String COLUMNNAME_ArchivoCountOnline = "ArchivoCountOnline";
+
+	/** Set ArchivoCountOnline.
+	  * Nombre del archivo CountOnline de interface de salida de Sisteco
+	  */
+	public void setArchivoCountOnline(String ArchivoCountOnline);
+
+	/** Get ArchivoCountOnline.
+	  * Nombre del archivo CountOnline de interface de salida de Sisteco
+	  */
+	public String getArchivoCountOnline();
+
+    /** Column name ArchivoOnline */
+    public static final String COLUMNNAME_ArchivoOnline = "ArchivoOnline";
+
+	/** Set ArchivoOnline.
+	  * Nombre del archivo Online de interface de salida de Sisteco
+	  */
+	public void setArchivoOnline(String ArchivoOnline);
+
+	/** Get ArchivoOnline.
+	  * Nombre del archivo Online de interface de salida de Sisteco
+	  */
+	public String getArchivoOnline();
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -119,6 +184,19 @@ public interface I_Z_SistecoConfig
 	/** Get RutaHistoricoPazos	  */
 	public String getRutaHistoricoPazos();
 
+    /** Column name RutaInterfaceOut */
+    public static final String COLUMNNAME_RutaInterfaceOut = "RutaInterfaceOut";
+
+	/** Set RutaInterfaceOut.
+	  * Ruta donde se crean los archivos de interface de salida para Sisteco
+	  */
+	public void setRutaInterfaceOut(String RutaInterfaceOut);
+
+	/** Get RutaInterfaceOut.
+	  * Ruta donde se crean los archivos de interface de salida para Sisteco
+	  */
+	public String getRutaInterfaceOut();
+
     /** Column name RutaOrigenPazos */
     public static final String COLUMNNAME_RutaOrigenPazos = "RutaOrigenPazos";
 
@@ -127,6 +205,19 @@ public interface I_Z_SistecoConfig
 
 	/** Get RutaOrigenPazos	  */
 	public String getRutaOrigenPazos();
+
+    /** Column name SeparadorArchivoOut */
+    public static final String COLUMNNAME_SeparadorArchivoOut = "SeparadorArchivoOut";
+
+	/** Set SeparadorArchivoOut.
+	  * Separador de campos del archivo de interface de salida de Sisteco
+	  */
+	public void setSeparadorArchivoOut(String SeparadorArchivoOut);
+
+	/** Get SeparadorArchivoOut.
+	  * Separador de campos del archivo de interface de salida de Sisteco
+	  */
+	public String getSeparadorArchivoOut();
 
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";

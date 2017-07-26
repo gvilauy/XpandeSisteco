@@ -276,26 +276,28 @@ public final class SistecoUtils {
                 }
             }
 
-            // Convierto array de bits en Hexadecimal
-            String hexaTmp = "";
-            for (int i = 0; i < arrayBits.length; i++){
+            if (lineas.size() > 0) {
+                // Convierto array de bits en Hexadecimal
+                String hexaTmp = "";
+                for (int i = 0; i < arrayBits.length; i++){
 
-                hexaTmp = arrayBits[i];
-                long longHexa = Long.parseLong(hexaTmp);
-                long reminder;
+                    hexaTmp = arrayBits[i];
+                    long longHexa = Long.parseLong(hexaTmp);
+                    long reminder;
 
-                while (longHexa > 0){
+                    while (longHexa > 0){
 
-                    reminder = longHexa % 10;
-                    longHexa = longHexa / 10;
+                        reminder = longHexa % 10;
+                        longHexa = longHexa / 10;
 
-                    if(reminder != 0 && reminder != 1){
-                        return valorHexa;
+                        if(reminder != 0 && reminder != 1){
+                            return valorHexa;
+                        }
                     }
-                }
 
-                int j = Integer.parseInt(hexaTmp,2);
-                valorHexa = valorHexa + Integer.toHexString(j);
+                    int j = Integer.parseInt(hexaTmp,2);
+                    valorHexa = valorHexa + Integer.toHexString(j);
+                }
             }
 
         }

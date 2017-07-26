@@ -265,6 +265,11 @@ public class ValidatorSisteco implements ModelValidator {
             }
             else if (type == ModelValidator.TYPE_AFTER_CHANGE){
 
+                // Si no cambio precio de venta no hago nada
+                if (!model.is_ValueChanged(X_M_ProductPrice.COLUMNNAME_PriceList)){
+                    return mensaje;
+                }
+
                 MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), model.get_TrxName());
                 if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
                     // Proceso segun marca que ya tenía este producto antes de su actualización.
