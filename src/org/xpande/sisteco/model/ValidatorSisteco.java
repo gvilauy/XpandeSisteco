@@ -149,7 +149,6 @@ public class ValidatorSisteco implements ModelValidator {
                         }
                     }
 
-                    // Para Sisteco, las actualizaciones de producto se guardan como marcas para en un proceso posterio considerarse en la generación de un archivo plano de interface.
                     // Si no tengo marca de update, la creo ahora.
                     if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
                         // No existe aun marca de UPDATE sobre este producto, la creo ahora.
@@ -159,6 +158,18 @@ public class ValidatorSisteco implements ModelValidator {
                         sistecoInterfaceOut.setSeqNo(20);
                         sistecoInterfaceOut.setRecord_ID(model.get_ID());
                         sistecoInterfaceOut.setIsPriceChanged(false);
+                        sistecoInterfaceOut.saveEx();
+                    }
+
+                    // Marca de update para Tandem si cambio
+                    if (model.is_ValueChanged("M_Product_Tandem_ID")){
+                        sistecoInterfaceOut.setIsTandemChanged(true);
+                        // Guardo tandem anterior en caso de haber cambio
+                        if (model.get_ValueOldAsInt("M_Product_Tandem_ID") > 0){
+                            if (sistecoInterfaceOut.getM_Product_Tandem_ID() <= 0){
+                                sistecoInterfaceOut.setM_Product_Tandem_ID(model.get_ValueOldAsInt("M_Product_Tandem_ID"));
+                            }
+                        }
                         sistecoInterfaceOut.saveEx();
                     }
                 }
@@ -251,60 +262,37 @@ public class ValidatorSisteco implements ModelValidator {
                 return mensaje;
             }
 
-            if (type == ModelValidator.TYPE_AFTER_NEW){
-
-                MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE);
-                sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
-                sistecoInterfaceOut.setRecord_ID(product.get_ID());
-                sistecoInterfaceOut.setSeqNo(30);
-                sistecoInterfaceOut.setIsPriceChanged(true);
-                sistecoInterfaceOut.setAD_OrgTrx_ID(priceList.getAD_Org_ID());
-                sistecoInterfaceOut.saveEx();
-
-            }
-            else if (type == ModelValidator.TYPE_AFTER_CHANGE){
-
-                // Si no cambio precio de venta no hago nada
-                if (!model.is_ValueChanged(X_M_ProductPrice.COLUMNNAME_PriceList)){
+            // Si existe, obtengo marca de interface de este producto
+            MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), model.get_TrxName());
+            if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
+                // Proceso segun marca que ya tenía este producto antes de su actualización.
+                // Si marca anterior es CREATE
+                if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                    // No hago nada y respeto primer marca
                     return mensaje;
                 }
-
-                MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), model.get_TrxName());
-                if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
-                    // Proceso segun marca que ya tenía este producto antes de su actualización.
-                    // Si marca anterior es CREATE
-                    if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                        // No hago nada y respeto primer marca
+                else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
+                    // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
+                    // Si este producto sigue estando inactivo
+                    if (!model.isActive()){
+                        // No hago nada y respeto primer marca.
                         return mensaje;
                     }
-                    else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
-                        // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
-                        // Si este producto sigue estando inactivo
-                        if (!model.isActive()){
-                            // No hago nada y respeto primer marca.
-                            return mensaje;
-                        }
-                    }
-                    else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE)){
-                        // Si tenia marca anterior de cambio de precio para este producto, no hago nada
-                        if (sistecoInterfaceOut.isPriceChanged()){
-                            return  mensaje;
-                        }
-                    }
                 }
+            }
 
-                // Para proveedores de pos, los cambios de precios se marcan pero se procesan luego (primero se imprimen etiquetas antes de enviar
-                // cambios de precios a las cajas).
-                sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+            // Si no tengo marca de update, la creo ahora.
+            if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)) {
+                // No existe aun marca de UPDATE sobre este producto, la creo ahora.
                 sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE);
                 sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
                 sistecoInterfaceOut.setRecord_ID(product.get_ID());
                 sistecoInterfaceOut.setSeqNo(30);
-                sistecoInterfaceOut.setIsPriceChanged(true);
-                sistecoInterfaceOut.setAD_OrgTrx_ID(priceList.getAD_Org_ID());
-                sistecoInterfaceOut.saveEx();
             }
+
+            sistecoInterfaceOut.setIsPriceChanged(true);
+            sistecoInterfaceOut.setM_PriceList_ID(priceList.get_ID());
+            sistecoInterfaceOut.saveEx();
         }
 
         return mensaje;

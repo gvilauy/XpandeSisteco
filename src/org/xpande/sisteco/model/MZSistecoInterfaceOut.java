@@ -1,8 +1,16 @@
 package org.xpande.sisteco.model;
 
-import org.compiere.model.Query;
+import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.*;
+import org.compiere.util.Env;
+import org.xpande.core.utils.PriceListUtils;
+import org.xpande.sisteco.utils.SistecoUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -41,4 +49,121 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
     }
 
+    public List<String> getLineasArchivoProducto(int adOrgID, String separadorCampos) {
+
+        List<String> lineas = new ArrayList<String>();
+
+        try{
+
+            if (this.getAD_Table_ID() != I_M_Product.Table_ID){
+                return lineas;
+            }
+
+            MProduct product = new MProduct(getCtx(), this.getRecord_ID(), get_TrxName());
+            MPriceList priceList = null;
+            if (this.getM_PriceList_ID() > 0){
+                priceList = (MPriceList)this.getM_PriceList();
+            }
+            else{
+                priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 142, true, get_TrxName());
+            }
+
+
+            // Si es marca de create
+            if ((this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE))
+                    || (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE))){
+
+                String lineaArchivo = "";
+
+                if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                    lineaArchivo ="I" + separadorCampos;
+                }
+                else{
+                    lineaArchivo ="U" + separadorCampos;
+                }
+
+                lineaArchivo += "ARTICULOS" + separadorCampos;
+
+                lineaArchivo += product.getValue() + separadorCampos;
+                lineaArchivo += product.getDescription().replace(separadorCampos,"_");
+                lineaArchivo += "0" + separadorCampos; // codigo entorno no utilizado
+                lineaArchivo += "0" + separadorCampos; // codigo subfamilia no utilizado
+
+                // Moneda
+                String monedaSisteco = "1";  // Pesos por defecto
+                if (priceList.getC_Currency_ID() == 100){
+                    monedaSisteco = "2";
+                }
+
+                lineaArchivo += monedaSisteco + separadorCampos;
+
+                // Codigo IVA
+                lineaArchivo += ((MTaxCategory) product.getC_TaxCategory()).getCommodityCode();
+
+                // Precio de venta
+                MPriceListVersion priceListVersion = priceList.getPriceListVersion(null);
+                MProductPrice productPrice = MProductPrice.get(getCtx(), priceListVersion.get_ID(), product.get_ID(), get_TrxName());
+                BigDecimal priceSO = productPrice.getPriceList();
+
+                String precioSisteco = "0", parteDecimalPrecio ="00";
+                BigDecimal decimalPrecioSO = priceSO.subtract(priceSO.setScale(0, RoundingMode.FLOOR)).movePointRight(priceSO.scale());
+                if (decimalPrecioSO != null){
+                    if (decimalPrecioSO.compareTo(Env.ZERO) != 0){
+                        if (decimalPrecioSO.toString().length() >= 3){
+                            parteDecimalPrecio = decimalPrecioSO.toString().substring(0, 2);
+                        }
+                        else if (decimalPrecioSO.toString().length() == 2){
+                            parteDecimalPrecio = decimalPrecioSO.toString();
+                        }
+                        else if (decimalPrecioSO.toString().length() == 1){
+                            parteDecimalPrecio = decimalPrecioSO.toString() + "0";
+                        }
+                    }
+                }
+                precioSisteco = String.valueOf(productPrice.getPriceList().intValue()) + parteDecimalPrecio;
+                lineaArchivo += precioSisteco + separadorCampos;
+
+                // Valor Hexadecimal del producto
+                String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(getCtx(), product, get_TrxName());
+                lineaArchivo += valorHexadecimal + separadorCampos;
+
+                // Unidades por pack
+                lineaArchivo += String.valueOf(product.getUnitsPerPack()) + separadorCampos;
+
+                // Unidad de medida
+                String unidadSisteco = "1";
+                if (product.get_ValueAsBoolean("EsProductoBalanza")){
+                    unidadSisteco = "2";
+                }
+                lineaArchivo += unidadSisteco;
+
+                lineas.add(lineaArchivo);
+
+                // Si es UPDATE y hubo cambio de Tandem
+                if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE)){
+                    if (this.isTandemChanged()){
+
+                    }
+                }
+
+            }
+            else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
+
+                String lineaArchivo = "";
+
+                lineaArchivo ="D" + separadorCampos;
+                lineaArchivo += "ARTICULOS" + separadorCampos;
+                lineaArchivo += product.getValue();
+
+                lineas.add(lineaArchivo);
+            }
+
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return lineas;
+    }
 }

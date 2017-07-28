@@ -125,7 +125,7 @@ public final class SistecoUtils {
      */
     public static String getHexadecimalAtributos(Properties ctx, MProduct product, String trxName) {
 
-        String valorHexa = null;
+        String valorHexa = "";
         String[] arrayBits = new String[16];
 
         try{

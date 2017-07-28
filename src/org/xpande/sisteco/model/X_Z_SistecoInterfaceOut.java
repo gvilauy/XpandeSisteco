@@ -30,7 +30,7 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170710L;
+	private static final long serialVersionUID = 20170727L;
 
     /** Standard Constructor */
     public X_Z_SistecoInterfaceOut (Properties ctx, int Z_SistecoInterfaceOut_ID, String trxName)
@@ -44,6 +44,8 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 			setIsExecuted (false);
 // N
 			setIsPriceChanged (false);
+// N
+			setIsTandemChanged (false);
 // N
 			setRecord_ID (0);
 			setSeqNo (0);
@@ -256,6 +258,86 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 			return "Y".equals(oo);
 		}
 		return false;
+	}
+
+	/** Set IsTandemChanged.
+		@param IsTandemChanged 
+		Si se modifico asociación de Tandem en un Producto para Reatil
+	  */
+	public void setIsTandemChanged (boolean IsTandemChanged)
+	{
+		set_Value (COLUMNNAME_IsTandemChanged, Boolean.valueOf(IsTandemChanged));
+	}
+
+	/** Get IsTandemChanged.
+		@return Si se modifico asociación de Tandem en un Producto para Reatil
+	  */
+	public boolean isTandemChanged () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsTandemChanged);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	public I_M_PriceList getM_PriceList() throws RuntimeException
+    {
+		return (I_M_PriceList)MTable.get(getCtx(), I_M_PriceList.Table_Name)
+			.getPO(getM_PriceList_ID(), get_TrxName());	}
+
+	/** Set Price List.
+		@param M_PriceList_ID 
+		Unique identifier of a Price List
+	  */
+	public void setM_PriceList_ID (int M_PriceList_ID)
+	{
+		if (M_PriceList_ID < 1) 
+			set_Value (COLUMNNAME_M_PriceList_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_PriceList_ID, Integer.valueOf(M_PriceList_ID));
+	}
+
+	/** Get Price List.
+		@return Unique identifier of a Price List
+	  */
+	public int getM_PriceList_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_PriceList_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_M_Product getM_Product_Tandem() throws RuntimeException
+    {
+		return (I_M_Product)MTable.get(getCtx(), I_M_Product.Table_Name)
+			.getPO(getM_Product_Tandem_ID(), get_TrxName());	}
+
+	/** Set M_Product_Tandem_ID.
+		@param M_Product_Tandem_ID 
+		Producto Tandem que se asocia a otro producto en Retail
+	  */
+	public void setM_Product_Tandem_ID (int M_Product_Tandem_ID)
+	{
+		if (M_Product_Tandem_ID < 1) 
+			set_Value (COLUMNNAME_M_Product_Tandem_ID, null);
+		else 
+			set_Value (COLUMNNAME_M_Product_Tandem_ID, Integer.valueOf(M_Product_Tandem_ID));
+	}
+
+	/** Get M_Product_Tandem_ID.
+		@return Producto Tandem que se asocia a otro producto en Retail
+	  */
+	public int getM_Product_Tandem_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_M_Product_Tandem_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Record ID.

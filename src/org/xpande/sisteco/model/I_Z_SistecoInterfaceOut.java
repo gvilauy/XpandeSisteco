@@ -190,6 +190,49 @@ public interface I_Z_SistecoInterfaceOut
 	  */
 	public boolean isPriceChanged();
 
+    /** Column name IsTandemChanged */
+    public static final String COLUMNNAME_IsTandemChanged = "IsTandemChanged";
+
+	/** Set IsTandemChanged.
+	  * Si se modifico asociación de Tandem en un Producto para Reatil
+	  */
+	public void setIsTandemChanged(boolean IsTandemChanged);
+
+	/** Get IsTandemChanged.
+	  * Si se modifico asociación de Tandem en un Producto para Reatil
+	  */
+	public boolean isTandemChanged();
+
+    /** Column name M_PriceList_ID */
+    public static final String COLUMNNAME_M_PriceList_ID = "M_PriceList_ID";
+
+	/** Set Price List.
+	  * Unique identifier of a Price List
+	  */
+	public void setM_PriceList_ID(int M_PriceList_ID);
+
+	/** Get Price List.
+	  * Unique identifier of a Price List
+	  */
+	public int getM_PriceList_ID();
+
+	public I_M_PriceList getM_PriceList() throws RuntimeException;
+
+    /** Column name M_Product_Tandem_ID */
+    public static final String COLUMNNAME_M_Product_Tandem_ID = "M_Product_Tandem_ID";
+
+	/** Set M_Product_Tandem_ID.
+	  * Producto Tandem que se asocia a otro producto en Retail
+	  */
+	public void setM_Product_Tandem_ID(int M_Product_Tandem_ID);
+
+	/** Get M_Product_Tandem_ID.
+	  * Producto Tandem que se asocia a otro producto en Retail
+	  */
+	public int getM_Product_Tandem_ID();
+
+	public I_M_Product getM_Product_Tandem() throws RuntimeException;
+
     /** Column name Record_ID */
     public static final String COLUMNNAME_Record_ID = "Record_ID";
 
