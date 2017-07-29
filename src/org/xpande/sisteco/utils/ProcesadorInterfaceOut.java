@@ -3,17 +3,17 @@ package org.xpande.sisteco.utils;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.I_C_BPartner;
 import org.compiere.model.I_M_Product;
+import org.compiere.model.MProduct;
 import org.compiere.model.Query;
+import org.compiere.util.DB;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.sisteco.model.I_Z_SistecoInterfaceOut;
 import org.xpande.sisteco.model.MZSistecoConfig;
 import org.xpande.sisteco.model.MZSistecoInterfaceOut;
 import org.xpande.sisteco.model.X_Z_SistecoInterfaceOut;
+import sun.misc.resources.Messages_pt_BR;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Properties;
@@ -88,6 +88,21 @@ public class ProcesadorInterfaceOut {
                 if (message != null) return message;
             }
 
+            // Cargo archivos contadores de lineas batch y online
+            int contadorLineasBatch = this.getCountBatchLines();
+            int contadorLineasOnline = this.getCountOnlineLines();
+
+            if (contadorLineasBatch > 0){
+                this.setBatchLines(contadorLineasBatch);
+            }
+
+            if (contadorLineasOnline > 0){
+                this.setOnlineLines(contadorLineasBatch);
+            }
+
+            // Copiar archivos creados en path destino de Sisteco
+
+
         }
         catch (Exception e){
             throw new AdempiereException(e);
@@ -96,6 +111,131 @@ public class ProcesadorInterfaceOut {
         return message;
     }
 
+    /***
+     * Guarda cantidad de lineas batch generadas en archivo de lineas batch.
+     * Xpande. Created by Gabriel Vila on 7/29/17.
+     * @param contadorLineasBatch
+     */
+    private void setBatchLines(int contadorLineasBatch) {
+
+        BufferedWriter bufferedWriterBatch = null;
+
+        try{
+
+            FileWriter fileWriterBatch = new FileWriter(this.fileCountBatch, false);
+            bufferedWriterBatch = new BufferedWriter(fileWriterBatch);
+
+            bufferedWriterBatch.append(String.valueOf(contadorLineasBatch));
+            bufferedWriterBatch.newLine();
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            if (bufferedWriterBatch != null){
+                try {
+                    bufferedWriterBatch.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+    /***
+     * Guarda cantidad de lineas batch generadas en archivo de lineas batch.
+     * Xpande. Created by Gabriel Vila on 7/29/17.
+     * @param contadorLineasOnline
+     */
+    private void setOnlineLines(int contadorLineasOnline) {
+
+        BufferedWriter bufferedWriterOnline = null;
+
+        try{
+
+            FileWriter fileWriterOnline = new FileWriter(this.fileCountOnline, false);
+            bufferedWriterOnline = new BufferedWriter(fileWriterOnline);
+
+            bufferedWriterOnline.append(String.valueOf(contadorLineasOnline));
+            bufferedWriterOnline.newLine();
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            if (bufferedWriterOnline != null){
+                try {
+                    bufferedWriterOnline.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+    /***
+     * Obtiene y retorna cantidad de lineas generadas en el archivo Batch durante este proceso.
+     * Xpande. Created by Gabriel Vila on 7/29/17.
+     * @return
+     */
+    private int getCountBatchLines() {
+
+        LineNumberReader reader = null;
+
+        try{
+            reader = new LineNumberReader(new FileReader(this.fileBatch));
+
+            while ((reader.readLine()) != null);
+
+            return reader.getLineNumber();
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            if(reader != null){
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /***
+     * Obtiene y retorna cantidad de lineas generadas en el archivo Online durante este proceso.
+     * Xpande. Created by Gabriel Vila on 7/29/17.
+     * @return
+     */
+    private int getCountOnlineLines() {
+
+        LineNumberReader reader = null;
+
+        try{
+            reader = new LineNumberReader(new FileReader(this.fileOnline));
+
+            while ((reader.readLine()) != null);
+
+            return reader.getLineNumber();
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            if(reader != null){
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     /***
      * Procesa interface de salida de productos para Sisteco.
@@ -121,6 +261,26 @@ public class ProcesadorInterfaceOut {
             // Obtengo y recorro lineas de interface aun no ejecutadas para productos
             List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted();
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
+
+                // Me aseguro que el producto tenga atributos asociados, sino se los creo ahora.
+                // Esto es momentaneo para crear los atributos de los productos migrados.
+                String sql = " select count(*) from z_productoatribsisteco where m_product_id =" + interfaceOut.getRecord_ID();
+                int contadorAtribs = DB.getSQLValue(this.trxName, sql);
+                if (contadorAtribs <= 0){
+                    // Asociación de atributos que requiere Sisteco al nuevo producto
+                    MProduct product = new MProduct(this.ctx, interfaceOut.getRecord_ID(), this.trxName);
+                    SistecoUtils.setProductAttributes(this.ctx, product, this.trxName);
+
+                    // Obtengo y guardo valor Hexadecimal segun seteos de atributos para el producto recibido.
+                    // Solo si el producto tiene unidad de medida o tandem asociado.
+                    if ((product.getC_UOM_ID() > 0) || (product.get_ValueAsInt("M_Product_Tandem_ID") > 0)){
+                        String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(this.ctx, product, this.trxName);
+                        String action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
+                                " where m_product_id =" + product.get_ID();
+                        DB.executeUpdateEx(action, this.trxName);
+                    }
+                }
+
                 List<String> lineasArchivo = interfaceOut.getLineasArchivoProducto(adOrgID, this.sistecoConfig.getSeparadorArchivoOut());
                 for (String lineaArchivo: lineasArchivo){
 

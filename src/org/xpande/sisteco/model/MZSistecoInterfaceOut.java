@@ -94,7 +94,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 lineaArchivo += "ARTICULOS" + separadorCampos;
 
                 lineaArchivo += product.getValue() + separadorCampos;
-                lineaArchivo += product.getDescription().replace(separadorCampos,"_");
+                lineaArchivo += product.getDescription().replace(separadorCampos,"_") + separadorCampos;
                 lineaArchivo += "0" + separadorCampos; // codigo entorno no utilizado
                 lineaArchivo += "0" + separadorCampos; // codigo subfamilia no utilizado
 
@@ -107,7 +107,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 lineaArchivo += monedaSisteco + separadorCampos;
 
                 // Codigo IVA
-                lineaArchivo += ((MTaxCategory) product.getC_TaxCategory()).getCommodityCode();
+                lineaArchivo += ((MTaxCategory) product.getC_TaxCategory()).getCommodityCode() + separadorCampos;
 
                 // Precio de venta
                 MPriceListVersion priceListVersion = priceList.getPriceListVersion(null);
@@ -160,18 +160,30 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                             lineaTandem += product.getValue();
                             lineas.add(lineaTandem);
                         }
+                        // Si el producto tiene Tandem
+                        if (product.get_ValueAsInt("M_Product_Tandem_ID") > 0){
+                            // Agrego linea de nuevo tandem
+                            String lineaTandem = "";
+                            lineaTandem ="I" + separadorCampos;
+                            lineaTandem += "TANDEM" + separadorCampos;
+                            lineaTandem += product.getValue() + separadorCampos;
+                            lineaTandem += this.getM_Product_Tandem().getValue();
+                            lineas.add(lineaTandem);
+                        }
                     }
                 }
+                else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
 
-                // Si el producto tiene Tandem
-                if (product.get_ValueAsInt("M_Product_Tandem_ID") > 0){
-                    // Agrego linea de nuevo tandem
-                    String lineaTandem = "";
-                    lineaTandem ="I" + separadorCampos;
-                    lineaTandem += "TANDEM" + separadorCampos;
-                    lineaTandem += product.getValue() + separadorCampos;
-                    lineaTandem += this.getM_Product_Tandem().getValue();
-                    lineas.add(lineaTandem);
+                    // Si el producto tiene Tandem
+                    if (product.get_ValueAsInt("M_Product_Tandem_ID") > 0){
+                        // Agrego linea de nuevo tandem
+                        String lineaTandem = "";
+                        lineaTandem ="I" + separadorCampos;
+                        lineaTandem += "TANDEM" + separadorCampos;
+                        lineaTandem += product.getValue() + separadorCampos;
+                        lineaTandem += this.getM_Product_Tandem().getValue();
+                        lineas.add(lineaTandem);
+                    }
                 }
             }
             else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
@@ -225,6 +237,8 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 lineaArchivo += productoUPC.getUPC() + separadorCampos;
                 lineaArchivo += product.getValue();
+
+                lineas.add(lineaArchivo);
             }
             else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
 

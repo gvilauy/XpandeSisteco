@@ -109,6 +109,24 @@ public class ValidatorSisteco implements ModelValidator {
             }
             else if (type == ModelValidator.TYPE_AFTER_CHANGE){
 
+                // Me aseguro que el producto tenga atributos asociados, sino se los creo ahora.
+                // Esto es momentaneo para crear los atributos de los productos migrados.
+                String sql = " select count(*) from z_productoatribsisteco where m_product_id =" + model.get_ID();
+                int contadorAtribs = DB.getSQLValue(model.get_TrxName(), sql);
+                if (contadorAtribs <= 0){
+                    // Asociación de atributos que requiere Sisteco al nuevo producto
+                    SistecoUtils.setProductAttributes(model.getCtx(), model, model.get_TrxName());
+
+                    // Obtengo y guardo valor Hexadecimal segun seteos de atributos para el producto recibido.
+                    // Solo si el producto tiene unidad de medida o tandem asociado.
+                    if ((model.getC_UOM_ID() > 0) || (model.get_ValueAsInt("M_Product_Tandem_ID") > 0)){
+                        String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(model.getCtx(), model, model.get_TrxName());
+                        String action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
+                                " where m_product_id =" + model.get_ID();
+                        DB.executeUpdateEx(action, model.get_TrxName());
+                    }
+                }
+
                 // Pregunto por los campos cuyo cambio requiere informar a Sisteco
                 if ((model.is_ValueChanged("C_UOM_ID")) || (model.is_ValueChanged("M_Product_Tandem_ID"))
                     || (model.is_ValueChanged("Description")) || (model.is_ValueChanged("C_TaxCategory_ID"))
