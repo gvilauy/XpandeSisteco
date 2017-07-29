@@ -284,6 +284,7 @@ public class ValidatorSisteco implements ModelValidator {
             // Si no tengo marca de update, la creo ahora.
             if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)) {
                 // No existe aun marca de UPDATE sobre este producto, la creo ahora.
+                sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
                 sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE);
                 sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
                 sistecoInterfaceOut.setRecord_ID(product.get_ID());

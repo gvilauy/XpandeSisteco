@@ -4,6 +4,7 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.I_C_BPartner;
 import org.compiere.model.I_M_Product;
 import org.compiere.model.Query;
+import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.sisteco.model.I_Z_SistecoInterfaceOut;
 import org.xpande.sisteco.model.MZSistecoConfig;
 import org.xpande.sisteco.model.MZSistecoInterfaceOut;
@@ -109,7 +110,6 @@ public class ProcesadorInterfaceOut {
         BufferedWriter bufferedWriterBatch = null;
         BufferedWriter bufferedWriterOnline = null;
 
-
         try{
 
             FileWriter fileWriterBatch = new FileWriter(this.fileBatch, true);
@@ -137,6 +137,28 @@ public class ProcesadorInterfaceOut {
                     //interfaceOut.saveEx();
                 }
             }
+
+            // Obtengo y recorro lineas de interface aun no ejecutadas para códigos de barra de productos
+            interfaceOuts = this.getLinesUPCNotExecuted();
+            for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
+                List<String> lineasArchivo = interfaceOut.getLineasArchivoUPC(adOrgID, this.sistecoConfig.getSeparadorArchivoOut());
+                for (String lineaArchivo: lineasArchivo){
+
+                    bufferedWriterBatch.append(lineaArchivo);
+                    bufferedWriterOnline.append(lineaArchivo);
+
+                    bufferedWriterBatch.newLine();
+                    bufferedWriterOnline.newLine();
+
+                }
+                if (lineasArchivo.size() > 0){
+                    // Marco linea como ejecutada
+                    //interfaceOut.setIsExecuted(true);
+                    //interfaceOut.saveEx();
+                }
+            }
+
+
         }
         catch (Exception e){
             throw new AdempiereException(e);
@@ -207,6 +229,24 @@ public class ProcesadorInterfaceOut {
         return lines;
 
     }
+
+
+    /***
+     * Obtiene y retorna lineas de interface de salida para códigos de barras no ejecutadas al momento
+     * Xpande. Created by Gabriel Vila on 7/24/17.
+     * @return
+     */
+    private List<MZSistecoInterfaceOut> getLinesUPCNotExecuted(){
+
+        String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_Z_ProductoUPC.Table_ID;
+
+        List<MZSistecoInterfaceOut> lines = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).setOrderBy(" SeqNo, Created  ").list();
+
+        return lines;
+
+    }
+
 
     /***
      * Obtiene y retorna lineas de interface de salida para socios de negocio no ejecutadas al momento.

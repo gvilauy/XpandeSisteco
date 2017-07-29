@@ -3,6 +3,8 @@ package org.xpande.sisteco.model;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.xpande.core.model.I_Z_ProductoUPC;
+import org.xpande.core.model.MZProductoUPC;
 import org.xpande.core.utils.PriceListUtils;
 import org.xpande.sisteco.utils.SistecoUtils;
 
@@ -49,6 +51,13 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
     }
 
+
+    /***
+     * Obtiene y retorna lineas para archivos de interface de salida con información de producto, a partir de la información de este modelo.
+     * @param adOrgID
+     * @param separadorCampos
+     * @return
+     */
     public List<String> getLineasArchivoProducto(int adOrgID, String separadorCampos) {
 
         List<String> lineas = new ArrayList<String>();
@@ -142,10 +151,28 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 // Si es UPDATE y hubo cambio de Tandem
                 if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE)){
                     if (this.isTandemChanged()){
-
+                        // Si tengo tandem anterior (o sea, que ya tenia tandem y se modifico)
+                        if (this.getM_Product_Tandem_ID() > 0){
+                            // Agrego linea de eliminación de tandem anterior
+                            String lineaTandem = "";
+                            lineaTandem ="D" + separadorCampos;
+                            lineaTandem += "TANDEM" + separadorCampos;
+                            lineaTandem += product.getValue();
+                            lineas.add(lineaTandem);
+                        }
                     }
                 }
 
+                // Si el producto tiene Tandem
+                if (product.get_ValueAsInt("M_Product_Tandem_ID") > 0){
+                    // Agrego linea de nuevo tandem
+                    String lineaTandem = "";
+                    lineaTandem ="I" + separadorCampos;
+                    lineaTandem += "TANDEM" + separadorCampos;
+                    lineaTandem += product.getValue() + separadorCampos;
+                    lineaTandem += this.getM_Product_Tandem().getValue();
+                    lineas.add(lineaTandem);
+                }
             }
             else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
 
@@ -158,6 +185,57 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 lineas.add(lineaArchivo);
             }
 
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return lineas;
+    }
+
+
+    /***
+     * Obtiene y retorna lineas para archivos de interface de salida con información de códigos de barra,
+     * a partir de la información de este modelo.
+     * @param adOrgID
+     * @param separadorCampos
+     * @return
+     */
+    public List<String> getLineasArchivoUPC(int adOrgID, String separadorCampos) {
+
+        List<String> lineas = new ArrayList<String>();
+
+        try{
+
+            if (this.getAD_Table_ID() != I_Z_ProductoUPC.Table_ID){
+                return lineas;
+            }
+
+            MZProductoUPC productoUPC = new MZProductoUPC(getCtx(), this.getRecord_ID(), get_TrxName());
+            MProduct product = (MProduct) productoUPC.getM_Product();
+
+            // Si es marca de create
+            if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+
+                String lineaArchivo = "";
+
+                lineaArchivo ="I" + separadorCampos;
+                lineaArchivo += "ARTICULOS_EQUIVALENTES" + separadorCampos;
+
+                lineaArchivo += productoUPC.getUPC() + separadorCampos;
+                lineaArchivo += product.getValue();
+            }
+            else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
+
+                String lineaArchivo = "";
+
+                lineaArchivo ="D" + separadorCampos;
+                lineaArchivo += "ARTICULOS_EQUIVALENTES" + separadorCampos;
+                lineaArchivo += productoUPC.getUPC();
+
+                lineas.add(lineaArchivo);
+            }
 
         }
         catch (Exception e){
