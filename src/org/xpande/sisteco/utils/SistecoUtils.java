@@ -281,7 +281,7 @@ public final class SistecoUtils {
                 String hexaTmp = "";
                 for (int i = 0; i < arrayBits.length; i++){
 
-                    hexaTmp = arrayBits[i];
+                    hexaTmp = arrayBits[i].trim();
                     long longHexa = Long.parseLong(hexaTmp);
                     long reminder;
 
@@ -305,7 +305,7 @@ public final class SistecoUtils {
             throw new AdempiereException(e);
         }
 
-        return valorHexa;
+        return valorHexa.toUpperCase();
     }
 
 

@@ -41,8 +41,8 @@ public class ProcesadorInterfaceOut {
     private File fileBatchError = null;
 
     private String fchToday;
-    private String fchTodayUpdate = "";
-    private static final String SEPARATOR_L = ":";//caracter separador de las lineas de los archivos a escribir
+
+
 
     /***
      * Constructor
@@ -354,17 +354,17 @@ public class ProcesadorInterfaceOut {
 
             String[] hra = (new Timestamp(System.currentTimeMillis()).toString().split(sistecoConfig.getSeparadorArchivoOut()));
             String fecha =hra[0].replace("-", "").replace(" ", "_")+hra[1];
-            fchTodayUpdate = getDateString();
+
             fchToday = fecha;
 
-            String pathArchivos = sistecoConfig.getRutaInterfaceOut() + File.separator + fchToday;
+            String pathArchivos = sistecoConfig.getRutaInterfaceOutHist() + File.separator + fchToday;
 
             fileBatch = new File( pathArchivos + sistecoConfig.getArchivoBatch());
             fileOnline = new File( pathArchivos + sistecoConfig.getArchivoOnline());
             fileCountBatch = new File( pathArchivos + sistecoConfig.getArchivoCountBatch());
             fileCountOnline = new File( pathArchivos + sistecoConfig.getArchivoCountOnline());
 
-            fileBatchError = new File(sistecoConfig.getRutaInterfaceOut() + File.separator + "ArchDeErrores" + File.separator + fchToday + sistecoConfig.getArchivoBatchError());
+            fileBatchError = new File(sistecoConfig.getRutaInterfaceOutHist() + File.separator + "ArchDeErrores" + File.separator + fchToday + sistecoConfig.getArchivoBatchError());
 
         }
         catch (Exception e){

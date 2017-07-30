@@ -197,6 +197,19 @@ public interface I_Z_SistecoConfig
 	  */
 	public String getRutaInterfaceOut();
 
+    /** Column name RutaInterfaceOutHist */
+    public static final String COLUMNNAME_RutaInterfaceOutHist = "RutaInterfaceOutHist";
+
+	/** Set RutaInterfaceOutHist.
+	  * Ruta donde dejar archivos de historico de interface de salida a Sisteco
+	  */
+	public void setRutaInterfaceOutHist(String RutaInterfaceOutHist);
+
+	/** Get RutaInterfaceOutHist.
+	  * Ruta donde dejar archivos de historico de interface de salida a Sisteco
+	  */
+	public String getRutaInterfaceOutHist();
+
     /** Column name RutaOrigenPazos */
     public static final String COLUMNNAME_RutaOrigenPazos = "RutaOrigenPazos";
 

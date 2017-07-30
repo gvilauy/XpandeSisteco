@@ -30,7 +30,7 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170724L;
+	private static final long serialVersionUID = 20170729L;
 
     /** Standard Constructor */
     public X_Z_SistecoConfig (Properties ctx, int Z_SistecoConfig_ID, String trxName)
@@ -212,6 +212,23 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	public String getRutaInterfaceOut () 
 	{
 		return (String)get_Value(COLUMNNAME_RutaInterfaceOut);
+	}
+
+	/** Set RutaInterfaceOutHist.
+		@param RutaInterfaceOutHist 
+		Ruta donde dejar archivos de historico de interface de salida a Sisteco
+	  */
+	public void setRutaInterfaceOutHist (String RutaInterfaceOutHist)
+	{
+		set_Value (COLUMNNAME_RutaInterfaceOutHist, RutaInterfaceOutHist);
+	}
+
+	/** Get RutaInterfaceOutHist.
+		@return Ruta donde dejar archivos de historico de interface de salida a Sisteco
+	  */
+	public String getRutaInterfaceOutHist () 
+	{
+		return (String)get_Value(COLUMNNAME_RutaInterfaceOutHist);
 	}
 
 	/** Set RutaOrigenPazos.
