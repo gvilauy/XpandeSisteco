@@ -18,6 +18,7 @@
 package org.xpande.sisteco.model;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
 
@@ -30,7 +31,7 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170727L;
+	private static final long serialVersionUID = 20170801L;
 
     /** Standard Constructor */
     public X_Z_SistecoInterfaceOut (Properties ctx, int Z_SistecoInterfaceOut_ID, String trxName)
@@ -158,6 +159,23 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 	public String getCRUDType () 
 	{
 		return (String)get_Value(COLUMNNAME_CRUDType);
+	}
+
+	/** Set DateExecuted.
+		@param DateExecuted 
+		Fecha ejecutado
+	  */
+	public void setDateExecuted (Timestamp DateExecuted)
+	{
+		set_Value (COLUMNNAME_DateExecuted, DateExecuted);
+	}
+
+	/** Get DateExecuted.
+		@return Fecha ejecutado
+	  */
+	public Timestamp getDateExecuted () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateExecuted);
 	}
 
 	/** Set Description.

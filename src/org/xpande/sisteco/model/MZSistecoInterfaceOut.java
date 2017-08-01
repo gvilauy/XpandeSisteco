@@ -112,6 +112,11 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 // Precio de venta
                 MPriceListVersion priceListVersion = priceList.getPriceListVersion(null);
                 MProductPrice productPrice = MProductPrice.get(getCtx(), priceListVersion.get_ID(), product.get_ID(), get_TrxName());
+
+                if (productPrice == null){
+                    throw new AdempiereException("No se obtuvo precio de venta para el producto con ID : " + product.get_ID());
+                }
+
                 BigDecimal priceSO = productPrice.getPriceList();
 
                 String precioSisteco = "0", parteDecimalPrecio ="00";

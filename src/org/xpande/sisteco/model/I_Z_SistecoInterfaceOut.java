@@ -120,6 +120,19 @@ public interface I_Z_SistecoInterfaceOut
 	  */
 	public String getCRUDType();
 
+    /** Column name DateExecuted */
+    public static final String COLUMNNAME_DateExecuted = "DateExecuted";
+
+	/** Set DateExecuted.
+	  * Fecha ejecutado
+	  */
+	public void setDateExecuted(Timestamp DateExecuted);
+
+	/** Get DateExecuted.
+	  * Fecha ejecutado
+	  */
+	public Timestamp getDateExecuted();
+
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
 

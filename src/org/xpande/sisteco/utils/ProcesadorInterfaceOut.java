@@ -144,6 +144,38 @@ public class ProcesadorInterfaceOut {
 
 
     /***
+     * Guarda linea de error en archivo de errores.
+     * Xpande. Created by Gabriel Vila on 7/29/17.
+     * @param lineaError
+     */
+    private void setBatchErrorLine(String lineaError) {
+
+        BufferedWriter bufferedWriterBatch = null;
+
+        try{
+
+            FileWriter fileWriterBatch = new FileWriter(this.fileBatchError, true);
+            bufferedWriterBatch = new BufferedWriter(fileWriterBatch);
+
+            bufferedWriterBatch.append(lineaError);
+            bufferedWriterBatch.newLine();
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            if (bufferedWriterBatch != null){
+                try {
+                    bufferedWriterBatch.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+    /***
      * Guarda cantidad de lineas batch generadas en archivo de lineas batch.
      * Xpande. Created by Gabriel Vila on 7/29/17.
      * @param contadorLineasOnline
@@ -293,8 +325,9 @@ public class ProcesadorInterfaceOut {
                 }
                 if (lineasArchivo.size() > 0){
                     // Marco linea como ejecutada
-                    //interfaceOut.setIsExecuted(true);
-                    //interfaceOut.saveEx();
+                    interfaceOut.setIsExecuted(true);
+                    interfaceOut.setDateExecuted(new Timestamp(System.currentTimeMillis()));
+                    interfaceOut.saveEx();
                 }
             }
 
@@ -313,11 +346,11 @@ public class ProcesadorInterfaceOut {
                 }
                 if (lineasArchivo.size() > 0){
                     // Marco linea como ejecutada
-                    //interfaceOut.setIsExecuted(true);
-                    //interfaceOut.saveEx();
+                    interfaceOut.setIsExecuted(true);
+                    interfaceOut.setDateExecuted(new Timestamp(System.currentTimeMillis()));
+                    interfaceOut.saveEx();
                 }
             }
-
 
         }
         catch (Exception e){

@@ -281,7 +281,7 @@ public class ValidatorSisteco implements ModelValidator {
             }
 
             // Si existe, obtengo marca de interface de este producto
-            MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), model.get_TrxName());
+            MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, product.get_ID(), model.get_TrxName());
             if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
                 // Proceso segun marca que ya tenía este producto antes de su actualización.
                 // Si marca anterior es CREATE
