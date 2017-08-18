@@ -89,6 +89,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             // Tiempo final de proceso
             this.setEndDate(new Timestamp(System.currentTimeMillis()));
 
+            this.setProcessed(true);
             this.saveEx();
 
         }
@@ -141,6 +142,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " order by datetrx, nomcateg ";
 
             pstmt = DB.prepareStatement(sql1 + " union " + sql2, get_TrxName());
+
+            System.out.println(sql1 + " union " + sql2);
+
         	rs = pstmt.executeQuery();
 
         	while(rs.next()){
@@ -152,6 +156,40 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 pazosTax.setTaxAmt(rs.getBigDecimal("impuestos"));
                 pazosTax.setTaxBaseAmt(rs.getBigDecimal("base"));
                 pazosTax.saveEx();
+        	}
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+        	rs = null; pstmt = null;
+        }
+   }
+
+   private void setVentasRUT(){
+
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = "SELECT a.ad_client_id, a.ad_org_id, b.st_documentoreceptor, upper(b.st_nombrereceptor) as st_nombrereceptor," +
+                    " sum(c.st_totaltcktsinpagoserv - c.st_ivatotaltcktsinpagoserv) AS AmtSubtotal," +
+                    " sum(c.st_ivatotaltcktsinpagoserv) AS TaxAmt, sum(c.st_totaltcktsinpagoserv) AS TotalAmt," +
+                    " sum(a.st_totalapagar) AS PayAmt, date_trunc('day'::text, b.datetrx) AS datetrx " +
+                    " FROM z_sisteco_tk_cvta a " +
+                    " JOIN z_sisteco_tk_cfecab b ON a.z_sisteco_tk_cvta_id = b.z_sisteco_tk_cvta_id " +
+                    " JOIN z_sisteco_tk_totalticket c ON a.z_sisteco_tk_cvta_id = c.z_sisteco_tk_cvta_id " +
+                    " WHERE a.st_estadoticket= 'F' AND a.st_tipolinea='1' AND b.st_tipodocumentoreceptor::text = '2' " +
+                    " and a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " GROUP BY a.ad_client_id, a.ad_org_id, b.st_documentoreceptor, b.st_nombrereceptor, (date_trunc('day'::text, b.datetrx))";
+
+        	pstmt = DB.prepareStatement(sql, get_TrxName());
+        	rs = pstmt.executeQuery();
+
+        	while(rs.next()){
+                // VER VISTA ZV_Sisteco_VtasRUT
         	}
         }
         catch (Exception e){
