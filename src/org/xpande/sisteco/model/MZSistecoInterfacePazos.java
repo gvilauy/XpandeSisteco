@@ -86,6 +86,12 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             // Obtengo y guardo desgloce de ventas por Impuesto
             this.setDesgloceImpuestos();
 
+            // Otengo y guardo detalle de ventas por RUT y Ticket
+            this.setVentasRUTxTicket();
+
+            // Otengo y guardo detalle de ventas por RUT y Ticket desglozadas por Impuestos
+            this.setDesgloceRUTImpuestos();
+
             // Tiempo final de proceso
             this.setEndDate(new Timestamp(System.currentTimeMillis()));
 
@@ -138,8 +144,8 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " and a.st_lineacancelada = 0 " +
                     " group by hdr.datetrx::date, prod.c_taxcategory_id, categ.name, idcateg, nomcateg " +
                     " order by datetrx, c_taxcategory_id ) as info " +
-                    " group by datetrx, c_taxcategory_id, nomcateg " +
-                    " order by datetrx, nomcateg ";
+                    " group by datetrx::date, c_taxcategory_id, nomcateg " +
+                    " order by datetrx::date, nomcateg ";
 
             pstmt = DB.prepareStatement(sql1 + " union " + sql2, get_TrxName());
 
@@ -167,29 +173,45 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         }
    }
 
-   private void setVentasRUT(){
+    /***
+     * Obtiene y guarda información de ventas por RUT y ticket de este proceso.
+     * Xpande. Created by Gabriel Vila on 8/19/17.
+     */
+   private void setVentasRUTxTicket(){
 
         String sql = "";
         PreparedStatement pstmt = null;
         ResultSet rs = null;
 
         try{
-            sql = "SELECT a.ad_client_id, a.ad_org_id, b.st_documentoreceptor, upper(b.st_nombrereceptor) as st_nombrereceptor," +
-                    " sum(c.st_totaltcktsinpagoserv - c.st_ivatotaltcktsinpagoserv) AS AmtSubtotal," +
-                    " sum(c.st_ivatotaltcktsinpagoserv) AS TaxAmt, sum(c.st_totaltcktsinpagoserv) AS TotalAmt," +
-                    " sum(a.st_totalapagar) AS PayAmt, date_trunc('day'::text, b.datetrx) AS datetrx " +
+            sql = " SELECT  b.st_documentoreceptor, upper(b.st_nombrereceptor::text) AS st_nombrereceptor, a.st_numeroticket," +
+                    " sum(c.st_totaltcktsinpagoserv - c.st_ivatotaltcktsinpagoserv) AS amtsubtotal, " +
+                    " sum(c.st_ivatotaltcktsinpagoserv) AS taxamt, sum(c.st_totaltcktsinpagoserv) AS totalamt," +
+                    " sum(a.st_totalapagar) AS payamt, date_trunc('day'::text, b.datetrx) AS datetrx " +
                     " FROM z_sisteco_tk_cvta a " +
                     " JOIN z_sisteco_tk_cfecab b ON a.z_sisteco_tk_cvta_id = b.z_sisteco_tk_cvta_id " +
                     " JOIN z_sisteco_tk_totalticket c ON a.z_sisteco_tk_cvta_id = c.z_sisteco_tk_cvta_id " +
-                    " WHERE a.st_estadoticket= 'F' AND a.st_tipolinea='1' AND b.st_tipodocumentoreceptor::text = '2' " +
-                    " and a.z_sistecointerfacepazos_id =" + this.get_ID() +
-                    " GROUP BY a.ad_client_id, a.ad_org_id, b.st_documentoreceptor, b.st_nombrereceptor, (date_trunc('day'::text, b.datetrx))";
+                    " WHERE a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " AND a.st_estadoticket::text ='F' " +
+                    " AND a.st_tipolinea::text ='1' " +
+                    " AND b.st_tipodocumentoreceptor='2' " +
+                    " GROUP BY b.st_documentoreceptor, b.st_nombrereceptor, a.st_numeroticket, date_trunc('day'::text, b.datetrx ";
 
         	pstmt = DB.prepareStatement(sql, get_TrxName());
         	rs = pstmt.executeQuery();
 
         	while(rs.next()){
-                // VER VISTA ZV_Sisteco_VtasRUT
+                MZSistecoPazosTKRUT tkrut = new MZSistecoPazosTKRUT(getCtx(), 0, get_TrxName());
+                tkrut.setZ_SistecoInterfacePazos_ID(this.get_ID());
+                tkrut.setST_DocumentoReceptor(rs.getString("st_documentoreceptor"));
+                tkrut.setST_NombreReceptor(rs.getString("st_nombrereceptor"));
+                tkrut.setST_NumeroTicket(rs.getString("st_numeroticket"));
+                tkrut.setAmtSubtotal(rs.getBigDecimal("amtsubtotal"));
+                tkrut.setTaxAmt(rs.getBigDecimal("taxamt"));
+                tkrut.setTotalAmt(rs.getBigDecimal("totalamt"));
+                tkrut.setPayAmt(rs.getBigDecimal("payamt"));
+                tkrut.setDateTrx(rs.getTimestamp("datetrx"));
+                tkrut.saveEx();
         	}
         }
         catch (Exception e){
@@ -200,6 +222,79 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         	rs = null; pstmt = null;
         }
    }
+
+    /***
+     * Obtiene y guarda detalle de ventas desglozadas por RUT e Impuestos.
+     * Xpande. Created by Gabriel Vila on 8/14/17.
+     */
+    private void setDesgloceRUTImpuestos() {
+
+        String sql1 = "", sql2 = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql1 = " select datetrx, st_documentoreceptor, st_nombrereceptor, st_numeroticket, c_taxcategory_id, nomcateg, sum(impuestos) as taxamt, sum(neto) as amtsubtotal " +
+                    " from( " +
+                    " select hdr.datetrx::date as datetrx, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg, " +
+                    " coalesce(categrubro.name, categ.name) as nomcateg, sum(a.st_ivadescuentototal) as impuestos, sum(a.st_preciodescuentototal) as neto " +
+                    " from z_sisteco_tk_lvta a " +
+                    " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
+                    " inner join zv_sisteco_vtasrut_tk vr on (hdr.z_sistecointerfacepazos_id = vr.z_sistecointerfacepazos_id AND hdr.st_numeroticket = vr.st_numeroticket) " +
+                    " left outer join m_product prod on a.m_product_id = prod.m_product_id " +
+                    " left outer join c_taxcategory categ on prod.c_taxcategory_id = categ.c_taxcategory_id " +
+                    " left outer join z_productorubrotax rubtax on (prod.z_productorubro_id = rubtax.z_productorubro_id and prod.c_taxcategory_id = rubtax.c_taxcategory_id) " +
+                    " left outer join c_taxcategory categrubro on categrubro.c_taxcategory_id = rubtax.c_taxcategory_to_id " +
+                    " where hdr.z_sistecointerfacepazos_id =" + + this.get_ID() +
+                    " and hdr.st_estadoticket ='F' " +
+                    " and a.st_lineacancelada =0 " +
+                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, idcateg, nomcateg ";
+
+            sql2 = " select hdr.datetrx::date as datetrx, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg, " +
+                    " coalesce(categrubro.name, categ.name) as nomcateg, sum(a.st_iva) as impuestos, sum(a.st_precio) as neto " +
+                    " from z_sisteco_tk_ldev a " +
+                    " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
+                    " inner join zv_sisteco_vtasrut_tk vr on (hdr.z_sistecointerfacepazos_id = vr.z_sistecointerfacepazos_id AND hdr.st_numeroticket = vr.st_numeroticket) " +
+                    " left outer join m_product prod on a.m_product_id = prod.m_product_id " +
+                    " left outer join c_taxcategory categ on prod.c_taxcategory_id = categ.c_taxcategory_id " +
+                    " left outer join z_productorubrotax rubtax on (prod.z_productorubro_id = rubtax.z_productorubro_id and prod.c_taxcategory_id = rubtax.c_taxcategory_id) " +
+                    " left outer join c_taxcategory categrubro on categrubro.c_taxcategory_id = rubtax.c_taxcategory_to_id " +
+                    " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and hdr.st_estadoticket ='F' " +
+                    " and a.st_lineacancelada =0 " +
+                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, idcateg, nomcateg) as info " +
+                    " group by datetrx, st_documentoreceptor, st_nombrereceptor, st_numeroticket, c_taxcategory_id, nomcateg " +
+                    " order by datetrx, st_documentoreceptor, st_nombrereceptor, st_numeroticket, c_taxcategory_id, nomcateg ";
+
+            pstmt = DB.prepareStatement(sql1 + " union " + sql2, get_TrxName());
+
+            System.out.println(sql1 + " union " + sql2);
+
+            rs = pstmt.executeQuery();
+
+            while(rs.next()){
+                MZSistecoPazosTaxTKRUT taxTKRUT = new MZSistecoPazosTaxTKRUT(getCtx(), 0, get_TrxName());
+                taxTKRUT.setZ_SistecoInterfacePazos_ID(this.get_ID());
+                taxTKRUT.setAmtSubtotal(rs.getBigDecimal("amtsubtotal"));
+                taxTKRUT.setC_TaxCategory_ID(rs.getInt("c_taxcategory_id"));
+                taxTKRUT.setDateTrx(rs.getTimestamp("datetrx"));
+                taxTKRUT.setName(rs.getString("nomcateg"));
+                taxTKRUT.setST_DocumentoReceptor(rs.getString("st_documentoreceptor"));
+                taxTKRUT.setST_NombreReceptor(rs.getString("st_nombrereceptor"));
+                taxTKRUT.setST_NumeroTicket(rs.getString("st_numeroticket"));
+                taxTKRUT.setTaxAmt(rs.getBigDecimal("taxamt"));
+                taxTKRUT.saveEx();
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+    }
+
 
     /***
      * Lee archivo a procesar y va guardando información en base de datos.
