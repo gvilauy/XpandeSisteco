@@ -40,9 +40,7 @@ public class ProcesadorInterfaceOut {
     private File fileCountOnline = null;
     private File fileBatchError = null;
 
-    private String fchToday;
-
-
+    private String fechaHoy;
 
     /***
      * Constructor
@@ -385,19 +383,20 @@ public class ProcesadorInterfaceOut {
 
         try{
 
-            String[] hra = (new Timestamp(System.currentTimeMillis()).toString().split(sistecoConfig.getSeparadorArchivoOut()));
-            String fecha =hra[0].replace("-", "").replace(" ", "_")+hra[1];
+            String[] hora = (new Timestamp(System.currentTimeMillis()).toString().split(sistecoConfig.getSeparadorArchivoOut()));
+            String fecha =hora[0].replace("-", "").replace(" ", "_") + hora[1];
 
-            fchToday = fecha;
+            this.fechaHoy = fecha;
 
-            String pathArchivos = sistecoConfig.getRutaInterfaceOutHist() + File.separator + fchToday;
+            String pathArchivos = sistecoConfig.getRutaInterfaceOutHist() + File.separator + this.fechaHoy;
 
             fileBatch = new File( pathArchivos + sistecoConfig.getArchivoBatch());
             fileOnline = new File( pathArchivos + sistecoConfig.getArchivoOnline());
             fileCountBatch = new File( pathArchivos + sistecoConfig.getArchivoCountBatch());
             fileCountOnline = new File( pathArchivos + sistecoConfig.getArchivoCountOnline());
 
-            fileBatchError = new File(sistecoConfig.getRutaInterfaceOutHist() + File.separator + "ArchDeErrores" + File.separator + fchToday + sistecoConfig.getArchivoBatchError());
+            fileBatchError = new File(sistecoConfig.getRutaInterfaceOutHist() + File.separator + "ArchDeErrores" + File.separator +
+                    this.fechaHoy + sistecoConfig.getArchivoBatchError());
 
         }
         catch (Exception e){

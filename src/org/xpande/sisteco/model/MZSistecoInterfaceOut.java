@@ -75,8 +75,10 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
             }
             else{
                 priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 142, true, get_TrxName());
+                if ((priceList == null) || (priceList.get_ID() <= 0)){
+                    priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 100, true, get_TrxName());
+                }
             }
-
 
             // Si es marca de create
             if ((this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE))
