@@ -64,6 +64,9 @@ public class ProcesadorInterfaceOut {
 
         String message = null;
 
+        BufferedWriter bufferedWriterBatch = null;
+        BufferedWriter bufferedWriterOnline = null;
+
         try{
 
             if (!processProducts && !processPartners) return message;
@@ -74,15 +77,23 @@ public class ProcesadorInterfaceOut {
             // Creación de archivos de interface
             this.createFiles();
 
+            // IO
+            FileWriter fileWriterBatch = new FileWriter(this.fileBatch, true);
+            FileWriter fileWriterOnline = new FileWriter(this.fileOnline, true);
+
+            bufferedWriterBatch = new BufferedWriter(fileWriterBatch);
+            bufferedWriterOnline = new BufferedWriter(fileWriterOnline);
+
+
             // Proceso lineas de interface de salida correspondiente a productos
             if (processProducts){
-                message = this.executeInterfaceOutProducts(adOrgID);
+                message = this.executeInterfaceOutProducts(adOrgID, bufferedWriterBatch, bufferedWriterOnline);
                 if (message != null) return message;
             }
 
             // Proces lineas de socios de negocio
             if (processPartners){
-                //message = this.executeInterfaceOutPartners();
+                message = this.executeInterfaceOutPartners(adOrgID, bufferedWriterBatch, bufferedWriterOnline);
                 if (message != null) return message;
             }
 
@@ -105,8 +116,60 @@ public class ProcesadorInterfaceOut {
         catch (Exception e){
             throw new AdempiereException(e);
         }
+        finally {
+            if (bufferedWriterBatch != null){
+                try {
+                    bufferedWriterBatch.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (bufferedWriterOnline != null){
+                try {
+                    bufferedWriterBatch.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
         return message;
+    }
+
+    private String executeInterfaceOutPartners(int adOrgID, BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterOnline) {
+
+        String message = null;
+
+        try{
+
+            // Obtengo y recorro lineas de interface aun no ejecutadas para socios de negocio
+            List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesBPartnerNotExecuted();
+            for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
+
+                List<String> lineasArchivo = interfaceOut.getLineasArchivoBPartner(adOrgID, this.sistecoConfig.getSeparadorArchivoOut());
+                for (String lineaArchivo: lineasArchivo){
+
+                    bufferedWriterBatch.append(lineaArchivo);
+                    bufferedWriterOnline.append(lineaArchivo);
+
+                    bufferedWriterBatch.newLine();
+                    bufferedWriterOnline.newLine();
+
+                }
+                if (lineasArchivo.size() > 0){
+                    // Marco linea como ejecutada
+                    interfaceOut.setIsExecuted(true);
+                    interfaceOut.setDateExecuted(new Timestamp(System.currentTimeMillis()));
+                    interfaceOut.saveEx();
+                }
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        return message;
+
     }
 
     /***
@@ -271,23 +334,14 @@ public class ProcesadorInterfaceOut {
      * Procesa interface de salida de productos para Sisteco.
      * Xpande. Created by Gabriel Vila on 7/27/17.
      * @param adOrgID
-     * @return
+     * @param bufferedWriterBatch
+     *@param bufferedWriterOnline @return
      */
-    private String executeInterfaceOutProducts(int adOrgID) {
+    private String executeInterfaceOutProducts(int adOrgID, BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterOnline) {
 
         String message = null;
 
-        BufferedWriter bufferedWriterBatch = null;
-        BufferedWriter bufferedWriterOnline = null;
-
         try{
-
-            FileWriter fileWriterBatch = new FileWriter(this.fileBatch, true);
-            FileWriter fileWriterOnline = new FileWriter(this.fileOnline, true);
-
-            bufferedWriterBatch = new BufferedWriter(fileWriterBatch);
-            bufferedWriterOnline = new BufferedWriter(fileWriterOnline);
-
             // Obtengo y recorro lineas de interface aun no ejecutadas para productos
             List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted();
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
@@ -354,23 +408,6 @@ public class ProcesadorInterfaceOut {
         catch (Exception e){
             throw new AdempiereException(e);
         }
-        finally {
-            if (bufferedWriterBatch != null){
-                try {
-                    bufferedWriterBatch.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (bufferedWriterOnline != null){
-                try {
-                    bufferedWriterBatch.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
         return message;
     }
 

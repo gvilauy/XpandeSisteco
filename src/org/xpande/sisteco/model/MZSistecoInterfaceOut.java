@@ -3,6 +3,7 @@ package org.xpande.sisteco.model;
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.*;
 import org.compiere.util.Env;
+import org.eevolution.model.X_C_TaxGroup;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.model.MZProductoUPC;
 import org.xpande.core.utils.PriceListUtils;
@@ -254,6 +255,149 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 lineaArchivo ="D" + separadorCampos;
                 lineaArchivo += "ARTICULOS_EQUIVALENTES" + separadorCampos;
                 lineaArchivo += productoUPC.getUPC();
+
+                lineas.add(lineaArchivo);
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return lineas;
+    }
+
+
+    /***
+     * Obtiene y retorna lineas para archivos de interface de salida con información de códigos de barra,
+     * a partir de la información de este modelo.
+     * Xpande. Created by Gabriel Vila on 8/29/17.
+     * @param adOrgID
+     * @param separadorCampos
+     * @return
+     */
+    public List<String> getLineasArchivoBPartner(int adOrgID, String separadorCampos) {
+
+        List<String> lineas = new ArrayList<String>();
+
+        try{
+
+            if (this.getAD_Table_ID() != I_C_BPartner.Table_ID){
+                return lineas;
+            }
+
+            // Instancio modelo de socio y localización.
+            MBPartner partner = new MBPartner(getCtx(), this.getRecord_ID(), get_TrxName());
+            MBPartnerLocation[] partnerLocations = partner.getLocations(true);
+            MBPartnerLocation partnerLocation = null;
+            MLocation location = null;
+            if (partnerLocations.length > 0){
+                partnerLocation = partnerLocations[0];
+                if (partnerLocation.getC_Location_ID() > 0){
+                    location = (MLocation) partnerLocation.getC_Location();
+                }
+            }
+
+            // Si es marca de create o update
+            if ((this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE))
+                    || (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE))){
+
+                String lineaArchivo = "";
+
+                if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                    lineaArchivo ="I" + separadorCampos;
+                }
+                else{
+                    lineaArchivo ="A" + separadorCampos;
+                }
+
+                lineaArchivo += "CLIENTES" + separadorCampos;
+
+                // Codigo y razon social
+                lineaArchivo += partner.getValue().trim() + separadorCampos;
+                lineaArchivo += partner.getName().trim() + separadorCampos;
+
+                String direccion = "", telefono = "", email = "";
+                String codigoPais = "", ciudad = "", departamento = "", codigoPostal = "";
+                String esquina1 = "", esquina2 = "";
+                if (location != null){
+                    if (location.getAddress1() != null){
+                        direccion = location.getAddress1().trim().replace(separadorCampos, "_");
+                    }
+                    if (location.getCity() != null){
+                        ciudad = location.getCity().trim().replace(separadorCampos, "_");
+                    }
+                    if (location.getRegionName() != null){
+                        departamento = location.getRegionName().trim().replace(separadorCampos, "_");
+                    }
+                    else{
+                        throw new AdempiereException("Falta definir Departamento para el Socio de Negocio : " + partner.getValue());
+                    }
+                    if (location.getPostal() != null){
+                        codigoPostal = location.getPostal().trim().replace(separadorCampos, "_");
+                    }
+                    if (location.getCountry() != null){
+                        codigoPais = ((MCountry) location.getCountry()).getCountryCode().trim();
+                    }
+                    else{
+                        throw new AdempiereException("Falta definir Pais para el Socio de Negocio : " + partner.getValue());
+                    }
+                }
+
+                if (partnerLocation.getPhone() != null){
+                    telefono = partnerLocation.getPhone().trim().replace(separadorCampos, "_");
+                }
+
+                if (partner.get_Value("EMail") == null){
+                    email = ((String) partner.get_Value("EMail")).trim().replace(separadorCampos, "_");
+                }
+
+                String tipoDocumento = "", nroDocumento = "", cedula = "";
+                nroDocumento = partner.getTaxID();
+                if ((nroDocumento == null) || (nroDocumento.trim().equalsIgnoreCase(""))){
+                    throw new AdempiereException("Falta definir Numero de Identificación para el Socio de Negocio : " + partner.getValue());
+                }
+
+                X_C_TaxGroup taxGroup = (X_C_TaxGroup) partner.getC_TaxGroup();
+                if (taxGroup.getValue().equalsIgnoreCase("RUT")){
+                    tipoDocumento = "2";
+                }
+                else if (taxGroup.getValue().equalsIgnoreCase("CI")){
+                    tipoDocumento = "3";
+                    nroDocumento = "";
+                    cedula = partner.getTaxID();
+                }
+                else{
+                    tipoDocumento = "4"; // Otros
+                }
+
+                // Valor Hexadecimal del socio de negocio
+                String valorHexadecimal = SistecoUtils.getHexadecimalAtributosPartner(getCtx(), partner, get_TrxName());
+
+                // Concateno campos y armo linea de archivo
+                lineaArchivo += direccion + separadorCampos;
+                lineaArchivo += esquina1 + separadorCampos;
+                lineaArchivo += esquina2 + separadorCampos;
+                lineaArchivo += telefono + separadorCampos;
+                lineaArchivo += nroDocumento + separadorCampos;
+                lineaArchivo += cedula + separadorCampos;
+                lineaArchivo += tipoDocumento + separadorCampos;
+                lineaArchivo += departamento + separadorCampos;
+                lineaArchivo += ciudad + separadorCampos;
+                lineaArchivo += codigoPostal + separadorCampos;
+                lineaArchivo += email + separadorCampos;
+                lineaArchivo += codigoPais + separadorCampos;
+                lineaArchivo += valorHexadecimal + separadorCampos;
+
+                lineas.add(lineaArchivo);
+            }
+            else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
+
+                String lineaArchivo = "";
+
+                lineaArchivo ="D" + separadorCampos;
+                lineaArchivo += "CLIENTES" + separadorCampos;
+                lineaArchivo += partner.getValue().trim();
 
                 lineas.add(lineaArchivo);
             }

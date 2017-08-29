@@ -1,6 +1,7 @@
 package org.xpande.sisteco.utils;
 
 import org.adempiere.exceptions.AdempiereException;
+import org.compiere.model.MBPartner;
 import org.compiere.model.MProduct;
 import org.compiere.model.MSequence;
 import org.compiere.model.Query;
@@ -298,6 +299,57 @@ public final class SistecoUtils {
                     int j = Integer.parseInt(hexaTmp,2);
                     valorHexa = valorHexa + Integer.toHexString(j);
                 }
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return valorHexa.toUpperCase();
+    }
+
+
+    /***
+     * Obtiene valor Hexadecimal de array de bits con los valores de los atributos asociados a un determinado socio de negocio.
+     * Xpande. Created by Gabriel Vila on 7/22/17.
+     * @param ctx
+     * @param partner
+     * @param trxName
+     * @return
+     */
+    public static String getHexadecimalAtributosPartner(Properties ctx, MBPartner partner, String trxName) {
+
+        String valorHexa = "";
+        String[] arrayBits = new String[4];
+
+        try{
+
+            arrayBits[0] = "1110";
+            arrayBits[1] = "0000";
+            arrayBits[2] = "0000";
+            arrayBits[3] = "0000";
+
+            // Convierto array de bits en Hexadecimal
+            String hexaTmp = "";
+            for (int i = 0; i < arrayBits.length; i++){
+
+                hexaTmp = arrayBits[i].trim();
+                long longHexa = Long.parseLong(hexaTmp);
+                long reminder;
+
+                while (longHexa > 0){
+
+                    reminder = longHexa % 10;
+                    longHexa = longHexa / 10;
+
+                    if(reminder != 0 && reminder != 1){
+                        return valorHexa;
+                    }
+                }
+
+                int j = Integer.parseInt(hexaTmp,2);
+                valorHexa = valorHexa + Integer.toHexString(j);
             }
 
         }
