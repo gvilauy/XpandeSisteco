@@ -356,12 +356,13 @@ public class ValidatorSisteco implements ModelValidator {
                 // Pregunto por los campos cuyo cambio requiere informar a Sisteco
                 if ((model.is_ValueChanged(X_C_BPartner.COLUMNNAME_Name)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_Name2))
                         || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_TaxID)) || (model.is_ValueChanged("EMail"))
-                        || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive))){
+                        || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsCustomer))){
 
 
                     // Si desactiva cliente, mando marca de delete
-                    if (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive)){
-                        if (!model.isActive()){
+                    if ((model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsCustomer))){
+
+                        if ((!model.isActive()) || (!model.isCustomer())){
                             // Marca Delete para Sisteco
                             MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), model.get_TrxName());
                             if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){

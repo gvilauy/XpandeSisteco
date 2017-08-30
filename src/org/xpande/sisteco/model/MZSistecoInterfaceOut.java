@@ -387,7 +387,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 lineaArchivo += codigoPostal + separadorCampos;
                 lineaArchivo += email + separadorCampos;
                 lineaArchivo += codigoPais + separadorCampos;
-                lineaArchivo += valorHexadecimal + separadorCampos;
+                lineaArchivo += valorHexadecimal;
 
                 lineas.add(lineaArchivo);
             }
