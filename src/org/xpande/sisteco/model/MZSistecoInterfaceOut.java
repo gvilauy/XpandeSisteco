@@ -348,7 +348,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                     telefono = partnerLocation.getPhone().trim().replace(separadorCampos, "_");
                 }
 
-                if (partner.get_Value("EMail") == null){
+                if (partner.get_Value("EMail") != null){
                     email = ((String) partner.get_Value("EMail")).trim().replace(separadorCampos, "_");
                 }
 

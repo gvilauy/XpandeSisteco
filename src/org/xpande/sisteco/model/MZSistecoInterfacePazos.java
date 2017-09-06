@@ -116,37 +116,6 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         ResultSet rs = null;
 
         try{
-            /*
-            sql1 = " select datetrx, c_taxcategory_id, nomcateg, sum(impuestos) as impuestos, sum(neto) as base" +
-                    " from ( " +
-                    " select hdr.datetrx::date as datetrx, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg, " +
-                    " coalesce(categrubro.name, categ.name) as nomcateg, sum(a.st_ivadescuentototal) as impuestos, sum(a.st_preciodescuentototal) as neto " +
-                    " from z_sisteco_tk_lvta a " +
-                    " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
-                    " left outer join m_product prod on a.m_product_id = prod.m_product_id " +
-                    " left outer join c_taxcategory categ on prod.c_taxcategory_id = categ.c_taxcategory_id" +
-                    " left outer join z_productorubrotax rubtax on (prod.z_productorubro_id = rubtax.z_productorubro_id and prod.c_taxcategory_id = rubtax.c_taxcategory_id) " +
-                    " left outer join c_taxcategory categrubro on categrubro.c_taxcategory_id = rubtax.c_taxcategory_to_id " +
-                    " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
-                    " and hdr.st_estadoticket ='F'" +
-                    " and a.st_lineacancelada = 0" +
-                    " group by hdr.datetrx::date, prod.c_taxcategory_id, categ.name, idcateg, nomcateg ";
-
-                    sql2 = " select hdr.datetrx::date as datetrx, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg," +
-                    " coalesce(categrubro.name, categ.name) as nomcateg, sum(a.st_iva) as impuestos, sum(a.st_precio) as neto" +
-                    " from z_sisteco_tk_ldev a " +
-                    " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id" +
-                    " left outer join m_product prod on a.m_product_id = prod.m_product_id " +
-                    " left outer join c_taxcategory categ on prod.c_taxcategory_id = categ.c_taxcategory_id " +
-                    " left outer join z_productorubrotax rubtax on (prod.z_productorubro_id = rubtax.z_productorubro_id and prod.c_taxcategory_id = rubtax.c_taxcategory_id) " +
-                    " left outer join c_taxcategory categrubro on categrubro.c_taxcategory_id = rubtax.c_taxcategory_to_id " +
-                    " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
-                    " and hdr.st_estadoticket ='F' " +
-                    " and a.st_lineacancelada = 0 " +
-                    " group by hdr.datetrx::date, prod.c_taxcategory_id, categ.name, idcateg, nomcateg) as info " +
-                    " group by datetrx, c_taxcategory_id, nomcateg " +
-                    " order by nomcateg ";
-            */
 
             sql1 =  " select hdr.datetrx::date as datetrx, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg, " +
                     " coalesce(categrubro.name, categ.name) as nomcateg, sum(a.st_ivadescuentototal) as impuestos, sum(a.st_preciodescuentototal) as neto " +
