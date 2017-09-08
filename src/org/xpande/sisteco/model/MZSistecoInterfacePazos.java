@@ -171,11 +171,12 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 }
             });
 
-            if (foundFiles.length > 0){
+            if ((foundFiles != null) && (foundFiles.length > 0)){
                 this.setFileName(foundFiles[0].getAbsolutePath());
             }
             else{
-                throw new AdempiereException("No se obtuvo archivo a procesar para : " + nombreFile);
+                throw new AdempiereException("No se obtuvo archivo a procesar para : " +
+                        this.sistecoConfig.getRutaOrigenPazos() + "/" + nombreFile);
             }
 
         }
