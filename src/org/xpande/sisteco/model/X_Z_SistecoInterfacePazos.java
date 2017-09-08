@@ -31,7 +31,7 @@ public class X_Z_SistecoInterfacePazos extends PO implements I_Z_SistecoInterfac
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170606L;
+	private static final long serialVersionUID = 20170908L;
 
     /** Standard Constructor */
     public X_Z_SistecoInterfacePazos (Properties ctx, int Z_SistecoInterfacePazos_ID, String trxName)
@@ -75,6 +75,23 @@ public class X_Z_SistecoInterfacePazos extends PO implements I_Z_SistecoInterfac
         .append(get_ID()).append("]");
       return sb.toString();
     }
+
+	/** Set Transaction Date.
+		@param DateTrx 
+		Transaction Date
+	  */
+	public void setDateTrx (Timestamp DateTrx)
+	{
+		set_Value (COLUMNNAME_DateTrx, DateTrx);
+	}
+
+	/** Get Transaction Date.
+		@return Transaction Date
+	  */
+	public Timestamp getDateTrx () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_DateTrx);
+	}
 
 	/** Set Description.
 		@param Description 
@@ -125,6 +142,23 @@ public class X_Z_SistecoInterfacePazos extends PO implements I_Z_SistecoInterfac
 	public String getFileName () 
 	{
 		return (String)get_Value(COLUMNNAME_FileName);
+	}
+
+	/** Set FileNameNoPath.
+		@param FileNameNoPath 
+		Nombre de archivo sin Path
+	  */
+	public void setFileNameNoPath (String FileNameNoPath)
+	{
+		set_Value (COLUMNNAME_FileNameNoPath, FileNameNoPath);
+	}
+
+	/** Get FileNameNoPath.
+		@return Nombre de archivo sin Path
+	  */
+	public String getFileNameNoPath () 
+	{
+		return (String)get_Value(COLUMNNAME_FileNameNoPath);
 	}
 
 	/** Set IsBatchProcessed.

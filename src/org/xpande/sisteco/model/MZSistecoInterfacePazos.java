@@ -14,7 +14,11 @@ import org.compiere.util.Env;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
@@ -53,8 +57,11 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
      * Xpande. Created by Gabriel Vila on 5/27/17.
      * Ejecuta interface Pazos de Sisteco considerando el archivo seleccionado.
      * @param isBatchProcessed : True si el proceso se corre de manera Batch, False si lo corre el usuario de manera manual.
+     * @param fechaProceso  : Fecha a procesar o null
      */
-    public void execute(boolean isBatchProcessed) {
+    public String execute(boolean isBatchProcessed, Timestamp fechaProceso) {
+
+        String message = null;
 
         try{
 
@@ -70,6 +77,14 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
             // Instancio modelo de configuración del proceso de Interface
             if (this.sistecoConfig == null) this.sistecoConfig = MZSistecoConfig.getDefault(getCtx(), null);
+
+            // Si el proceso es batch, debo obtener nombre del archivo a procesar.
+            if (this.isBatchProcessed()){
+                this.setDataFileName(fechaProceso);
+            }
+
+            // Seteo fecha POS segun fecha del nombre del archivo
+            this.setFechaPOS();
 
             // Obengo información leyendo el archivo seleccionado
             this.getDataFromFile();
@@ -97,6 +112,71 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
             this.setProcessed(true);
             this.saveEx();
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return message;
+
+    }
+
+    /***
+     * Seteo fecha POS si es que no la tengo.
+     * Xpande. Created by Gabriel Vila on 9/8/17.
+     */
+    private void setFechaPOS() {
+
+        try{
+            if (this.getDateTrx() != null){
+                return;
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+    }
+
+
+    /***
+     * Cuando este proceso de interfae pazos se ejecuta de manera batch (schedule del sistema), se debe obtener el nombre
+     * del archivo a procesar.
+     * Xpande. Created by Gabriel Vila on 9/8/17.
+     * @param fechaProceso : Fecha de proceso o null para considerar fecha de hoy
+     */
+    private void setDataFileName(Timestamp fechaProceso) {
+
+        try{
+
+            long timeFechaProceso = System.currentTimeMillis();
+            if (fechaProceso != null){
+                timeFechaProceso = fechaProceso.getTime();
+            }
+
+            this.setDateTrx(new Timestamp(timeFechaProceso));
+
+            String[] fechaAux = new Timestamp(timeFechaProceso).toString().split("-");
+            String fechaFile = fechaAux[0] + fechaAux[1] + fechaAux[2].substring(0, 2);
+            System.out.println(fechaFile);
+
+            String nombreFile = this.sistecoConfig.getPrefijoArchivoPazos() + fechaFile;
+            System.out.println(nombreFile);
+
+            File dir = new File(this.sistecoConfig.getRutaOrigenPazos());
+            File[] foundFiles = dir.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.startsWith(nombreFile);
+                }
+            });
+
+            if (foundFiles.length > 0){
+                this.setFileName(foundFiles[0].getAbsolutePath());
+            }
+            else{
+                throw new AdempiereException("No se obtuvo archivo a procesar para : " + nombreFile);
+            }
 
         }
         catch (Exception e){
@@ -351,6 +431,14 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             fReader = new FileReader(archivoPazos);
             bReader = new BufferedReader(fReader);
 
+            // Guardo nombre del archivo sin path para validaciones
+            this.setFileNameNoPath(archivoPazos.getName());
+
+            // Valido que no se haya procesado anteriormente este archivo
+            if (this.archivoYaProcesado()){
+                throw new AdempiereException("Este archivo ya fue procesado anteriormente : " + this.getFileNameNoPath());
+            }
+
             int contLineas = 0;
             int zSistecoTkCVtaID = 0;
             String action = "";
@@ -456,6 +544,38 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 }
             }
         }
+    }
+
+
+    /***
+     * Verifica si el archivo a procesar no fue procesado anteriormente.
+     * Xpande. Created by Gabriel Vila on 9/8/17.
+     * @return : true si el archivo ya fue procesado anteriormente
+     */
+    private boolean archivoYaProcesado() {
+
+        boolean value = false;
+
+        try{
+
+            if (this.getFileNameNoPath() == null){
+                return false;
+            }
+
+            String sql = " select z_sistecointerfacepazos_id from z_sistecointerfacepazos " +
+                    " where lower(filenamenopath)='" + this.getFileNameNoPath().trim().toLowerCase() + "'";
+            int recordID = DB.getSQLValueEx(get_TrxName(), sql);
+
+            if (recordID > 0){
+                value = true;
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return value;
     }
 
     /***

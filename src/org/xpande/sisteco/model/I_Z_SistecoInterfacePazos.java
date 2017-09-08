@@ -79,6 +79,19 @@ public interface I_Z_SistecoInterfacePazos
 	  */
 	public int getCreatedBy();
 
+    /** Column name DateTrx */
+    public static final String COLUMNNAME_DateTrx = "DateTrx";
+
+	/** Set Transaction Date.
+	  * Transaction Date
+	  */
+	public void setDateTrx(Timestamp DateTrx);
+
+	/** Get Transaction Date.
+	  * Transaction Date
+	  */
+	public Timestamp getDateTrx();
+
     /** Column name Description */
     public static final String COLUMNNAME_Description = "Description";
 
@@ -117,6 +130,19 @@ public interface I_Z_SistecoInterfacePazos
 	  * Name of the local file or URL
 	  */
 	public String getFileName();
+
+    /** Column name FileNameNoPath */
+    public static final String COLUMNNAME_FileNameNoPath = "FileNameNoPath";
+
+	/** Set FileNameNoPath.
+	  * Nombre de archivo sin Path
+	  */
+	public void setFileNameNoPath(String FileNameNoPath);
+
+	/** Get FileNameNoPath.
+	  * Nombre de archivo sin Path
+	  */
+	public String getFileNameNoPath();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
