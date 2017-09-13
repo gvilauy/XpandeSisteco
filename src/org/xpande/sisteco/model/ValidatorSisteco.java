@@ -338,7 +338,7 @@ public class ValidatorSisteco implements ModelValidator {
 
             if (type == ModelValidator.TYPE_AFTER_NEW){
 
-                // Si el producto no se vende o no esta activo al momento de crearse, no hago nada
+                // Si el socio no es cliente o no esta activo al momento de crearse, no hago nada
                 if ((!model.isCustomer()) || (!model.isActive())){
                     return mensaje;
                 }
@@ -394,6 +394,12 @@ public class ValidatorSisteco implements ModelValidator {
                         }
                     }
                     else{
+
+                        // Si el socio no es cliente o no esta activo al momento de crearse, no hago nada
+                        if ((!model.isCustomer()) || (!model.isActive())){
+                            return mensaje;
+                        }
+
                         // Marca Update para Sisteco
                         MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), model.get_TrxName());
                         if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){

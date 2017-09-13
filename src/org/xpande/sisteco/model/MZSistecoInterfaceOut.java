@@ -304,8 +304,9 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 String lineaArchivo = "";
 
+                // Por ahora tanto el crear como el actualizar clientes, tiene como operacion A
                 if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                    lineaArchivo ="I" + separadorCampos;
+                    lineaArchivo ="A" + separadorCampos;
                 }
                 else{
                     lineaArchivo ="A" + separadorCampos;
