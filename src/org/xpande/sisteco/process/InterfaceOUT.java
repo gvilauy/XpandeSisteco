@@ -39,7 +39,7 @@ public class InterfaceOUT extends SvrProcess {
     @Override
     protected String doIt() throws Exception {
 
-        String message = this.procesadorInterfaceOut.executeInterfaceOut(this.adOrgID, true, true);
+        String message = this.procesadorInterfaceOut.executeInterfaceOut(this.adOrgID, 0,true, true, true);
 
             if (message != null){
             return "@Error@ " + message;

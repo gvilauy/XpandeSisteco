@@ -55,12 +55,17 @@ public class ProcesadorInterfaceOut {
 
     /***
      * Ejecuta proceso de interface de salida para Sisteco.
+     * En caso de venir un ID correspondiente un proceso de comunicacin de datos al pos, entonces verifico que datos debo enviar o no.
+     * En caso de no venir dicho ID, considero los flags que indican si debo procesar lo correspondiente a productos y socios.
      * Xpande. Created by Gabriel Vila on 7/27/17.
+     * @param adOrgID
+     * @param zComunicacionPosID
+     * @param processPrices
      * @param processProducts
      * @param processPartners
      * @return
      */
-    public String executeInterfaceOut(int adOrgID, boolean processProducts, boolean processPartners){
+    public String executeInterfaceOut(int adOrgID, int zComunicacionPosID, boolean processPrices, boolean processProducts, boolean processPartners){
 
         String message = null;
 
@@ -69,7 +74,17 @@ public class ProcesadorInterfaceOut {
 
         try{
 
-            if (!processProducts && !processPartners) return message;
+            // Si no tengo id de proceso de comunicacion
+            if (zComunicacionPosID <= 0){
+                // Si no recibo flags de procesar productos o socios, no hago nada
+                if (!processProducts && !processPartners){
+                    return message;
+                }
+            }
+            else{
+                // Siempre comunico socios si recibo ID de proceso de comunicacion de datos al pos
+                processPartners = true;
+            }
 
             // Obtengo configurador de sisteco
             this.sistecoConfig = MZSistecoConfig.getDefault(ctx, trxName);
@@ -86,8 +101,8 @@ public class ProcesadorInterfaceOut {
 
 
             // Proceso lineas de interface de salida correspondiente a productos
-            if (processProducts){
-                message = this.executeInterfaceOutProducts(adOrgID, bufferedWriterBatch, bufferedWriterOnline);
+            if ((zComunicacionPosID > 0) || (processProducts)){
+                message = this.executeInterfaceOutProducts(adOrgID, zComunicacionPosID, processPrices, bufferedWriterBatch, bufferedWriterOnline);
                 if (message != null) return message;
             }
 
@@ -334,16 +349,18 @@ public class ProcesadorInterfaceOut {
      * Procesa interface de salida de productos para Sisteco.
      * Xpande. Created by Gabriel Vila on 7/27/17.
      * @param adOrgID
+     * @param zComunicacionPosID
+     * @param processPrices
      * @param bufferedWriterBatch
-     *@param bufferedWriterOnline @return
+     * @param bufferedWriterOnline @return
      */
-    private String executeInterfaceOutProducts(int adOrgID, BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterOnline) {
+    private String executeInterfaceOutProducts(int adOrgID, int zComunicacionPosID, boolean processPrices, BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterOnline) {
 
         String message = null;
 
         try{
             // Obtengo y recorro lineas de interface aun no ejecutadas para productos
-            List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted();
+            List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted(zComunicacionPosID, processPrices);
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
 
                 // Me aseguro que el producto tenga atributos asociados, sino se los creo ahora.
@@ -384,7 +401,7 @@ public class ProcesadorInterfaceOut {
             }
 
             // Obtengo y recorro lineas de interface aun no ejecutadas para códigos de barra de productos
-            interfaceOuts = this.getLinesUPCNotExecuted();
+            interfaceOuts = this.getLinesUPCNotExecuted(zComunicacionPosID, processPrices);
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
                 List<String> lineasArchivo = interfaceOut.getLineasArchivoUPC(adOrgID, this.sistecoConfig.getSeparadorArchivoOut());
                 for (String lineaArchivo: lineasArchivo){
@@ -444,14 +461,33 @@ public class ProcesadorInterfaceOut {
 
 
     /***
-     * Obtiene y retorna lineas de interface de salida para productos no ejecutadas al momento
+     * Obtiene y retorna lineas de interface de salida para productos no ejecutadas al momento.
+     * En caso de recibir un id de proceso de comunicacion de datos al pos, debo filtrar segun proceso o no precios.
      * Xpande. Created by Gabriel Vila on 7/24/17.
      * @return
+     * @param zComunicacionPosID
+     * @param processPrices
      */
-    private List<MZSistecoInterfaceOut> getLinesProdsNotExecuted(){
+    private List<MZSistecoInterfaceOut> getLinesProdsNotExecuted(int zComunicacionPosID, boolean processPrices){
 
         String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
                 " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_M_Product.Table_ID;
+
+        // Si recibo ID de proceso de comunicacion de datos al pos
+        if (zComunicacionPosID > 0){
+            // Si en este proceso No se quiere comunicar precios de productos
+            if (!processPrices){
+                // No proceso ninguna marca de crear o actualizar productos. Solo considero las marcas de eliminar.
+                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_CRUDType + " ='" + X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE + "' ";
+            }
+            else {
+                // Solo debo conisderar marcas de aquellos productos contenidos en el proceso de comunicacion de datos al pos.
+                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
+                        " (select m_product_id from z_confirmacionetiquetaprod where z_confirmacionetiquetadoc_id in " +
+                        " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc where z_confirmacionetiqueta_id in " +
+                        " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + "))) ";
+            }
+        }
 
         List<MZSistecoInterfaceOut> lines = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).setOrderBy(" SeqNo, Created  ").list();
 
@@ -461,14 +497,34 @@ public class ProcesadorInterfaceOut {
 
 
     /***
-     * Obtiene y retorna lineas de interface de salida para códigos de barras no ejecutadas al momento
+     * Obtiene y retorna lineas de interface de salida para códigos de barras no ejecutadas al momento.
+     * En caso de recibir un id de proceso de comunicacion de datos al pos, debo filtrar segun proceso o no precios.
      * Xpande. Created by Gabriel Vila on 7/24/17.
      * @return
+     * @param zComunicacionPosID
+     * @param processPrices
      */
-    private List<MZSistecoInterfaceOut> getLinesUPCNotExecuted(){
+    private List<MZSistecoInterfaceOut> getLinesUPCNotExecuted(int zComunicacionPosID, boolean processPrices){
 
         String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
                 " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_Z_ProductoUPC.Table_ID;
+
+        // Si recibo ID de proceso de comunicacion de datos al pos
+        if (zComunicacionPosID > 0){
+            // Si en este proceso No se quiere comunicar precios de productos
+            if (!processPrices){
+                // No proceso ninguna marca de crear o actualizar productos. Solo considero las marcas de eliminar.
+                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_CRUDType + " ='" + X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE + "' ";
+            }
+            else{
+                // Solo debo conisderar marcas de aquellos productos contenidos en el proceso de comunicacion de datos al pos.
+                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
+                        " (select z_productoupc_id from z_productoupc where m_product_id in " +
+                        " (select m_product_id from z_confirmacionetiquetaprod where z_confirmacionetiquetadoc_id in " +
+                        " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc where z_confirmacionetiqueta_id in " +
+                        " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + ")))) ";
+            }
+        }
 
         List<MZSistecoInterfaceOut> lines = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).setOrderBy(" SeqNo, Created  ").list();
 

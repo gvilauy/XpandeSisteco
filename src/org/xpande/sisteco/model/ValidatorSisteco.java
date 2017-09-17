@@ -359,14 +359,15 @@ public class ValidatorSisteco implements ModelValidator {
                         || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsCustomer))){
 
 
-                    // Si desactiva cliente, mando marca de delete
+
                     if ((model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsCustomer))){
 
+                        // Si desactiva cliente, mando marca de delete
                         if ((!model.isActive()) || (!model.isCustomer())){
                             // Marca Delete para Sisteco
                             MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), model.get_TrxName());
                             if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
-                                // Proceso segun marca que ya tenía este producto antes de su actualización.
+                                // Proceso segun marca que ya tenía este socio antes de su actualización.
                                 // Si marca anterior es CREATE
                                 if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
                                     // Elimino marca anterior de create, ya que finalmente este socio de negocio no va al POS
@@ -374,12 +375,9 @@ public class ValidatorSisteco implements ModelValidator {
                                     return mensaje;
                                 }
                                 else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
-                                    // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
-                                    // Si este producto sigue estando inactivo
-                                    if (!model.isActive()){
-                                        // No hago nada y respeto primer marca.
-                                        return mensaje;
-                                    }
+                                    // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
+                                    // No hago nada y respeto primer marca.
+                                    return mensaje;
                                 }
                             }
                             // Si no tengo marca de delete, la creo ahora.
@@ -392,6 +390,37 @@ public class ValidatorSisteco implements ModelValidator {
                                 sistecoInterfaceOut.saveEx();
                             }
                         }
+                        else{
+                            // Si es cliente y esta activo
+                            if (model.isActive() && model.isCustomer()){
+                                // Doy de alta
+                                MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), model.get_TrxName());
+                                if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
+                                    // Proceso segun marca que ya tenía este socio antes de su actualización.
+                                    // Si marca anterior es CREATE
+                                    if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                                        // No hago nada
+                                        return mensaje;
+                                    }
+                                    else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
+                                        // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
+                                        // Elimino marca anterior de create, ya que finalmente este socio de negocio va al POS
+                                        sistecoInterfaceOut.deleteEx(true);
+                                        sistecoInterfaceOut = null;
+                                    }
+                                }
+                                // Si no tengo marca, la creo ahora.
+                                if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
+                                    sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                                    sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
+                                    sistecoInterfaceOut.setSeqNo(10);
+                                    sistecoInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
+                                    sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                                    sistecoInterfaceOut.saveEx();
+                                }
+                            }
+                        }
+
                     }
                     else{
 
