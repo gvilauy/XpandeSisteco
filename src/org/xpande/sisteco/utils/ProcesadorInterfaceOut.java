@@ -484,7 +484,7 @@ public class ProcesadorInterfaceOut {
                 // Solo debo conisderar marcas de aquellos productos contenidos en el proceso de comunicacion de datos al pos.
                 whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
                         " (select m_product_id from z_confirmacionetiquetaprod where z_confirmacionetiquetadoc_id in " +
-                        " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc where z_confirmacionetiqueta_id in " +
+                        " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc where isselected='Y' and isconfirmed='Y' and z_confirmacionetiqueta_id in " +
                         " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + "))) ";
             }
         }
@@ -521,7 +521,7 @@ public class ProcesadorInterfaceOut {
                 whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
                         " (select z_productoupc_id from z_productoupc where m_product_id in " +
                         " (select m_product_id from z_confirmacionetiquetaprod where z_confirmacionetiquetadoc_id in " +
-                        " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc where z_confirmacionetiqueta_id in " +
+                        " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc where isselected='Y' and isconfirmed='Y' and z_confirmacionetiqueta_id in " +
                         " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + ")))) ";
             }
         }
