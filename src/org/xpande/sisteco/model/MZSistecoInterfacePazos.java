@@ -460,12 +460,15 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     if (zSistecoTkCVtaID <= 0) {
                         mensaje = "Error al insertar linea cabezal " + contLineas + " : " + lineaArchivo;
                         throw new AdempiereException(mensaje);
-                    } else {
+                    }
+                    else {
 
                         // Seteo ID del proceso de interface en el cabezal
                         action = " update " + I_Z_Sisteco_TK_CVta.Table_Name +
                                  " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + ", " +
-                                 " datetrx = (select to_timestamp(st_timestampticket, 'YYYYMMDDHH24MISS')) " +
+                                 " datetrx = (select to_timestamp(st_timestampticket, 'YYYYMMDDHH24MISS')) , " +
+                                 " ad_client_id =" + this.getAD_Client_ID() + ", " +
+                                 " ad_org_id =" + this.getAD_Org_ID() +
                                  " where " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID;
                         DB.executeUpdateEx(action, get_TrxName());
 
@@ -499,7 +502,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                                 " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID + ", " +
                                 " st_positionfile ='" + String.valueOf(contLineas) + "', " +
                                 X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + ", " +
-                                " datetrx = (select to_timestamp('" + fechaCabezalTicket + " ' || st_timestamplinea, 'YYYYMMDDHH24MISS')) " +
+                                " datetrx = (select to_timestamp('" + fechaCabezalTicket + " ' || st_timestamplinea, 'YYYYMMDDHH24MISS')) , " +
+                                " ad_client_id =" + this.getAD_Client_ID() + ", " +
+                                " ad_org_id =" + this.getAD_Org_ID() +
                                 " where " + tablaFormato.getTableName() + "_ID = " + ID;
                         DB.executeUpdateEx(action, get_TrxName());
 
