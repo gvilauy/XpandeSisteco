@@ -232,11 +232,14 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 return lineas;
             }
 
-            MZProductoUPC productoUPC = new MZProductoUPC(getCtx(), this.getRecord_ID(), get_TrxName());
-            MProduct product = (MProduct) productoUPC.getM_Product();
 
             // Si es marca de create
             if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+
+                // Cuando creo un UPC, el Record_ID de la marca = ID de la tabla de codigos de barra
+                MZProductoUPC productoUPC = new MZProductoUPC(getCtx(), this.getRecord_ID(), get_TrxName());
+                MProduct product = (MProduct) productoUPC.getM_Product();
+
 
                 String lineaArchivo = "";
 
@@ -254,7 +257,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 lineaArchivo ="D" + separadorCampos;
                 lineaArchivo += "ARTICULOS_EQUIVALENTES" + separadorCampos;
-                lineaArchivo += productoUPC.getUPC();
+                lineaArchivo += this.getDescription().trim();   // Se guarda en description, el codigo de barra ya eliminado.
 
                 lineas.add(lineaArchivo);
             }

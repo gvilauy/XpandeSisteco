@@ -236,13 +236,16 @@ public class ValidatorSisteco implements ModelValidator {
         }
         else if (type == ModelValidator.TYPE_AFTER_DELETE){
 
-            // Marca Update
-            MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-            sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE);
-            sistecoInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
-            sistecoInterfaceOut.setRecord_ID(model.get_ID());
-            sistecoInterfaceOut.setSeqNo(13);
-            sistecoInterfaceOut.saveEx();
+            // Marca Update si tengo UPC
+            if (model.getUPC() != null){
+                MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE);
+                sistecoInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
+                sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                sistecoInterfaceOut.setDescription(model.getUPC().trim());
+                sistecoInterfaceOut.setSeqNo(13);
+                sistecoInterfaceOut.saveEx();
+            }
         }
 
         return mensaje;
