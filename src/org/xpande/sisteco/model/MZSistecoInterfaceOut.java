@@ -277,9 +277,10 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
      * Xpande. Created by Gabriel Vila on 8/29/17.
      * @param adOrgID
      * @param separadorCampos
+     * @param sistecoConfig
      * @return
      */
-    public List<String> getLineasArchivoBPartner(int adOrgID, String separadorCampos) {
+    public List<String> getLineasArchivoBPartner(int adOrgID, String separadorCampos, MZSistecoConfig sistecoConfig) {
 
         List<String> lineas = new ArrayList<String>();
 
@@ -309,10 +310,10 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 // Por ahora tanto el crear como el actualizar clientes, tiene como operacion A
                 if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                    lineaArchivo ="I" + separadorCampos;
+                    lineaArchivo ="A" + separadorCampos;
                 }
                 else{
-                    lineaArchivo ="U" + separadorCampos;
+                    lineaArchivo ="A" + separadorCampos;
                 }
 
                 lineaArchivo += "CLIENTES" + separadorCampos;
@@ -323,7 +324,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 String direccion = "", telefono = "", email = "";
                 String codigoPais = "", ciudad = "", departamento = "", codigoPostal = "";
-                String esquina1 = "", esquina2 = "";
+                String esquina1 = "", esquina2 = "", codigoDptoSisteco = "10";
                 if (location != null){
                     if (location.getAddress1() != null){
                         direccion = location.getAddress1().trim().replace(separadorCampos, "_");
@@ -333,6 +334,12 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                     }
                     if (location.getRegionName() != null){
                         departamento = location.getRegionName().trim().replace(separadorCampos, "_");
+                        if (departamento != null){
+                            MZSistecoRegion sistecoRegion = sistecoConfig.getByDepartamento(departamento);
+                            if ((sistecoRegion != null) && (sistecoRegion.get_ID() > 0)){
+                                codigoDptoSisteco = sistecoRegion.getST_CodigoDepartamento().trim();
+                            }
+                        }
                     }
                     else{
                         throw new AdempiereException("Falta definir Departamento para el Socio de Negocio : " + partner.getValue());
@@ -386,7 +393,8 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 lineaArchivo += nroDocumento + separadorCampos;
                 lineaArchivo += cedula + separadorCampos;
                 lineaArchivo += tipoDocumento + separadorCampos;
-                lineaArchivo += departamento + separadorCampos;
+                //lineaArchivo += departamento + separadorCampos;
+                lineaArchivo += codigoDptoSisteco + separadorCampos;
                 lineaArchivo += ciudad + separadorCampos;
                 lineaArchivo += codigoPostal + separadorCampos;
                 lineaArchivo += email + separadorCampos;

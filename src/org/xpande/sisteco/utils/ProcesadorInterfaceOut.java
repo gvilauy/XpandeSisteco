@@ -102,13 +102,13 @@ public class ProcesadorInterfaceOut {
 
             // Proceso lineas de interface de salida correspondiente a productos
             if ((zComunicacionPosID > 0) || (processProducts)){
-                message = this.executeInterfaceOutProducts(adOrgID, zComunicacionPosID, processPrices, bufferedWriterBatch, bufferedWriterOnline);
-                if (message != null) return message;
+                //message = this.executeInterfaceOutProducts(adOrgID, zComunicacionPosID, processPrices, bufferedWriterBatch, bufferedWriterOnline);
+                //if (message != null) return message;
             }
 
             // Proces lineas de socios de negocio
             if (processPartners){
-                message = this.executeInterfaceOutPartners(adOrgID, bufferedWriterBatch, bufferedWriterOnline);
+                message = this.executeInterfaceOutPartners(adOrgID, bufferedWriterBatch, bufferedWriterOnline, sistecoConfig);
                 if (message != null) return message;
             }
 
@@ -151,7 +151,16 @@ public class ProcesadorInterfaceOut {
         return message;
     }
 
-    private String executeInterfaceOutPartners(int adOrgID, BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterOnline) {
+    /***
+     * Procesa interface de salida de clientes para Sisteco.
+     * Xpande. Created by Gabriel Vila on 10/9/17.
+     * @param adOrgID
+     * @param bufferedWriterBatch
+     * @param bufferedWriterOnline
+     * @param sistecoConfig
+     * @return
+     */
+    private String executeInterfaceOutPartners(int adOrgID, BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterOnline, MZSistecoConfig sistecoConfig) {
 
         String message = null;
 
@@ -161,7 +170,7 @@ public class ProcesadorInterfaceOut {
             List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesBPartnerNotExecuted();
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
 
-                List<String> lineasArchivo = interfaceOut.getLineasArchivoBPartner(adOrgID, this.sistecoConfig.getSeparadorArchivoOut());
+                List<String> lineasArchivo = interfaceOut.getLineasArchivoBPartner(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), sistecoConfig);
                 for (String lineaArchivo: lineasArchivo){
 
                     bufferedWriterBatch.append(lineaArchivo);

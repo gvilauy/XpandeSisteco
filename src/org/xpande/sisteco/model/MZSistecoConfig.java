@@ -64,4 +64,23 @@ public class MZSistecoConfig extends X_Z_SistecoConfig {
 
         return lines;
     }
+
+
+    /***
+     * Obtiene y retorna modelo de parametrizacion de departamento de sisteco, segun nombre de departamento recibido.
+     * Xpande. Created by Gabriel Vila on 10/9/17.
+     * @param departamento
+     * @return
+     */
+    public MZSistecoRegion getByDepartamento(String departamento){
+
+        String whereClause = X_Z_SistecoRegion.COLUMNNAME_Z_SistecoConfig_ID + " =" + this.get_ID() +
+                " AND " + X_Z_SistecoRegion.COLUMNNAME_RegionName + " ='" + departamento + "'";
+
+        MZSistecoRegion model = new Query(getCtx(), I_Z_SistecoRegion.Table_Name, whereClause, get_TrxName()).first();
+
+        return model;
+    }
+
+
 }
