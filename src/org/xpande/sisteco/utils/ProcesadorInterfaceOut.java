@@ -102,8 +102,8 @@ public class ProcesadorInterfaceOut {
 
             // Proceso lineas de interface de salida correspondiente a productos
             if ((zComunicacionPosID > 0) || (processProducts)){
-                //message = this.executeInterfaceOutProducts(adOrgID, zComunicacionPosID, processPrices, bufferedWriterBatch, bufferedWriterOnline);
-                //if (message != null) return message;
+                message = this.executeInterfaceOutProducts(adOrgID, zComunicacionPosID, processPrices, bufferedWriterBatch, bufferedWriterOnline);
+                if (message != null) return message;
             }
 
             // Proces lineas de socios de negocio
