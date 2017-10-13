@@ -17,10 +17,12 @@
 /** Generated Model - DO NOT CHANGE */
 package org.xpande.sisteco.model;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Properties;
 import org.compiere.model.*;
+import org.compiere.util.Env;
 
 /** Generated Model for Z_SistecoInterfaceOut
  *  @author Adempiere (generated) 
@@ -31,7 +33,7 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170801L;
+	private static final long serialVersionUID = 20171013L;
 
     /** Standard Constructor */
     public X_Z_SistecoInterfaceOut (Properties ctx, int Z_SistecoInterfaceOut_ID, String trxName)
@@ -358,6 +360,26 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 		return ii.intValue();
 	}
 
+	/** Set PriceSO.
+		@param PriceSO 
+		PriceSO
+	  */
+	public void setPriceSO (BigDecimal PriceSO)
+	{
+		set_Value (COLUMNNAME_PriceSO, PriceSO);
+	}
+
+	/** Get PriceSO.
+		@return PriceSO
+	  */
+	public BigDecimal getPriceSO () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_PriceSO);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
 	/** Set Record ID.
 		@param Record_ID 
 		Direct internal record ID
@@ -396,6 +418,26 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 	public int getSeqNo () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_SeqNo);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set Z_ComunicacionPOS ID.
+		@param Z_ComunicacionPOS_ID Z_ComunicacionPOS ID	  */
+	public void setZ_ComunicacionPOS_ID (int Z_ComunicacionPOS_ID)
+	{
+		if (Z_ComunicacionPOS_ID < 1) 
+			set_Value (COLUMNNAME_Z_ComunicacionPOS_ID, null);
+		else 
+			set_Value (COLUMNNAME_Z_ComunicacionPOS_ID, Integer.valueOf(Z_ComunicacionPOS_ID));
+	}
+
+	/** Get Z_ComunicacionPOS ID.
+		@return Z_ComunicacionPOS ID	  */
+	public int getZ_ComunicacionPOS_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Z_ComunicacionPOS_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

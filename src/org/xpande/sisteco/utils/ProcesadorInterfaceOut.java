@@ -108,7 +108,7 @@ public class ProcesadorInterfaceOut {
 
             // Proces lineas de socios de negocio
             if (processPartners){
-                message = this.executeInterfaceOutPartners(adOrgID, bufferedWriterBatch, bufferedWriterOnline, sistecoConfig);
+                message = this.executeInterfaceOutPartners(adOrgID, zComunicacionPosID, bufferedWriterBatch, bufferedWriterOnline, sistecoConfig);
                 if (message != null) return message;
             }
 
@@ -155,12 +155,13 @@ public class ProcesadorInterfaceOut {
      * Procesa interface de salida de clientes para Sisteco.
      * Xpande. Created by Gabriel Vila on 10/9/17.
      * @param adOrgID
+     * @param zComunicacionPosID
      * @param bufferedWriterBatch
      * @param bufferedWriterOnline
      * @param sistecoConfig
      * @return
      */
-    private String executeInterfaceOutPartners(int adOrgID, BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterOnline, MZSistecoConfig sistecoConfig) {
+    private String executeInterfaceOutPartners(int adOrgID, int zComunicacionPosID, BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterOnline, MZSistecoConfig sistecoConfig) {
 
         String message = null;
 
@@ -184,6 +185,11 @@ public class ProcesadorInterfaceOut {
                     // Marco linea como ejecutada
                     interfaceOut.setIsExecuted(true);
                     interfaceOut.setDateExecuted(new Timestamp(System.currentTimeMillis()));
+
+                    if (zComunicacionPosID > 0){
+                        interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    }
+
                     interfaceOut.saveEx();
                 }
             }
@@ -405,6 +411,9 @@ public class ProcesadorInterfaceOut {
                     // Marco linea como ejecutada
                     interfaceOut.setIsExecuted(true);
                     interfaceOut.setDateExecuted(new Timestamp(System.currentTimeMillis()));
+                    if (zComunicacionPosID > 0){
+                        interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    }
                     interfaceOut.saveEx();
                 }
             }
@@ -426,6 +435,9 @@ public class ProcesadorInterfaceOut {
                     // Marco linea como ejecutada
                     interfaceOut.setIsExecuted(true);
                     interfaceOut.setDateExecuted(new Timestamp(System.currentTimeMillis()));
+                    if (zComunicacionPosID > 0){
+                        interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    }
                     interfaceOut.saveEx();
                 }
             }
@@ -557,4 +569,22 @@ public class ProcesadorInterfaceOut {
         return lines;
 
     }
+
+
+    /***
+     * Obtiene y retorna lista de marcas procesadas para un determinado proceso de Comunicacion de datos al POS.
+     * Xpande. Created by Gabriel Vila on 10/13/17.
+     * @param zComunicacionPosID
+     * @return
+     */
+    public List<MZSistecoInterfaceOut> getMarcasProcesadas(int zComunicacionPosID) {
+
+        String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_Z_ComunicacionPOS_ID + " =" + zComunicacionPosID;
+
+        List<MZSistecoInterfaceOut> lines = new Query(this.ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, this.trxName).list();
+
+        return lines;
+
+    }
+
 }

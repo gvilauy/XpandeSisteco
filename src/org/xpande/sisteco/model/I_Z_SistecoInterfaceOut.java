@@ -246,6 +246,19 @@ public interface I_Z_SistecoInterfaceOut
 
 	public I_M_Product getM_Product_Tandem() throws RuntimeException;
 
+    /** Column name PriceSO */
+    public static final String COLUMNNAME_PriceSO = "PriceSO";
+
+	/** Set PriceSO.
+	  * PriceSO
+	  */
+	public void setPriceSO(BigDecimal PriceSO);
+
+	/** Get PriceSO.
+	  * PriceSO
+	  */
+	public BigDecimal getPriceSO();
+
     /** Column name Record_ID */
     public static final String COLUMNNAME_Record_ID = "Record_ID";
 
@@ -289,6 +302,15 @@ public interface I_Z_SistecoInterfaceOut
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name Z_ComunicacionPOS_ID */
+    public static final String COLUMNNAME_Z_ComunicacionPOS_ID = "Z_ComunicacionPOS_ID";
+
+	/** Set Z_ComunicacionPOS ID	  */
+	public void setZ_ComunicacionPOS_ID(int Z_ComunicacionPOS_ID);
+
+	/** Get Z_ComunicacionPOS ID	  */
+	public int getZ_ComunicacionPOS_ID();
 
     /** Column name Z_SistecoInterfaceOut_ID */
     public static final String COLUMNNAME_Z_SistecoInterfaceOut_ID = "Z_SistecoInterfaceOut_ID";

@@ -121,6 +121,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 }
 
                 BigDecimal priceSO = productPrice.getPriceList();
+                this.setPriceSO(priceSO); // Guardo precio de venta obtenido y que será el comunicado al POS
 
                 String precioSisteco = "0", parteDecimalPrecio ="00";
                 BigDecimal decimalPrecioSO = priceSO.subtract(priceSO.setScale(0, RoundingMode.FLOOR)).movePointRight(priceSO.scale());
@@ -232,7 +233,6 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 return lineas;
             }
 
-
             // Si es marca de create
             if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
 
@@ -250,6 +250,8 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 lineaArchivo += product.getValue();
 
                 lineas.add(lineaArchivo);
+
+                this.setDescription(productoUPC.getUPC()); // Guardo UPC comunicado
             }
             else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
 
