@@ -498,8 +498,11 @@ public class ProcesadorInterfaceOut {
         if (zComunicacionPosID > 0){
             // Si en este proceso No se quiere comunicar precios de productos
             if (!processPrices){
-                // No proceso ninguna marca de crear o actualizar productos. Solo considero las marcas de eliminar.
-                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_CRUDType + " ='" + X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE + "' ";
+                // No proceso ninguna marca de crear o actualizar productos. Solo considero las marcas de eliminar y aquellas marcas de
+                // actualización pero que no sean por cambios de precio
+                whereClause += " AND ((" + X_Z_SistecoInterfaceOut.COLUMNNAME_CRUDType + " ='" + X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE + "') " +
+                        " OR (" + X_Z_SistecoInterfaceOut.COLUMNNAME_CRUDType + " ='" + X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE + "'" +
+                        " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_IsPriceChanged + " ='N')) ";
             }
             else {
                 // Solo debo conisderar marcas de aquellos productos contenidos en el proceso de comunicacion de datos al pos.
