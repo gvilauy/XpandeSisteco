@@ -198,7 +198,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
         try{
 
-            sql1 =  " select hdr.datetrx::date as datetrx, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg, " +
+            sql1 =  " select hdr.ad_client_id, hdr.ad_org_id, hdr.datetrx::date as datetrx, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg, " +
                     " coalesce(categrubro.name, categ.name) as nomcateg, sum(a.st_ivadescuentototal) as impuestos, sum(a.st_preciodescuentototal) as neto " +
                     " from z_sisteco_tk_lvta a " +
                     " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
@@ -209,9 +209,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " and hdr.st_estadoticket ='F'" +
                     " and a.st_lineacancelada = 0" +
-                    " group by hdr.datetrx::date, prod.c_taxcategory_id, categ.name, idcateg, nomcateg ";
+                    " group by hdr.ad_client_id, hdr.ad_org_id, hdr.datetrx::date, prod.c_taxcategory_id, categ.name, idcateg, nomcateg ";
 
-            sql2 = " select hdr.datetrx::date as datetrx, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg," +
+            sql2 = " select hdr.ad_client_id, hdr.ad_org_id, hdr.datetrx::date as datetrx, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg," +
                     " coalesce(categrubro.name, categ.name) as nomcateg, sum(a.st_iva) as impuestos, sum(a.st_precio) as neto" +
                     " from z_sisteco_tk_ldev a " +
                     " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id" +
@@ -222,7 +222,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " and hdr.st_estadoticket ='F' " +
                     " and a.st_lineacancelada = 0 " +
-                    " group by hdr.datetrx::date, prod.c_taxcategory_id, categ.name, idcateg, nomcateg " +
+                    " group hdr.ad_client_id, hdr.ad_org_id, by hdr.datetrx::date, prod.c_taxcategory_id, categ.name, idcateg, nomcateg " +
                     " order by nomcateg ";
 
 
@@ -254,6 +254,8 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     acumulaSubTotal = Env.ZERO;
 
                     pazosTax = new MZSistecoPazosTax(getCtx(), 0, get_TrxName());
+                    pazosTax.set_ValueOfColumn("AD_Client_ID", rs.getInt("ad_client_id"));
+                    pazosTax.setAD_Org_ID(rs.getInt("ad_org_id"));
                     pazosTax.setZ_SistecoInterfacePazos_ID(this.get_ID());
                     pazosTax.setC_TaxCategory_ID(rs.getInt("c_taxcategory_id"));
                     pazosTax.setDateTrx(rs.getTimestamp("datetrx"));
@@ -294,7 +296,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         ResultSet rs = null;
 
         try{
-            sql = " SELECT  b.st_documentoreceptor, upper(b.st_nombrereceptor::text) AS st_nombrereceptor, a.st_numeroticket," +
+            sql = " SELECT a.ad_client_id, a.ad_org_id, b.st_documentoreceptor, upper(b.st_nombrereceptor::text) AS st_nombrereceptor, a.st_numeroticket," +
                     " sum(c.st_totaltcktsinpagoserv - c.st_ivatotaltcktsinpagoserv) AS amtsubtotal, " +
                     " sum(c.st_ivatotaltcktsinpagoserv) AS taxamt, sum(c.st_totaltcktsinpagoserv) AS totalamt," +
                     " sum(a.st_totalapagar) AS payamt, date_trunc('day'::text, b.datetrx) AS datetrx " +
@@ -305,7 +307,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " AND a.st_estadoticket::text ='F' " +
                     " AND a.st_tipolinea::text ='1' " +
                     " AND b.st_tipodocumentoreceptor='2' " +
-                    " GROUP BY b.st_documentoreceptor, b.st_nombrereceptor, a.st_numeroticket, date_trunc('day'::text, b.datetrx) ";
+                    " GROUP BY a.ad_client_id, a.ad_org_id, b.st_documentoreceptor, b.st_nombrereceptor, a.st_numeroticket, date_trunc('day'::text, b.datetrx) ";
 
         	pstmt = DB.prepareStatement(sql, get_TrxName());
         	rs = pstmt.executeQuery();
@@ -313,6 +315,8 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         	while(rs.next()){
                 MZSistecoPazosTKRUT tkrut = new MZSistecoPazosTKRUT(getCtx(), 0, get_TrxName());
                 tkrut.setZ_SistecoInterfacePazos_ID(this.get_ID());
+                tkrut.setAD_Org_ID(rs.getInt("ad_org_id"));
+                tkrut.set_ValueOfColumn("AD_Client_ID", rs.getInt("ad_client_id"));
                 tkrut.setST_DocumentoReceptor(rs.getString("st_documentoreceptor"));
                 tkrut.setST_NombreReceptor(rs.getString("st_nombrereceptor"));
                 tkrut.setST_NumeroTicket(rs.getString("st_numeroticket"));
@@ -384,6 +388,8 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
             while(rs.next()){
                 MZSistecoPazosTaxTKRUT taxTKRUT = new MZSistecoPazosTaxTKRUT(getCtx(), 0, get_TrxName());
+                taxTKRUT.setAD_Org_ID(this.sistecoConfig.getAD_Org_ID());
+                taxTKRUT.set_ValueOfColumn("AD_Client_ID", this.sistecoConfig.getAD_Client_ID());
                 taxTKRUT.setZ_SistecoInterfacePazos_ID(this.get_ID());
                 taxTKRUT.setAmtSubtotal(rs.getBigDecimal("amtsubtotal"));
                 taxTKRUT.setC_TaxCategory_ID(rs.getInt("c_taxcategory_id"));
@@ -862,6 +868,8 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             this.saveEx();
             
             MZSistecoPazosTotal stTotales = new MZSistecoPazosTotal(getCtx(), 0, get_TrxName());
+            stTotales.setAD_Org_ID(this.sistecoConfig.getAD_Org_ID());
+            stTotales.set_ValueOfColumn("AD_Client_ID", this.sistecoConfig.getAD_Client_ID());
             stTotales.setST_TotalVtaEfectivo(this.getTotalVtaEfectivo());
             stTotales.setST_TotalVtaEfectivoUSD(this.getTotalVtaEfectivoUSD());
             stTotales.setST_TotalVtaCheque(this.getTotalVtaCheque());
