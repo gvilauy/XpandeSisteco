@@ -222,7 +222,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " and hdr.st_estadoticket ='F' " +
                     " and a.st_lineacancelada = 0 " +
-                    " group hdr.ad_client_id, hdr.ad_org_id, by hdr.datetrx::date, prod.c_taxcategory_id, categ.name, idcateg, nomcateg " +
+                    " group hdr.ad_client_id, hdr.ad_org_id, hdr.datetrx::date, prod.c_taxcategory_id, categ.name, idcateg, nomcateg " +
                     " order by nomcateg ";
 
 
