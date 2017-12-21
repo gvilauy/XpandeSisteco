@@ -176,7 +176,12 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                             lineaTandem ="I" + separadorCampos;
                             lineaTandem += "TANDEM" + separadorCampos;
                             lineaTandem += product.getValue() + separadorCampos;
-                            lineaTandem += this.getM_Product_Tandem().getValue();
+
+                            MProduct productTandem = new MProduct(getCtx(), product.get_ValueAsInt("M_Product_Tandem_ID"), null);
+                            if ((productTandem == null) || (productTandem.get_ID() <= 0)){
+                                throw new AdempiereException("No se obtuvo producto tandem con ID : " + product.get_ValueAsInt("M_Product_Tandem_ID"));
+                            }
+                            lineaTandem += productTandem.getValue();
                             lineas.add(lineaTandem);
                         }
                     }
