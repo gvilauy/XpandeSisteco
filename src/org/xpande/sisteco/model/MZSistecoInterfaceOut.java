@@ -2,6 +2,7 @@ package org.xpande.sisteco.model;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.*;
+import org.compiere.util.DB;
 import org.compiere.util.Env;
 import org.eevolution.model.X_C_TaxGroup;
 import org.xpande.core.model.I_Z_ProductoUPC;
@@ -81,6 +82,8 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 }
             }
 
+            boolean creaProducto = false;
+
             // Si es marca de create
             if ((this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE))
                     || (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE))){
@@ -89,6 +92,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
                     lineaArchivo ="I" + separadorCampos;
+                    creaProducto = true;
                 }
                 else{
                     lineaArchivo ="U" + separadorCampos;
@@ -184,6 +188,12 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                             lineaTandem += productTandem.getValue();
                             lineas.add(lineaTandem);
                         }
+                    }
+
+                    // Mardo producto com comunicado pos si es la primera vez que se comunica
+                    if (creaProducto){
+                        String action = " update m_product set comunicadopos ='Y' where m_product_id =" + product.get_ID();
+                        DB.executeUpdateEx(action, get_TrxName());
                     }
                 }
                 else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){

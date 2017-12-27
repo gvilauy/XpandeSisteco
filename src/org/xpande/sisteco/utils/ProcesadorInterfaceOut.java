@@ -7,6 +7,7 @@ import org.compiere.model.MProduct;
 import org.compiere.model.Query;
 import org.compiere.util.DB;
 import org.xpande.core.model.I_Z_ProductoUPC;
+import org.xpande.core.utils.FileUtils;
 import org.xpande.sisteco.model.I_Z_SistecoInterfaceOut;
 import org.xpande.sisteco.model.MZSistecoConfig;
 import org.xpande.sisteco.model.MZSistecoInterfaceOut;
@@ -39,6 +40,10 @@ public class ProcesadorInterfaceOut {
     private File fileOnline = null;
     private File fileCountOnline = null;
     private File fileBatchError = null;
+
+    // Contadores de lineas
+    private int contadorLinBatch = 0;
+    private int contadorLinOnline = 0;
 
     private String fechaHoy;
 
@@ -112,20 +117,22 @@ public class ProcesadorInterfaceOut {
                 if (message != null) return message;
             }
 
-            // Cargo archivos contadores de lineas batch y online
-            int contadorLineasBatch = this.getCountBatchLines();
-            int contadorLineasOnline = this.getCountOnlineLines();
+            String pathArchivosDestino = sistecoConfig.getRutaInterfaceOut() + File.separator;
 
-            if (contadorLineasBatch > 0){
-                this.setBatchLines(contadorLineasBatch);
+            // Si tengo lineas en archivos batch
+            if (this.contadorLinBatch > 0){
+                this.setBatchLines(this.contadorLinBatch);
+
+                // Copio archivo batch a path destino
+                File fileBatchDest = new File( pathArchivosDestino + sistecoConfig.getArchivoBatch());
+                FileUtils.copyFile(this.fileBatch, fileBatchDest);
+
             }
 
-            if (contadorLineasOnline > 0){
-                this.setOnlineLines(contadorLineasBatch);
+            // Si tengo lineas en archivos online
+            if (this.contadorLinOnline > 0){
+                this.setOnlineLines(this.contadorLinOnline);
             }
-
-            // Copiar archivos creados en path destino de Sisteco
-
 
         }
         catch (Exception e){
@@ -179,6 +186,9 @@ public class ProcesadorInterfaceOut {
 
                     bufferedWriterBatch.newLine();
                     bufferedWriterOnline.newLine();
+
+                    this.contadorLinBatch++;
+                    this.contadorLinOnline++;
 
                 }
                 if (lineasArchivo.size() > 0){
@@ -406,6 +416,9 @@ public class ProcesadorInterfaceOut {
                     bufferedWriterBatch.newLine();
                     bufferedWriterOnline.newLine();
 
+                    this.contadorLinBatch++;
+                    this.contadorLinOnline++;
+
                 }
                 if (lineasArchivo.size() > 0){
                     // Marco linea como ejecutada
@@ -429,6 +442,9 @@ public class ProcesadorInterfaceOut {
 
                     bufferedWriterBatch.newLine();
                     bufferedWriterOnline.newLine();
+
+                    this.contadorLinBatch++;
+                    this.contadorLinOnline++;
 
                 }
                 if (lineasArchivo.size() > 0){
@@ -542,11 +558,18 @@ public class ProcesadorInterfaceOut {
             }
             else{
                 // Solo debo conisderar marcas de aquellos productos contenidos en el proceso de comunicacion de datos al pos.
+
+                /*
                 whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
                         " (select z_productoupc_id from z_productoupc where m_product_id in " +
                         " (select m_product_id from z_confirmacionetiquetaprod where z_confirmacionetiquetadoc_id in " +
                         " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc where isselected='Y' and isconfirmed='Y' and z_confirmacionetiqueta_id in " +
                         " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + ")))) ";
+                */
+
+                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
+                        " (select z_productoupc_id from z_productoupc where m_product_id in " +
+                        " (select m_product_id from m_product where ComunicadoPos ='Y')) ";
             }
         }
 
