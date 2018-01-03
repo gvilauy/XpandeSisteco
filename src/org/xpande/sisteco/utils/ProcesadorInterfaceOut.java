@@ -117,6 +117,14 @@ public class ProcesadorInterfaceOut {
                 if (message != null) return message;
             }
 
+            if (bufferedWriterBatch != null){
+                bufferedWriterBatch.close();
+            }
+
+            if (bufferedWriterOnline != null){
+                bufferedWriterOnline.close();
+            }
+
             String pathArchivosDestino = sistecoConfig.getRutaInterfaceOut() + File.separator;
 
             // Si tengo lineas en archivos batch
@@ -148,7 +156,7 @@ public class ProcesadorInterfaceOut {
             }
             if (bufferedWriterOnline != null){
                 try {
-                    bufferedWriterBatch.close();
+                    bufferedWriterOnline.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -567,9 +575,11 @@ public class ProcesadorInterfaceOut {
                         " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + ")))) ";
                 */
 
+                /*
                 whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
                         " (select z_productoupc_id from z_productoupc where m_product_id in " +
                         " (select m_product_id from m_product where ComunicadoPos ='Y')) ";
+                */
             }
         }
 
