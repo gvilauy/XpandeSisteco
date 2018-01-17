@@ -6,6 +6,7 @@ import org.compiere.model.I_M_Product;
 import org.compiere.model.MProduct;
 import org.compiere.model.Query;
 import org.compiere.util.DB;
+import org.compiere.util.TimeUtil;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.utils.FileUtils;
 import org.xpande.sisteco.model.I_Z_SistecoInterfaceOut;
@@ -518,6 +519,8 @@ public class ProcesadorInterfaceOut {
         String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
                 " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_M_Product.Table_ID;
 
+        Timestamp fechaHoy = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
+
         // Si recibo ID de proceso de comunicacion de datos al pos
         if (zComunicacionPosID > 0){
             // Si en este proceso No se quiere comunicar precios de productos
@@ -531,8 +534,12 @@ public class ProcesadorInterfaceOut {
             else {
                 // Solo debo conisderar marcas de aquellos productos contenidos en el proceso de comunicacion de datos al pos.
                 whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
-                        " (select m_product_id from z_confirmacionetiquetaprod where z_confirmacionetiquetadoc_id in " +
-                        " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc where isselected='Y' and isconfirmed='Y' and z_confirmacionetiqueta_id in " +
+                        " (select m_product_id from z_confirmacionetiquetaprod " +
+                        " where WithOfferSO ='N' and z_confirmacionetiquetadoc_id in " +
+                        " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc " +
+                        " where comunicadopos='N' and isselected='Y' and isconfirmed='Y' " +
+                        " and ((DateToPos is null) or (DateToPos <='" + fechaHoy + "')) " +
+                        " and z_confirmacionetiqueta_id in " +
                         " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + "))) ";
             }
         }
