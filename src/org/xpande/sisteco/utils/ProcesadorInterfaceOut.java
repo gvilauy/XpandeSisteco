@@ -95,6 +95,13 @@ public class ProcesadorInterfaceOut {
             // Obtengo configurador de sisteco
             this.sistecoConfig = MZSistecoConfig.getDefault(ctx, trxName);
 
+            // Valido que no haya un archivo de interface esperando ser procesado por Sisteco.
+            // Esto es para no sobreescribir un archivo generado y aun no procesado por Sisteco, con un archivo nuevo.
+            message = this.validateFiles();
+            if (message != null){
+                return message;
+            }
+
             // Creación de archivos de interface
             this.createFiles();
 
@@ -166,6 +173,36 @@ public class ProcesadorInterfaceOut {
 
         return message;
     }
+
+
+    /***
+     * Valida que no hay aun archivo de interface generado y no procesado aun por Sisteco.
+     * Esto es para evitar sobreescribir dicho archivo con uno nuevo y de esa manera perder información no enviada al pos.
+     * Xpande. Created by Gabriel Vila on 1/22/18.
+     * @return
+     */
+    private String validateFiles() {
+
+        String message = null;
+
+        try{
+
+            String pathArchivosDestino = sistecoConfig.getRutaInterfaceOut() + File.separator;
+
+            File fileBatchDest = new File( pathArchivosDestino + sistecoConfig.getArchivoBatch());
+
+            if (fileBatchDest.exists()){
+                return "Existe un archivo de interface generado y no procesado aún por Sisteco.\n" + "Debe procesarlo antes de generar uno nuevo.";
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return message;
+    }
+
 
     /***
      * Procesa interface de salida de clientes para Sisteco.
