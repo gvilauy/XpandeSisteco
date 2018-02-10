@@ -4,18 +4,19 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.model.*;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.TimeUtil;
 import org.eevolution.model.X_C_TaxGroup;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.model.MZProductoUPC;
+import org.xpande.core.utils.DateUtils;
 import org.xpande.core.utils.PriceListUtils;
 import org.xpande.sisteco.utils.SistecoUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.sql.Timestamp;
+import java.util.*;
 
 /**
  * Modelo para interface de datos desde el sistema hacia Sisteco
@@ -53,6 +54,28 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
     }
 
+    /***
+     * Obtiene y retorna modelo según parametros recibidos
+     * Xpande. Created by Gabriel Vila on 7/6/17.
+     * @param ctx
+     * @param adTableID
+     * @param recordID
+     * @param crudType
+     * @param trxName
+     * @return
+     */
+    public static MZSistecoInterfaceOut getRecordByCrud(Properties ctx, int adTableID, int recordID, String crudType, String trxName){
+
+        String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + adTableID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " =" + recordID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N'" +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_CRUDType + " ='" + crudType + "'";
+
+        MZSistecoInterfaceOut model = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).first();
+
+        return model;
+
+    }
 
     /***
      * Obtiene y retorna lineas para archivos de interface de salida con información de producto, a partir de la información de este modelo.
@@ -236,9 +259,11 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
      * a partir de la información de este modelo.
      * @param adOrgID
      * @param separadorCampos
+     * @param processPrices
+     * @param hashProds
      * @return
      */
-    public List<String> getLineasArchivoUPC(int adOrgID, String separadorCampos) {
+    public List<String> getLineasArchivoUPC(int adOrgID, String separadorCampos, boolean processPrices, HashMap<Integer, Integer> hashProds) {
 
         List<String> lineas = new ArrayList<String>();
 
@@ -255,6 +280,41 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 MZProductoUPC productoUPC = new MZProductoUPC(getCtx(), this.getRecord_ID(), get_TrxName());
                 MProduct product = (MProduct) productoUPC.getM_Product();
 
+                // Obtengo si es que existe, la marca de CREATE del producto de esta barra
+                MZSistecoInterfaceOut interfaceOutProd = MZSistecoInterfaceOut.getRecordByCrud(getCtx(), product.Table_ID, product.get_ID(),
+                        X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE, get_TrxName());
+
+
+                // Si estoy en la opcion de no procesar cambios de precios
+                if (!processPrices){
+
+                    // Debo verificar que el producto asociado a este codigo de barras, haya sido comunicado alguna vez al pos.
+
+                    // Si el producto de esta barra nunca fue comunicado al POS como Alta
+                    if ((interfaceOutProd == null) || (interfaceOutProd.get_ID() <= 0)){
+
+                        // Si el producto fue creado hace menos de un mes, entonces no comunico esta barra.
+                        Timestamp fechaHoy = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
+                        Date dateFechaAux = new Date(fechaHoy.getTime());
+                        dateFechaAux =  DateUtils.addDays(dateFechaAux, -30);
+                        Timestamp fechaTope = new Timestamp(dateFechaAux.getTime());
+
+                        if (product.getCreated().after(fechaTope)){
+                            return lineas;
+                        }
+                    }
+                }
+                else{
+                    // Estoy comunicando precios
+                    // Si no tengo marca de create del producto
+                    if ((interfaceOutProd == null) || (interfaceOutProd.get_ID() <= 0)){
+                        // Si el producto no esta siendo comunicado en este proceso
+                        if (!hashProds.containsKey(product.get_ID())){
+                            // No comunico esta barra
+                            return lineas;
+                        }
+                    }
+                }
 
                 String lineaArchivo = "";
 

@@ -17,6 +17,7 @@ import sun.misc.resources.Messages_pt_BR;
 
 import java.io.*;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -429,6 +430,9 @@ public class ProcesadorInterfaceOut {
 
         String message = null;
 
+        HashMap<Integer, Integer> hashProds = new HashMap<Integer, Integer>();
+
+
         try{
             // Obtengo y recorro lineas de interface aun no ejecutadas para productos
             List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted(zComunicacionPosID, processPrices);
@@ -450,6 +454,14 @@ public class ProcesadorInterfaceOut {
                         String action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
                                 " where m_product_id =" + product.get_ID();
                         DB.executeUpdateEx(action, this.trxName);
+                    }
+                }
+
+                // Si la marca para este producto es de CREAR, guardo id de producto en hash para luego ver consideración o no
+                // de códigos de barras.
+                if (interfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                    if (!hashProds.containsKey(interfaceOut.getRecord_ID())){
+                        hashProds.put(interfaceOut.getRecord_ID(), interfaceOut.getRecord_ID());
                     }
                 }
 
@@ -478,9 +490,9 @@ public class ProcesadorInterfaceOut {
             }
 
             // Obtengo y recorro lineas de interface aun no ejecutadas para códigos de barra de productos
-            interfaceOuts = this.getLinesUPCNotExecuted(zComunicacionPosID, processPrices);
+            interfaceOuts = this.getLinesUPCNotExecuted();
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
-                List<String> lineasArchivo = interfaceOut.getLineasArchivoUPC(adOrgID, this.sistecoConfig.getSeparadorArchivoOut());
+                List<String> lineasArchivo = interfaceOut.getLineasArchivoUPC(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), processPrices, hashProds);
                 for (String lineaArchivo: lineasArchivo){
 
                     bufferedWriterBatch.append(lineaArchivo);
@@ -590,42 +602,13 @@ public class ProcesadorInterfaceOut {
 
     /***
      * Obtiene y retorna lineas de interface de salida para códigos de barras no ejecutadas al momento.
-     * En caso de recibir un id de proceso de comunicacion de datos al pos, debo filtrar segun proceso o no precios.
      * Xpande. Created by Gabriel Vila on 7/24/17.
      * @return
-     * @param zComunicacionPosID
-     * @param processPrices
      */
-    private List<MZSistecoInterfaceOut> getLinesUPCNotExecuted(int zComunicacionPosID, boolean processPrices){
+    private List<MZSistecoInterfaceOut> getLinesUPCNotExecuted(){
 
         String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
                 " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_Z_ProductoUPC.Table_ID;
-
-        // Si recibo ID de proceso de comunicacion de datos al pos
-        if (zComunicacionPosID > 0){
-            // Si en este proceso No se quiere comunicar precios de productos
-            if (!processPrices){
-                // No proceso ninguna marca de crear o actualizar productos. Solo considero las marcas de eliminar.
-                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_CRUDType + " ='" + X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE + "' ";
-            }
-            else{
-                // Solo debo conisderar marcas de aquellos productos contenidos en el proceso de comunicacion de datos al pos.
-
-                /*
-                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
-                        " (select z_productoupc_id from z_productoupc where m_product_id in " +
-                        " (select m_product_id from z_confirmacionetiquetaprod where z_confirmacionetiquetadoc_id in " +
-                        " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc where isselected='Y' and isconfirmed='Y' and z_confirmacionetiqueta_id in " +
-                        " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + ")))) ";
-                */
-
-                /*
-                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
-                        " (select z_productoupc_id from z_productoupc where m_product_id in " +
-                        " (select m_product_id from m_product where ComunicadoPos ='Y')) ";
-                */
-            }
-        }
 
         List<MZSistecoInterfaceOut> lines = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).setOrderBy(" SeqNo, Created  ").list();
 
