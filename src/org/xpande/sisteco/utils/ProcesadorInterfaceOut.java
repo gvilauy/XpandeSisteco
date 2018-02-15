@@ -222,7 +222,7 @@ public class ProcesadorInterfaceOut {
         try{
 
             // Obtengo y recorro lineas de interface aun no ejecutadas para socios de negocio
-            List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesBPartnerNotExecuted();
+            List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesBPartnerNotExecuted(adOrgID);
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
 
                 List<String> lineasArchivo = interfaceOut.getLineasArchivoBPartner(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), sistecoConfig);
@@ -435,7 +435,7 @@ public class ProcesadorInterfaceOut {
 
         try{
             // Obtengo y recorro lineas de interface aun no ejecutadas para productos
-            List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted(zComunicacionPosID, processPrices);
+            List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted(adOrgID, zComunicacionPosID, processPrices);
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
 
                 // Me aseguro que el producto tenga atributos asociados, sino se los creo ahora.
@@ -490,7 +490,7 @@ public class ProcesadorInterfaceOut {
             }
 
             // Obtengo y recorro lineas de interface aun no ejecutadas para códigos de barra de productos
-            interfaceOuts = this.getLinesUPCNotExecuted();
+            interfaceOuts = this.getLinesUPCNotExecuted(adOrgID);
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
                 List<String> lineasArchivo = interfaceOut.getLineasArchivoUPC(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), processPrices, hashProds);
                 for (String lineaArchivo: lineasArchivo){
@@ -560,13 +560,15 @@ public class ProcesadorInterfaceOut {
      * En caso de recibir un id de proceso de comunicacion de datos al pos, debo filtrar segun proceso o no precios.
      * Xpande. Created by Gabriel Vila on 7/24/17.
      * @return
+     * @param adOrgID
      * @param zComunicacionPosID
      * @param processPrices
      */
-    private List<MZSistecoInterfaceOut> getLinesProdsNotExecuted(int zComunicacionPosID, boolean processPrices){
+    private List<MZSistecoInterfaceOut> getLinesProdsNotExecuted(int adOrgID, int zComunicacionPosID, boolean processPrices){
 
         String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
-                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_M_Product.Table_ID;
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_M_Product.Table_ID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + " =" + adOrgID;
 
         Timestamp fechaHoy = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
 
@@ -603,12 +605,14 @@ public class ProcesadorInterfaceOut {
     /***
      * Obtiene y retorna lineas de interface de salida para códigos de barras no ejecutadas al momento.
      * Xpande. Created by Gabriel Vila on 7/24/17.
+     * @param adOrgID
      * @return
      */
-    private List<MZSistecoInterfaceOut> getLinesUPCNotExecuted(){
+    private List<MZSistecoInterfaceOut> getLinesUPCNotExecuted(int adOrgID){
 
         String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
-                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_Z_ProductoUPC.Table_ID;
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_Z_ProductoUPC.Table_ID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + " =" + adOrgID;
 
         List<MZSistecoInterfaceOut> lines = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).setOrderBy(" SeqNo, Created  ").list();
 
@@ -620,12 +624,14 @@ public class ProcesadorInterfaceOut {
     /***
      * Obtiene y retorna lineas de interface de salida para socios de negocio no ejecutadas al momento.
      * Xpande. Created by Gabriel Vila on 7/24/17.
+     * @param adOrgID
      * @return
      */
-    private List<MZSistecoInterfaceOut> getLinesBPartnerNotExecuted(){
+    private List<MZSistecoInterfaceOut> getLinesBPartnerNotExecuted(int adOrgID){
 
         String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
-                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_C_BPartner.Table_ID;
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_C_BPartner.Table_ID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + " =" + adOrgID;
 
         List<MZSistecoInterfaceOut> lines = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).setOrderBy(" SeqNo, Created  ").list();
 

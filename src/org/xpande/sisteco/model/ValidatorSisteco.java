@@ -83,41 +83,28 @@ public class ValidatorSisteco implements ModelValidator {
         // Sisteco. Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
 
-            if (type == ModelValidator.TYPE_AFTER_NEW){
+            // Proceso para cada organización asociada a la configuracion de sisteco.
+            // Manejo una marca de interface por cada organización de este pos
+            MZSistecoConfig sistecoConfig = MZSistecoConfig.getDefault(model.getCtx(), model.get_TrxName());
+            List<MZSistecoConfigOrg> orgs = sistecoConfig.getOrganization();
+            for (MZSistecoConfigOrg configOrg: orgs){
 
-                // Si el producto no se vende o no esta activo al momento de crearse, no hago nada
-                if ((!model.isSold()) || (!model.isActive())){
-                    return mensaje;
-                }
+                if (type == ModelValidator.TYPE_AFTER_NEW){
 
-                // Marca de Creacion de Producto
-                MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
-                sistecoInterfaceOut.setSeqNo(10);
-                sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
-                sistecoInterfaceOut.setRecord_ID(model.get_ID());
-                sistecoInterfaceOut.saveEx();
+                    // Si el producto no se vende o no esta activo al momento de crearse, no hago nada
+                    if ((!model.isSold()) || (!model.isActive())){
+                        return mensaje;
+                    }
 
-                // Asociación de atributos que requiere Sisteco al nuevo producto
-                SistecoUtils.setProductAttributes(model.getCtx(), model, model.get_TrxName());
+                    // Marca de Creacion de Producto
+                    MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                    sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
+                    sistecoInterfaceOut.setSeqNo(10);
+                    sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
+                    sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                    sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
+                    sistecoInterfaceOut.saveEx();
 
-                // Obtengo y guardo valor Hexadecimal segun seteos de atributos para el producto recibido.
-                // Solo si el producto tiene unidad de medida o tandem asociado.
-                if ((model.getC_UOM_ID() > 0) || (model.get_ValueAsInt("M_Product_Tandem_ID") > 0)){
-                    String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(model.getCtx(), model, model.get_TrxName());
-                    String action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
-                            " where m_product_id =" + model.get_ID();
-                    DB.executeUpdateEx(action, model.get_TrxName());
-                }
-
-            }
-            else if (type == ModelValidator.TYPE_AFTER_CHANGE){
-
-                // Me aseguro que el producto tenga atributos asociados, sino se los creo ahora.
-                // Esto es momentaneo para crear los atributos de los productos migrados.
-                String sql = " select count(*) from z_productoatribsisteco where m_product_id =" + model.get_ID();
-                int contadorAtribs = DB.getSQLValue(model.get_TrxName(), sql);
-                if (contadorAtribs <= 0){
                     // Asociación de atributos que requiere Sisteco al nuevo producto
                     SistecoUtils.setProductAttributes(model.getCtx(), model, model.get_TrxName());
 
@@ -129,135 +116,165 @@ public class ValidatorSisteco implements ModelValidator {
                                 " where m_product_id =" + model.get_ID();
                         DB.executeUpdateEx(action, model.get_TrxName());
                     }
+
                 }
+                else if (type == ModelValidator.TYPE_AFTER_CHANGE){
 
-                // Pregunto por los campos cuyo cambio requiere informar a Sisteco
-                if ((model.is_ValueChanged("C_UOM_ID")) || (model.is_ValueChanged("M_Product_Tandem_ID"))
-                    || (model.is_ValueChanged("Description")) || (model.is_ValueChanged("C_TaxCategory_ID"))
-                        || (model.is_ValueChanged("Name")) || (model.is_ValueChanged("EsProductoBalanza"))
-                        || (model.is_ValueChanged("Z_ProductoSeccion_ID")) || (model.is_ValueChanged("Z_ProductoRubro_ID"))
-                        || (model.is_ValueChanged("Z_ProductoFamilia_ID")) || (model.is_ValueChanged("Z_ProductoSubfamilia_ID"))
-                        || (model.is_ValueChanged("IsBonificable"))){
+                    // Me aseguro que el producto tenga atributos asociados, sino se los creo ahora.
+                    // Esto es momentaneo para crear los atributos de los productos migrados.
+                    String sql = " select count(*) from z_productoatribsisteco where m_product_id =" + model.get_ID();
+                    int contadorAtribs = DB.getSQLValue(model.get_TrxName(), sql);
+                    if (contadorAtribs <= 0){
+                        // Asociación de atributos que requiere Sisteco al nuevo producto
+                        SistecoUtils.setProductAttributes(model.getCtx(), model, model.get_TrxName());
 
-
-                    if ((model.is_ValueChanged("IsActive")) || (model.is_ValueChanged(X_M_Product.COLUMNNAME_IsSold))){
-
-                        // Si desactiva o marca producto como no vendible
-                        if ((!model.isActive()) || (!model.isSold())){
-                            // Marca Delete para Sisteco
-                            MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), model.get_TrxName());
-                            if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
-                                // Proceso segun marca que ya tenía este socio antes de su actualización.
-                                // Si marca anterior es CREATE
-                                if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                                    // Elimino marca anterior de create, ya que finalmente este socio de negocio no va al POS
-                                    sistecoInterfaceOut.deleteEx(true);
-                                    return mensaje;
-                                }
-                                else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
-                                    // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
-                                    // No hago nada y respeto primer marca.
-                                    return mensaje;
-                                }
-                            }
-                            // Si no tengo marca de delete, la creo ahora.
-                            if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
-                                sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                                sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE);
-                                sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
-                                sistecoInterfaceOut.setSeqNo(10);
-                                sistecoInterfaceOut.setRecord_ID(model.get_ID());
-                                sistecoInterfaceOut.saveEx();
-                            }
+                        // Obtengo y guardo valor Hexadecimal segun seteos de atributos para el producto recibido.
+                        // Solo si el producto tiene unidad de medida o tandem asociado.
+                        if ((model.getC_UOM_ID() > 0) || (model.get_ValueAsInt("M_Product_Tandem_ID") > 0)){
+                            String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(model.getCtx(), model, model.get_TrxName());
+                            String action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
+                                    " where m_product_id =" + model.get_ID();
+                            DB.executeUpdateEx(action, model.get_TrxName());
                         }
-                        else{
-                            // Si es producto esta activo y se vende
-                            if (model.isActive() && model.isSold()){
-                                // Doy de alta
-                                MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), model.get_TrxName());
+                    }
+
+                    // Pregunto por los campos cuyo cambio requiere informar a Sisteco
+                    if ((model.is_ValueChanged("C_UOM_ID")) || (model.is_ValueChanged("M_Product_Tandem_ID"))
+                            || (model.is_ValueChanged("Description")) || (model.is_ValueChanged("C_TaxCategory_ID"))
+                            || (model.is_ValueChanged("Name")) || (model.is_ValueChanged("EsProductoBalanza"))
+                            || (model.is_ValueChanged("Z_ProductoSeccion_ID")) || (model.is_ValueChanged("Z_ProductoRubro_ID"))
+                            || (model.is_ValueChanged("Z_ProductoFamilia_ID")) || (model.is_ValueChanged("Z_ProductoSubfamilia_ID"))
+                            || (model.is_ValueChanged("IsBonificable"))){
+
+
+                        if ((model.is_ValueChanged("IsActive")) || (model.is_ValueChanged(X_M_Product.COLUMNNAME_IsSold))){
+
+                            // Si desactiva o marca producto como no vendible
+                            if ((!model.isActive()) || (!model.isSold())){
+                                // Marca Delete para Sisteco
+                                MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(),
+                                                                                                            configOrg.getAD_OrgTrx_ID(), model.get_TrxName());
                                 if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
                                     // Proceso segun marca que ya tenía este socio antes de su actualización.
                                     // Si marca anterior es CREATE
                                     if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                                        // No hago nada
-                                        return mensaje;
+                                        // Elimino marca anterior de create, ya que finalmente este socio de negocio no va al POS
+                                        sistecoInterfaceOut.deleteEx(true);
+                                        //return mensaje;
+                                        continue;
                                     }
                                     else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
                                         // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
-                                        // Elimino marca anterior de create, ya que finalmente este socio de negocio va al POS
-                                        sistecoInterfaceOut.deleteEx(true);
-                                        sistecoInterfaceOut = null;
+                                        // No hago nada y respeto primer marca.
+                                        //return mensaje;
+                                        continue;
                                     }
                                 }
-                                // Si no tengo marca, la creo ahora.
+                                // Si no tengo marca de delete, la creo ahora.
                                 if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
                                     sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                                    sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
-                                    sistecoInterfaceOut.setSeqNo(10);
+                                    sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE);
                                     sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
+                                    sistecoInterfaceOut.setSeqNo(10);
                                     sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                                    sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
                                     sistecoInterfaceOut.saveEx();
                                 }
                             }
+                            else{
+                                // Si es producto esta activo y se vende
+                                if (model.isActive() && model.isSold()){
+                                    // Doy de alta
+                                    MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(),
+                                                                                                                configOrg.getAD_OrgTrx_ID(), model.get_TrxName());
+                                    if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
+                                        // Proceso segun marca que ya tenía este socio antes de su actualización.
+                                        // Si marca anterior es CREATE
+                                        if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                                            // No hago nada
+                                            //return mensaje;
+                                            continue;
+                                        }
+                                        else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
+                                            // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
+                                            // Elimino marca anterior de create, ya que finalmente este socio de negocio va al POS
+                                            sistecoInterfaceOut.deleteEx(true);
+                                            sistecoInterfaceOut = null;
+                                        }
+                                    }
+                                    // Si no tengo marca, la creo ahora.
+                                    if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
+                                        sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                                        sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
+                                        sistecoInterfaceOut.setSeqNo(10);
+                                        sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
+                                        sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                                        sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
+                                        sistecoInterfaceOut.saveEx();
+                                    }
+                                }
+                            }
+
+                        }
+                        // Si el producto tiene unidad de medida o tandem asociado.
+                        if ((model.is_ValueChanged("C_UOM_ID")) || (model.is_ValueChanged("M_Product_Tandem_ID"))){
+
+                            // Refreso valores de atributos del producto
+                            SistecoUtils.refreshProductAttributes(model.getCtx(), model, model.get_TrxName());
+
+                            // Obtengo y guardo valor Hexadecimal segun seteos de atributos
+                            String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(model.getCtx(), model, model.get_TrxName());
+                            String action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
+                                    " where m_product_id =" + model.get_ID();
+                            DB.executeUpdateEx(action, model.get_TrxName());
                         }
 
-                    }
-
-
-                    // Si el producto tiene unidad de medida o tandem asociado.
-                    if ((model.is_ValueChanged("C_UOM_ID")) || (model.is_ValueChanged("M_Product_Tandem_ID"))){
-
-                        // Refreso valores de atributos del producto
-                        SistecoUtils.refreshProductAttributes(model.getCtx(), model, model.get_TrxName());
-
-                        // Obtengo y guardo valor Hexadecimal segun seteos de atributos
-                        String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(model.getCtx(), model, model.get_TrxName());
-                        String action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
-                                " where m_product_id =" + model.get_ID();
-                        DB.executeUpdateEx(action, model.get_TrxName());
-                    }
-
-                    // Marca Update para Sisteco
-                    MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(), model.get_TrxName());
-                    if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
-                        // Proceso segun marca que ya tenía este producto antes de su actualización.
-                        // Si marca anterior es CREATE
-                        if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                            // No hago nada y respeto primer marca
-                            return mensaje;
-                        }
-                        else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
-                            // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
-                            // Si este producto sigue estando inactivo
-                            if (!model.isActive()){
-                                // No hago nada y respeto primer marca.
-                                return mensaje;
+                        // Marca Update para Sisteco
+                        MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, model.get_ID(),
+                                                                                                    configOrg.getAD_OrgTrx_ID(), model.get_TrxName());
+                        if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
+                            // Proceso segun marca que ya tenía este producto antes de su actualización.
+                            // Si marca anterior es CREATE
+                            if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                                // No hago nada y respeto primer marca
+                                //return mensaje;
+                                continue;
+                            }
+                            else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
+                                // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
+                                // Si este producto sigue estando inactivo
+                                if (!model.isActive()){
+                                    // No hago nada y respeto primer marca.
+                                    //return mensaje;
+                                    continue;
+                                }
                             }
                         }
-                    }
 
-                    // Si no tengo marca de update, la creo ahora.
-                    if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
-                        // No existe aun marca de UPDATE sobre este producto, la creo ahora.
-                        sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                        sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE);
-                        sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
-                        sistecoInterfaceOut.setSeqNo(20);
-                        sistecoInterfaceOut.setRecord_ID(model.get_ID());
-                        sistecoInterfaceOut.setIsPriceChanged(false);
-                        sistecoInterfaceOut.saveEx();
-                    }
-
-                    // Marca de update para Tandem si cambio
-                    if (model.is_ValueChanged("M_Product_Tandem_ID")){
-                        sistecoInterfaceOut.setIsTandemChanged(true);
-                        // Guardo tandem anterior en caso de haber cambio
-                        if (model.get_ValueOldAsInt("M_Product_Tandem_ID") > 0){
-                            if (sistecoInterfaceOut.getM_Product_Tandem_ID() <= 0){
-                                sistecoInterfaceOut.setM_Product_Tandem_ID(model.get_ValueOldAsInt("M_Product_Tandem_ID"));
-                            }
+                        // Si no tengo marca de update, la creo ahora.
+                        if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
+                            // No existe aun marca de UPDATE sobre este producto, la creo ahora.
+                            sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                            sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE);
+                            sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
+                            sistecoInterfaceOut.setSeqNo(20);
+                            sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                            sistecoInterfaceOut.setIsPriceChanged(false);
+                            sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
+                            sistecoInterfaceOut.saveEx();
                         }
-                        sistecoInterfaceOut.saveEx();
+
+                        // Marca de update para Tandem si cambio
+                        if (model.is_ValueChanged("M_Product_Tandem_ID")){
+                            sistecoInterfaceOut.setIsTandemChanged(true);
+                            // Guardo tandem anterior en caso de haber cambio
+                            if (model.get_ValueOldAsInt("M_Product_Tandem_ID") > 0){
+                                if (sistecoInterfaceOut.getM_Product_Tandem_ID() <= 0){
+                                    sistecoInterfaceOut.setM_Product_Tandem_ID(model.get_ValueOldAsInt("M_Product_Tandem_ID"));
+                                }
+                            }
+                            sistecoInterfaceOut.saveEx();
+                        }
                     }
                 }
             }
@@ -286,31 +303,41 @@ public class ValidatorSisteco implements ModelValidator {
             return mensaje;
         }
 
-        // Sisteco. Interface salida POS
-        // Para Sisteco, solo se crean la marcas para luego considerarse en la generación del archivo plano.
-        if (type == ModelValidator.TYPE_AFTER_NEW){
+        // Proceso para cada organización asociada a la configuracion de sisteco.
+        // Manejo una marca de interface por cada organización de este pos
+        MZSistecoConfig sistecoConfig = MZSistecoConfig.getDefault(model.getCtx(), model.get_TrxName());
+        List<MZSistecoConfigOrg> orgs = sistecoConfig.getOrganization();
+        for (MZSistecoConfigOrg configOrg: orgs){
 
-            // Marca Create
-            MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-            sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
-            sistecoInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
-            sistecoInterfaceOut.setRecord_ID(model.get_ID());
-            sistecoInterfaceOut.setSeqNo(15);
-            sistecoInterfaceOut.saveEx();
+            // Sisteco. Interface salida POS
+            // Para Sisteco, solo se crean la marcas para luego considerarse en la generación del archivo plano.
+            if (type == ModelValidator.TYPE_AFTER_NEW){
 
-        }
-        else if (type == ModelValidator.TYPE_AFTER_DELETE){
-
-            // Marca Update si tengo UPC
-            if (model.getUPC() != null){
+                // Marca Create
                 MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE);
+                sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
                 sistecoInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
                 sistecoInterfaceOut.setRecord_ID(model.get_ID());
-                sistecoInterfaceOut.setDescription(model.getUPC().trim());
-                sistecoInterfaceOut.setSeqNo(13);
+                sistecoInterfaceOut.setSeqNo(15);
+                sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
                 sistecoInterfaceOut.saveEx();
+
             }
+            else if (type == ModelValidator.TYPE_AFTER_DELETE){
+
+                // Marca Update si tengo UPC
+                if (model.getUPC() != null){
+                    MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                    sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE);
+                    sistecoInterfaceOut.setAD_Table_ID(I_Z_ProductoUPC.Table_ID);
+                    sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                    sistecoInterfaceOut.setDescription(model.getUPC().trim());
+                    sistecoInterfaceOut.setSeqNo(13);
+                    sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
+                    sistecoInterfaceOut.saveEx();
+                }
+            }
+
         }
 
         return mensaje;
@@ -353,7 +380,8 @@ public class ValidatorSisteco implements ModelValidator {
             }
 
             // Si existe, obtengo marca de interface de este producto
-            MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, product.get_ID(), model.get_TrxName());
+            MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_M_Product.Table_ID, product.get_ID(),
+                                                                                        priceList.getAD_Org_ID(), model.get_TrxName());
             if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
                 // Proceso segun marca que ya tenía este producto antes de su actualización.
                 // Si marca anterior es CREATE
@@ -378,6 +406,7 @@ public class ValidatorSisteco implements ModelValidator {
                 sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE);
                 sistecoInterfaceOut.setAD_Table_ID(I_M_Product.Table_ID);
                 sistecoInterfaceOut.setRecord_ID(product.get_ID());
+                sistecoInterfaceOut.setAD_OrgTrx_ID(priceList.getAD_Org_ID());
                 sistecoInterfaceOut.setSeqNo(30);
             }
 
@@ -404,129 +433,150 @@ public class ValidatorSisteco implements ModelValidator {
         // Sisteco. Interface salida POS
         if ((type == ModelValidator.TYPE_AFTER_NEW) || (type == ModelValidator.TYPE_AFTER_CHANGE)){
 
-            if (type == ModelValidator.TYPE_AFTER_NEW){
+            // Proceso para cada organización asociada a la configuracion de sisteco.
+            // Manejo una marca de interface por cada organización de este pos
+            MZSistecoConfig sistecoConfig = MZSistecoConfig.getDefault(model.getCtx(), model.get_TrxName());
+            List<MZSistecoConfigOrg> orgs = sistecoConfig.getOrganization();
+            for (MZSistecoConfigOrg configOrg: orgs){
 
-                // Si el socio no es cliente o no esta activo al momento de crearse, no hago nada
-                if ((!model.isCustomer()) || (!model.isActive())){
-                    return mensaje;
+                if (type == ModelValidator.TYPE_AFTER_NEW){
+
+                    // Si el socio no es cliente o no esta activo al momento de crearse, no hago nada
+                    if ((!model.isCustomer()) || (!model.isActive())){
+                        return mensaje;
+                    }
+
+                    // Marca de Creacion de Socio
+                    MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                    sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
+                    sistecoInterfaceOut.setSeqNo(10);
+                    sistecoInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
+                    sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                    sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
+                    sistecoInterfaceOut.saveEx();
+
                 }
+                else if (type == ModelValidator.TYPE_AFTER_CHANGE){
 
-                // Marca de Creacion de Socio
-                MZSistecoInterfaceOut sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
-                sistecoInterfaceOut.setSeqNo(10);
-                sistecoInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
-                sistecoInterfaceOut.setRecord_ID(model.get_ID());
-                sistecoInterfaceOut.saveEx();
-            }
-            else if (type == ModelValidator.TYPE_AFTER_CHANGE){
-
-                // Pregunto por los campos cuyo cambio requiere informar a Sisteco
-                if ((model.is_ValueChanged(X_C_BPartner.COLUMNNAME_Name)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_Name2))
-                        || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_TaxID)) || (model.is_ValueChanged("EMail"))
-                        || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsCustomer))){
+                    // Pregunto por los campos cuyo cambio requiere informar a Sisteco
+                    if ((model.is_ValueChanged(X_C_BPartner.COLUMNNAME_Name)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_Name2))
+                            || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_TaxID)) || (model.is_ValueChanged("EMail"))
+                            || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsCustomer))){
 
 
 
-                    if ((model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsCustomer))){
+                        if ((model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsActive)) || (model.is_ValueChanged(X_C_BPartner.COLUMNNAME_IsCustomer))){
 
-                        // Si desactiva cliente, mando marca de delete
-                        if ((!model.isActive()) || (!model.isCustomer())){
-                            // Marca Delete para Sisteco
-                            MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), model.get_TrxName());
-                            if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
-                                // Proceso segun marca que ya tenía este socio antes de su actualización.
-                                // Si marca anterior es CREATE
-                                if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                                    // Elimino marca anterior de create, ya que finalmente este socio de negocio no va al POS
-                                    sistecoInterfaceOut.deleteEx(true);
-                                    return mensaje;
-                                }
-                                else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
-                                    // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
-                                    // No hago nada y respeto primer marca.
-                                    return mensaje;
-                                }
-                            }
-                            // Si no tengo marca de delete, la creo ahora.
-                            if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
-                                sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                                sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE);
-                                sistecoInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
-                                sistecoInterfaceOut.setSeqNo(30);
-                                sistecoInterfaceOut.setRecord_ID(model.get_ID());
-                                sistecoInterfaceOut.saveEx();
-                            }
-                        }
-                        else{
-                            // Si es cliente y esta activo
-                            if (model.isActive() && model.isCustomer()){
-                                // Doy de alta
-                                MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), model.get_TrxName());
+                            // Si desactiva cliente, mando marca de delete
+                            if ((!model.isActive()) || (!model.isCustomer())){
+                                // Marca Delete para Sisteco
+                                MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(),
+                                                                                                            configOrg.getAD_OrgTrx_ID(), model.get_TrxName());
                                 if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
                                     // Proceso segun marca que ya tenía este socio antes de su actualización.
                                     // Si marca anterior es CREATE
                                     if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                                        // No hago nada
-                                        return mensaje;
+                                        // Elimino marca anterior de create, ya que finalmente este socio de negocio no va al POS
+                                        sistecoInterfaceOut.deleteEx(true);
+                                        //return mensaje;
+                                        continue;
                                     }
                                     else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
                                         // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
-                                        // Elimino marca anterior de create, ya que finalmente este socio de negocio va al POS
-                                        sistecoInterfaceOut.deleteEx(true);
-                                        sistecoInterfaceOut = null;
+                                        // No hago nada y respeto primer marca.
+                                        //return mensaje;
+                                        continue;
                                     }
                                 }
-                                // Si no tengo marca, la creo ahora.
+                                // Si no tengo marca de delete, la creo ahora.
                                 if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
                                     sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                                    sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
-                                    sistecoInterfaceOut.setSeqNo(10);
+                                    sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE);
                                     sistecoInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
+                                    sistecoInterfaceOut.setSeqNo(30);
                                     sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                                    sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
                                     sistecoInterfaceOut.saveEx();
                                 }
                             }
-                        }
-
-                    }
-                    else{
-
-                        // Si el socio no es cliente o no esta activo al momento de crearse, no hago nada
-                        if ((!model.isCustomer()) || (!model.isActive())){
-                            return mensaje;
-                        }
-
-                        // Marca Update para Sisteco
-                        MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(), model.get_TrxName());
-                        if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
-                            // Proceso segun marca que ya tenía este producto antes de su actualización.
-                            // Si marca anterior es CREATE
-                            if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                                // No hago nada y respeto primer marca
-                                return mensaje;
-                            }
-                            else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
-                                // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
-                                // Si este producto sigue estando inactivo
-                                if (!model.isActive()){
-                                    // No hago nada y respeto primer marca.
-                                    return mensaje;
+                            else{
+                                // Si es cliente y esta activo
+                                if (model.isActive() && model.isCustomer()){
+                                    // Doy de alta
+                                    MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(),
+                                                                                                                configOrg.getAD_OrgTrx_ID(), model.get_TrxName());
+                                    if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
+                                        // Proceso segun marca que ya tenía este socio antes de su actualización.
+                                        // Si marca anterior es CREATE
+                                        if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                                            // No hago nada
+                                            //return mensaje;
+                                            continue;
+                                        }
+                                        else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
+                                            // Si marca anterior es DELETEAR, es porque el socio se inactivo anteriormente.
+                                            // Elimino marca anterior de create, ya que finalmente este socio de negocio va al POS
+                                            sistecoInterfaceOut.deleteEx(true);
+                                            sistecoInterfaceOut = null;
+                                        }
+                                    }
+                                    // Si no tengo marca, la creo ahora.
+                                    if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
+                                        sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                                        sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE);
+                                        sistecoInterfaceOut.setSeqNo(10);
+                                        sistecoInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
+                                        sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                                        sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
+                                        sistecoInterfaceOut.saveEx();
+                                    }
                                 }
                             }
-                        }
-                        // Si no tengo marca de update, la creo ahora.
-                        if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
-                            sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
-                            sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE);
-                            sistecoInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
-                            sistecoInterfaceOut.setSeqNo(20);
-                            sistecoInterfaceOut.setRecord_ID(model.get_ID());
-                            sistecoInterfaceOut.saveEx();
-                        }
 
+                        }
+                        else{
+
+                            // Si el socio no es cliente o no esta activo al momento de crearse, no hago nada
+                            if ((!model.isCustomer()) || (!model.isActive())){
+                                return mensaje;
+                            }
+
+                            // Marca Update para Sisteco
+                            MZSistecoInterfaceOut sistecoInterfaceOut = MZSistecoInterfaceOut.getRecord(model.getCtx(), I_C_BPartner.Table_ID, model.get_ID(),
+                                                                                                        configOrg.getAD_OrgTrx_ID(), model.get_TrxName());
+                            if ((sistecoInterfaceOut != null) && (sistecoInterfaceOut.get_ID() > 0)){
+                                // Proceso segun marca que ya tenía este producto antes de su actualización.
+                                // Si marca anterior es CREATE
+                                if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                                    // No hago nada y respeto primer marca
+                                    //return mensaje;
+                                    continue;
+                                }
+                                else if (sistecoInterfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE)){
+                                    // Si marca anterior es DELETEAR, es porque el producto se inactivo anteriormente.
+                                    // Si este producto sigue estando inactivo
+                                    if (!model.isActive()){
+                                        // No hago nada y respeto primer marca.
+                                        //return mensaje;
+                                        continue;
+                                    }
+                                }
+                            }
+                            // Si no tengo marca de update, la creo ahora.
+                            if ((sistecoInterfaceOut == null) || (sistecoInterfaceOut.get_ID() <= 0)){
+                                sistecoInterfaceOut = new MZSistecoInterfaceOut(model.getCtx(), 0, model.get_TrxName());
+                                sistecoInterfaceOut.setCRUDType(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE);
+                                sistecoInterfaceOut.setAD_Table_ID(I_C_BPartner.Table_ID);
+                                sistecoInterfaceOut.setSeqNo(20);
+                                sistecoInterfaceOut.setRecord_ID(model.get_ID());
+                                sistecoInterfaceOut.setAD_OrgTrx_ID(configOrg.getAD_OrgTrx_ID());
+                                sistecoInterfaceOut.saveEx();
+                            }
+
+                        }
                     }
                 }
+
             }
         }
 

@@ -39,13 +39,15 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
      * @param ctx
      * @param adTableID
      * @param recordID
+     * @param adOrgID
      * @param trxName
      * @return
      */
-    public static MZSistecoInterfaceOut getRecord(Properties ctx, int adTableID, int recordID, String trxName){
+    public static MZSistecoInterfaceOut getRecord(Properties ctx, int adTableID, int recordID, int adOrgID, String trxName){
 
         String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + adTableID +
                 " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " =" + recordID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + " =" + adOrgID +
                 " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N'";
 
         MZSistecoInterfaceOut model = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).first();

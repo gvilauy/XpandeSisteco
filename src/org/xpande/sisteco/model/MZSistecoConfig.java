@@ -83,4 +83,18 @@ public class MZSistecoConfig extends X_Z_SistecoConfig {
     }
 
 
+    /***
+     * Obtiene y retorna lista de organizaciones asociadas a la configuracion del proveedor de POS Sisteco.
+     * Xpande. Created by Gabriel Vila on 2/13/18.
+     * @return
+     */
+    public List<MZSistecoConfigOrg> getOrganization(){
+
+        String whereClause = X_Z_SistecoConfigOrg.COLUMNNAME_Z_SistecoConfig_ID + " =" + this.get_ID();
+
+        List<MZSistecoConfigOrg> lines = new Query(getCtx(), I_Z_SistecoConfigOrg.Table_Name, whereClause, get_TrxName()).setOnlyActiveRecords(true).list();
+
+        return lines;
+    }
+
 }
