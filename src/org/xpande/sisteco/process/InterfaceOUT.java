@@ -41,7 +41,7 @@ public class InterfaceOUT extends SvrProcess {
 
         String message = this.procesadorInterfaceOut.executeInterfaceOut(this.adOrgID, 0,true, true, true);
 
-            if (message != null){
+        if (message != null){
             return "@Error@ " + message;
         }
 
