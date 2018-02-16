@@ -432,8 +432,10 @@ public class ProcesadorInterfaceOut {
 
         HashMap<Integer, Integer> hashProds = new HashMap<Integer, Integer>();
 
-
         try{
+
+            Timestamp fechaHoy = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
+
             // Obtengo y recorro lineas de interface aun no ejecutadas para productos
             List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted(adOrgID, zComunicacionPosID, processPrices);
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
@@ -456,6 +458,14 @@ public class ProcesadorInterfaceOut {
                         DB.executeUpdateEx(action, this.trxName);
                     }
                 }
+
+                // Si es marca de oferta y su vigencia no es acorde a la fecha actual, no proceso esta marca
+                if (interfaceOut.isWithOfferSO()){
+                    if ((interfaceOut.getStartDate().after(fechaHoy)) || (interfaceOut.getEndDate().before(fechaHoy))){
+                        continue;
+                    }
+                }
+
 
                 // Si la marca para este producto es de CREAR, guardo id de producto en hash para luego ver consideración o no
                 // de códigos de barras.

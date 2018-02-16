@@ -150,7 +150,16 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 }
 
                 BigDecimal priceSO = productPrice.getPriceList();
-                this.setPriceSO(priceSO); // Guardo precio de venta obtenido y que será el comunicado al POS
+
+                // Si es marca de producto en oferta, tomo directo el precio de oferta seteado aqui
+                if (this.isWithOfferSO()){
+                    if ((this.getPriceSO() == null) || (this.getPriceSO().compareTo(Env.ZERO) <= 0)){
+                        throw new AdempiereException("No se obtuvo precio de venta de OFERTA para el producto con ID : " + product.get_ID());
+                    }
+                }
+                else{
+                    this.setPriceSO(priceSO); // Guardo precio de venta obtenido y que será el comunicado al POS
+                }
 
                 String precioSisteco = "0", parteDecimalPrecio ="00";
                 BigDecimal decimalPrecioSO = priceSO.subtract(priceSO.setScale(0, RoundingMode.FLOOR)).movePointRight(priceSO.scale());
@@ -282,34 +291,18 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 MZProductoUPC productoUPC = new MZProductoUPC(getCtx(), this.getRecord_ID(), get_TrxName());
                 MProduct product = (MProduct) productoUPC.getM_Product();
 
-                // Obtengo si es que existe, la marca de CREATE del producto de esta barra
-                MZSistecoInterfaceOut interfaceOutProd = MZSistecoInterfaceOut.getRecordByCrud(getCtx(), product.Table_ID, product.get_ID(),
-                        X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE, get_TrxName());
-
-
                 // Si estoy en la opcion de no procesar cambios de precios
                 if (!processPrices){
 
                     // Debo verificar que el producto asociado a este codigo de barras, haya sido comunicado alguna vez al pos.
-
-                    // Si el producto de esta barra nunca fue comunicado al POS como Alta
-                    if ((interfaceOutProd == null) || (interfaceOutProd.get_ID() <= 0)){
-
-                        // Si el producto fue creado hace menos de un mes, entonces no comunico esta barra.
-                        Timestamp fechaHoy = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
-                        Date dateFechaAux = new Date(fechaHoy.getTime());
-                        dateFechaAux =  DateUtils.addDays(dateFechaAux, -30);
-                        Timestamp fechaTope = new Timestamp(dateFechaAux.getTime());
-
-                        if (product.getCreated().after(fechaTope)){
-                            return lineas;
-                        }
+                    if (!product.get_ValueAsBoolean("ComunicadoPOS")){
+                        return lineas;
                     }
                 }
                 else{
                     // Estoy comunicando precios
-                    // Si no tengo marca de create del producto
-                    if ((interfaceOutProd == null) || (interfaceOutProd.get_ID() <= 0)){
+                    // Si el producto no fue comunicado nunca al pos
+                    if (!product.get_ValueAsBoolean("ComunicadoPOS")){
                         // Si el producto no esta siendo comunicado en este proceso
                         if (!hashProds.containsKey(product.get_ID())){
                             // No comunico esta barra

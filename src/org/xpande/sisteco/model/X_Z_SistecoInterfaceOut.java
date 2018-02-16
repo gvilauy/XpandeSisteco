@@ -33,7 +33,7 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20171013L;
+	private static final long serialVersionUID = 20180215L;
 
     /** Standard Constructor */
     public X_Z_SistecoInterfaceOut (Properties ctx, int Z_SistecoInterfaceOut_ID, String trxName)
@@ -52,6 +52,8 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 // N
 			setRecord_ID (0);
 			setSeqNo (0);
+			setWithOfferSO (false);
+// N
 			setZ_SistecoInterfaceOut_ID (0);
         } */
     }
@@ -195,6 +197,23 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 	public String getDescription () 
 	{
 		return (String)get_Value(COLUMNNAME_Description);
+	}
+
+	/** Set End Date.
+		@param EndDate 
+		Last effective date (inclusive)
+	  */
+	public void setEndDate (Timestamp EndDate)
+	{
+		set_Value (COLUMNNAME_EndDate, EndDate);
+	}
+
+	/** Get End Date.
+		@return Last effective date (inclusive)
+	  */
+	public Timestamp getEndDate () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_EndDate);
 	}
 
 	/** Set Error Msg.
@@ -421,6 +440,47 @@ public class X_Z_SistecoInterfaceOut extends PO implements I_Z_SistecoInterfaceO
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Start Date.
+		@param StartDate 
+		First effective day (inclusive)
+	  */
+	public void setStartDate (Timestamp StartDate)
+	{
+		set_Value (COLUMNNAME_StartDate, StartDate);
+	}
+
+	/** Get Start Date.
+		@return First effective day (inclusive)
+	  */
+	public Timestamp getStartDate () 
+	{
+		return (Timestamp)get_Value(COLUMNNAME_StartDate);
+	}
+
+	/** Set WithOfferSO.
+		@param WithOfferSO 
+		Si tiene o no oferta en precio de venta en Retail
+	  */
+	public void setWithOfferSO (boolean WithOfferSO)
+	{
+		set_Value (COLUMNNAME_WithOfferSO, Boolean.valueOf(WithOfferSO));
+	}
+
+	/** Get WithOfferSO.
+		@return Si tiene o no oferta en precio de venta en Retail
+	  */
+	public boolean isWithOfferSO () 
+	{
+		Object oo = get_Value(COLUMNNAME_WithOfferSO);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set Z_ComunicacionPOS ID.

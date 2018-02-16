@@ -146,6 +146,19 @@ public interface I_Z_SistecoInterfaceOut
 	  */
 	public String getDescription();
 
+    /** Column name EndDate */
+    public static final String COLUMNNAME_EndDate = "EndDate";
+
+	/** Set End Date.
+	  * Last effective date (inclusive)
+	  */
+	public void setEndDate(Timestamp EndDate);
+
+	/** Get End Date.
+	  * Last effective date (inclusive)
+	  */
+	public Timestamp getEndDate();
+
     /** Column name ErrorMsg */
     public static final String COLUMNNAME_ErrorMsg = "ErrorMsg";
 
@@ -287,6 +300,19 @@ public interface I_Z_SistecoInterfaceOut
 	  */
 	public int getSeqNo();
 
+    /** Column name StartDate */
+    public static final String COLUMNNAME_StartDate = "StartDate";
+
+	/** Set Start Date.
+	  * First effective day (inclusive)
+	  */
+	public void setStartDate(Timestamp StartDate);
+
+	/** Get Start Date.
+	  * First effective day (inclusive)
+	  */
+	public Timestamp getStartDate();
+
     /** Column name Updated */
     public static final String COLUMNNAME_Updated = "Updated";
 
@@ -302,6 +328,19 @@ public interface I_Z_SistecoInterfaceOut
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name WithOfferSO */
+    public static final String COLUMNNAME_WithOfferSO = "WithOfferSO";
+
+	/** Set WithOfferSO.
+	  * Si tiene o no oferta en precio de venta en Retail
+	  */
+	public void setWithOfferSO(boolean WithOfferSO);
+
+	/** Get WithOfferSO.
+	  * Si tiene o no oferta en precio de venta en Retail
+	  */
+	public boolean isWithOfferSO();
 
     /** Column name Z_ComunicacionPOS_ID */
     public static final String COLUMNNAME_Z_ComunicacionPOS_ID = "Z_ComunicacionPOS_ID";
