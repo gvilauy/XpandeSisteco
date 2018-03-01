@@ -156,6 +156,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                     if ((this.getPriceSO() == null) || (this.getPriceSO().compareTo(Env.ZERO) <= 0)){
                         throw new AdempiereException("No se obtuvo precio de venta de OFERTA para el producto con ID : " + product.get_ID());
                     }
+                    priceSO = this.getPriceSO();
                 }
                 else{
                     this.setPriceSO(priceSO); // Guardo precio de venta obtenido y que será el comunicado al POS
