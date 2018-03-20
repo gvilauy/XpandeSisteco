@@ -440,13 +440,14 @@ public class ProcesadorInterfaceOut {
             List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted(adOrgID, zComunicacionPosID, processPrices);
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
 
+                MProduct product = new MProduct(this.ctx, interfaceOut.getRecord_ID(), this.trxName);
+
                 // Me aseguro que el producto tenga atributos asociados, sino se los creo ahora.
                 // Esto es momentaneo para crear los atributos de los productos migrados.
                 String sql = " select count(*) from z_productoatribsisteco where m_product_id =" + interfaceOut.getRecord_ID();
                 int contadorAtribs = DB.getSQLValue(this.trxName, sql);
                 if (contadorAtribs <= 0){
                     // Asociación de atributos que requiere Sisteco al nuevo producto
-                    MProduct product = new MProduct(this.ctx, interfaceOut.getRecord_ID(), this.trxName);
                     SistecoUtils.setProductAttributes(this.ctx, product, this.trxName);
 
                     // Obtengo y guardo valor Hexadecimal segun seteos de atributos para el producto recibido.
@@ -486,6 +487,13 @@ public class ProcesadorInterfaceOut {
 
                     this.contadorLinBatch++;
                     this.contadorLinOnline++;
+
+
+                    // Marco el producto como comunicado al POS
+                    if (interfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                        product.set_ValueOfColumn("ComunicadoPOS", true);
+                        product.saveEx();
+                    }
 
                 }
                 if (lineasArchivo.size() > 0){
