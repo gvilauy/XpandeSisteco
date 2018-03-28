@@ -14,6 +14,7 @@ public class InterfaceOUT extends SvrProcess {
 
     private ProcesadorInterfaceOut procesadorInterfaceOut = null;
     private int adOrgID = 1000000;
+    private int zComunicacionPosID = 0;
 
     @Override
     protected void prepare() {
@@ -29,6 +30,9 @@ public class InterfaceOUT extends SvrProcess {
                     if (name.trim().equalsIgnoreCase("AD_Org_ID")){
                         this.adOrgID = ((BigDecimal)para[i].getParameter()).intValueExact();
                     }
+                    else if (name.trim().equalsIgnoreCase("Z_ComunicacionPOS_ID")){
+                        this.zComunicacionPosID = ((BigDecimal)para[i].getParameter()).intValueExact();
+                    }
                 }
             }
         }
@@ -39,7 +43,15 @@ public class InterfaceOUT extends SvrProcess {
     @Override
     protected String doIt() throws Exception {
 
-        String message = this.procesadorInterfaceOut.executeInterfaceOut(this.adOrgID, 0,true, true, true);
+        String message = null;
+
+        // Si recibo ID de comunicacion al POS, entonces RE-PROCESO interface ya ejecutada anteriormente y asociada con el ID recibido de comunicacion al POS.
+        if (this.zComunicacionPosID > 0){
+            message = this.procesadorInterfaceOut.executeInterfaceOut(this.adOrgID, this.zComunicacionPosID,true, true, true, true);
+        }
+        else{
+            message = this.procesadorInterfaceOut.executeInterfaceOut(this.adOrgID, 0,true, true, true);
+        }
 
         if (message != null){
             return "@Error@ " + message;

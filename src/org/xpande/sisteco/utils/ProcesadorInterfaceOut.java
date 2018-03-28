@@ -49,6 +49,9 @@ public class ProcesadorInterfaceOut {
 
     private String fechaHoy;
 
+    // True = reprocesa una interface ya ejecutada anteriormente y asociada a un ID de comunicacion de POS.
+    private boolean reProcessByComPos = false;
+
     /***
      * Constructor
      * @param ctx
@@ -221,8 +224,17 @@ public class ProcesadorInterfaceOut {
 
         try{
 
-            // Obtengo y recorro lineas de interface aun no ejecutadas para socios de negocio
-            List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesBPartnerNotExecuted(adOrgID);
+            // Obtengo y recorro lineas de interface de socios de negocio, segun si es proceso o reproceso de interface
+            List<MZSistecoInterfaceOut> interfaceOuts = null;
+            if (!this.reProcessByComPos){
+                // Lineas de interface aun no ejecutadas
+                interfaceOuts = this.getLinesBPartnerNotExecuted(adOrgID);
+            }
+            else{
+                // Lineas de interface ya ejecutadas anteriormente y asociadas a un ID de comunicacion al POS.
+                interfaceOuts = this.getLinesBPartnerByComPos(adOrgID, zComunicacionPosID);
+            }
+
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
 
                 List<String> lineasArchivo = interfaceOut.getLineasArchivoBPartner(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), sistecoConfig);
@@ -436,8 +448,17 @@ public class ProcesadorInterfaceOut {
 
             Timestamp fechaHoy = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
 
-            // Obtengo y recorro lineas de interface aun no ejecutadas para productos
-            List<MZSistecoInterfaceOut> interfaceOuts = this.getLinesProdsNotExecuted(adOrgID, zComunicacionPosID, processPrices);
+            // Obtengo y recorro lineas de interface de productos, segun si es proceso o reproceso de interface
+            List<MZSistecoInterfaceOut> interfaceOuts = null;
+            if (!this.reProcessByComPos){
+                // Lineas de interface aun no ejecutadas
+                interfaceOuts = this.getLinesProdsNotExecuted(adOrgID, zComunicacionPosID, processPrices);
+            }
+            else{
+                // Lineas de interface ya ejecutadas anteriormente para reprocesar, asociadas a un ID de Comunicación al POS.
+                interfaceOuts = this.getLinesProdsByComPos(adOrgID, zComunicacionPosID, processPrices);
+            }
+
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
 
                 MProduct product = new MProduct(this.ctx, interfaceOut.getRecord_ID(), this.trxName);
@@ -467,7 +488,6 @@ public class ProcesadorInterfaceOut {
                     }
                 }
 
-
                 // Si la marca para este producto es de CREAR, guardo id de producto en hash para luego ver consideración o no
                 // de códigos de barras.
                 if (interfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
@@ -488,7 +508,6 @@ public class ProcesadorInterfaceOut {
                     this.contadorLinBatch++;
                     this.contadorLinOnline++;
 
-
                     // Marco el producto como comunicado al POS
                     if (interfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
                         product.set_ValueOfColumn("ComunicadoPOS", true);
@@ -507,8 +526,16 @@ public class ProcesadorInterfaceOut {
                 }
             }
 
-            // Obtengo y recorro lineas de interface aun no ejecutadas para códigos de barra de productos
-            interfaceOuts = this.getLinesUPCNotExecuted(adOrgID);
+            // Obtengo y recorro lineas de interface de productos, segun si es proceso o reproceso de interface
+            if (!this.reProcessByComPos){
+                // Lineas de interface aun no ejecutadas
+                interfaceOuts = this.getLinesUPCNotExecuted(adOrgID);
+            }
+            else{
+                // Lineas de interface ya ejecutadas anteriormente y asociadas a un ID de comunicacion de POS.
+                interfaceOuts = this.getLinesUPCByComPos(adOrgID, zComunicacionPosID);
+            }
+
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
                 List<String> lineasArchivo = interfaceOut.getLineasArchivoUPC(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), processPrices, hashProds);
                 for (String lineaArchivo: lineasArchivo){
@@ -621,6 +648,28 @@ public class ProcesadorInterfaceOut {
 
 
     /***
+     * Obtiene y retorna lineas de interface correspondientes a productos segun un determinado ID de comunicacio a POS.
+     * No importa si ya fueron ejecutadas anteriormente o no.
+     * Xpande. Created by Gabriel Vila on 3/27/18.     
+     * @param adOrgID
+     * @param zComunicacionPosID
+     * @param processPrices
+     * @return
+     */
+    private List<MZSistecoInterfaceOut> getLinesProdsByComPos(int adOrgID, int zComunicacionPosID, boolean processPrices){
+
+        String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_Z_ComunicacionPOS_ID + " =" + zComunicacionPosID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_M_Product.Table_ID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + " =" + adOrgID;
+
+        List<MZSistecoInterfaceOut> lines = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).setOrderBy(" SeqNo, Created  ").list();
+
+        return lines;
+
+    }
+    
+
+    /***
      * Obtiene y retorna lineas de interface de salida para códigos de barras no ejecutadas al momento.
      * Xpande. Created by Gabriel Vila on 7/24/17.
      * @param adOrgID
@@ -640,6 +689,25 @@ public class ProcesadorInterfaceOut {
 
 
     /***
+     * Obtiene y retorna lineas de interface de salida para codigos de barra según un determinado ID de comunicacion al POS.
+     * Xpande. Created by Gabriel Vila on 3/27/18.
+     * @param adOrgID
+     * @param zComunicacionPosID
+     * @return
+     */
+    private List<MZSistecoInterfaceOut> getLinesUPCByComPos(int adOrgID, int zComunicacionPosID){
+
+        String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_Z_ComunicacionPOS_ID + " =" + zComunicacionPosID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_Z_ProductoUPC.Table_ID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + " =" + adOrgID;
+
+        List<MZSistecoInterfaceOut> lines = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).setOrderBy(" SeqNo, Created  ").list();
+
+        return lines;
+
+    }
+
+    /***
      * Obtiene y retorna lineas de interface de salida para socios de negocio no ejecutadas al momento.
      * Xpande. Created by Gabriel Vila on 7/24/17.
      * @param adOrgID
@@ -648,6 +716,26 @@ public class ProcesadorInterfaceOut {
     private List<MZSistecoInterfaceOut> getLinesBPartnerNotExecuted(int adOrgID){
 
         String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_IsExecuted + " ='N' " +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_C_BPartner.Table_ID +
+                " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + " =" + adOrgID;
+
+        List<MZSistecoInterfaceOut> lines = new Query(ctx, I_Z_SistecoInterfaceOut.Table_Name, whereClause, trxName).setOrderBy(" SeqNo, Created  ").list();
+
+        return lines;
+
+    }
+
+
+    /***
+     * Obtiene y retorna lineas de interface para socios de negocio según ID determinado de comunicacion al pos.
+     * Xpande. Created by Gabriel Vila on 3/27/18.
+     * @param adOrgID
+     * @param zComunicacionPosID
+     * @return
+     */
+    private List<MZSistecoInterfaceOut> getLinesBPartnerByComPos(int adOrgID, int zComunicacionPosID){
+
+        String whereClause = X_Z_SistecoInterfaceOut.COLUMNNAME_Z_ComunicacionPOS_ID + " =" + zComunicacionPosID +
                 " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_Table_ID + " =" + I_C_BPartner.Table_ID +
                 " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_AD_OrgTrx_ID + " =" + adOrgID;
 
@@ -672,6 +760,26 @@ public class ProcesadorInterfaceOut {
 
         return lines;
 
+    }
+
+    /***
+     * Invoca al metodo de ejecucion de interface pero recibe parametro que indica si es un reproceso de interface ya ejecutada
+     * anteriormente y asociada a una comunicación de POS.
+     * Xpande. Created by Gabriel Vila on 3/27/18.
+     * @param adOrgID
+     * @param zComunicacionPosID
+     * @param processPrices
+     * @param processProducts
+     * @param processPartners
+     * @param reProcessByComPos
+     * @return
+     */
+    public String executeInterfaceOut(int adOrgID, int zComunicacionPosID, boolean processPrices, boolean processProducts,
+                                      boolean processPartners, boolean reProcessByComPos){
+
+        this.reProcessByComPos = reProcessByComPos;
+
+        return this.executeInterfaceOut(adOrgID, zComunicacionPosID, processPrices, processProducts, processPartners);
     }
 
 }

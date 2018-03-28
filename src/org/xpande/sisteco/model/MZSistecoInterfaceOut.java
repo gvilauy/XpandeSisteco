@@ -149,16 +149,16 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                     throw new AdempiereException("No se obtuvo precio de venta para el producto con ID : " + product.get_ID());
                 }
 
-                BigDecimal priceSO = productPrice.getPriceList();
+                BigDecimal priceSO = this.getPriceSO();
 
                 // Si es marca de producto en oferta, tomo directo el precio de oferta seteado aqui
                 if (this.isWithOfferSO()){
                     if ((this.getPriceSO() == null) || (this.getPriceSO().compareTo(Env.ZERO) <= 0)){
                         throw new AdempiereException("No se obtuvo precio de venta de OFERTA para el producto con ID : " + product.get_ID());
                     }
-                    priceSO = this.getPriceSO();
                 }
                 else{
+                    priceSO = productPrice.getPriceList();
                     this.setPriceSO(priceSO); // Guardo precio de venta obtenido y que será el comunicado al POS
                 }
 
@@ -177,7 +177,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                         }
                     }
                 }
-                precioSisteco = String.valueOf(productPrice.getPriceList().intValue()) + parteDecimalPrecio;
+                precioSisteco = String.valueOf(priceSO.intValue()) + parteDecimalPrecio;
                 lineaArchivo += precioSisteco + separadorCampos;
 
                 // Valor Hexadecimal del producto
