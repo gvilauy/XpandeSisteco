@@ -629,14 +629,18 @@ public class ProcesadorInterfaceOut {
             }
             else {
                 // Solo debo conisderar marcas de aquellos productos contenidos en el proceso de comunicacion de datos al pos.
-                whereClause += " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
+                whereClause += " AND ((" + X_Z_SistecoInterfaceOut.COLUMNNAME_Record_ID + " IN " +
                         " (select m_product_id from z_confirmacionetiquetaprod " +
                         " where WithOfferSO ='N' and z_confirmacionetiquetadoc_id in " +
                         " (select z_confirmacionetiquetadoc_id from z_confirmacionetiquetadoc " +
                         " where comunicadopos='N' and isselected='Y' and isconfirmed='Y' " +
                         " and ((DateToPos is null) or (DateToPos <='" + fechaHoy + "')) " +
                         " and z_confirmacionetiqueta_id in " +
-                        " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + "))) ";
+                        " (select z_confirmacionetiqueta_id from z_confirmacionetiqueta where z_comunicacionpos_id =" + zComunicacionPosID + ")))) ";
+
+                whereClause += " OR (((" + X_Z_SistecoInterfaceOut.COLUMNNAME_CRUDType + " ='" + X_Z_SistecoInterfaceOut.CRUDTYPE_DELETE + "') " +
+                        " OR (" + X_Z_SistecoInterfaceOut.COLUMNNAME_CRUDType + " ='" + X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE + "'" +
+                        " AND " + X_Z_SistecoInterfaceOut.COLUMNNAME_IsPriceChanged + " ='N')))) ";
             }
         }
 
