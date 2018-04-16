@@ -95,6 +95,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             // Log de productos que vinieron en la interface pero no estan definidos en Adempiere
             this.logNotMatchedProducts();
 
+            // Log de productos con diferencias de Impuestos entre Adempiere y Sisteco
+            this.logNotMatchedTaxes();
+
             // Sumarizo información cargada
             this.setTotals();
 
@@ -851,6 +854,54 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         catch (Exception e){
             throw new AdempiereException(e);
         }
+    }
+
+
+    /***
+     * Se guarda el detalle de productos con diferencias de impuestos entre Adempiere y Sisteco en esta corrida de Pazos.
+     * Xpande. Created by Gabriel Vila on 4/15/18.
+     */
+    private void logNotMatchedTaxes() {
+
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select distinct prod.m_product_id, prod.c_taxcategory_id, a.st_codigoiva " +
+                    "from z_sisteco_tk_lvta a " +
+                    "inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
+                    "inner join m_product prod on a.m_product_id = prod.m_product_id " +
+                    "inner join c_taxcategory categ on prod.c_taxcategory_id = categ.c_taxcategory_id " +
+                    "where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    "and hdr.st_estadoticket ='F'" +
+                    "and a.st_lineacancelada = 0" +
+                    "and categ.commoditycode != a.st_codigoiva ";
+
+        	pstmt = DB.prepareStatement(sql, get_TrxName());
+        	rs = pstmt.executeQuery();
+
+        	while(rs.next()){
+
+        	    MZSistecoTKTaxError tkTaxError = new MZSistecoTKTaxError(getCtx(), 0, get_TrxName());
+        	    tkTaxError.setZ_SistecoInterfacePazos_ID(this.get_ID());
+        	    tkTaxError.setC_TaxCategory_ID(rs.getInt("c_taxcategory_id"));
+        	    tkTaxError.setM_Product_ID(rs.getInt("m_product_id"));
+        	    tkTaxError.setST_CodigoIVA(rs.getString("st_codigoiva"));
+        	    tkTaxError.set_ValueOfColumn("AD_Client_ID", this.getAD_Client_ID());
+        	    tkTaxError.setAD_Org_ID(this.getAD_Org_ID());
+        	    tkTaxError.saveEx();
+        	}
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+        	rs = null; pstmt = null;
+        }
+
     }
 
 
