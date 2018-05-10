@@ -145,8 +145,13 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 MPriceListVersion priceListVersion = priceList.getPriceListVersion(null);
                 MProductPrice productPrice = MProductPrice.get(getCtx(), priceListVersion.get_ID(), product.get_ID(), get_TrxName());
 
+                // Si no tengo precio, no me preocupo por esta linea de interface, la marco como ejecutada y salgo.
                 if (productPrice == null){
-                    throw new AdempiereException("No se obtuvo precio de venta para el producto con ID : " + product.get_ID());
+                    this.setIsExecuted(true);
+                    this.setDescription("No se obtuvo precio de venta para este producto");
+                    this.saveEx();
+                    return lineas;
+                    //throw new AdempiereException("No se obtuvo precio de venta para el producto con ID : " + product.get_ID());
                 }
 
                 BigDecimal priceSO = this.getPriceSO();
