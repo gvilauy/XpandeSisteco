@@ -144,7 +144,8 @@ public class ValidatorSisteco implements ModelValidator {
                             || (model.is_ValueChanged("Name")) || (model.is_ValueChanged("EsProductoBalanza"))
                             || (model.is_ValueChanged("Z_ProductoSeccion_ID")) || (model.is_ValueChanged("Z_ProductoRubro_ID"))
                             || (model.is_ValueChanged("Z_ProductoFamilia_ID")) || (model.is_ValueChanged("Z_ProductoSubfamilia_ID"))
-                            || (model.is_ValueChanged("IsBonificable")) || (model.is_ValueChanged("IsSold"))){
+                            || (model.is_ValueChanged("IsBonificable")) || (model.is_ValueChanged("IsSold"))
+                            || (model.is_ValueChanged("IsActive"))){
 
 
                         if ((model.is_ValueChanged("IsActive")) || (model.is_ValueChanged(X_M_Product.COLUMNNAME_IsSold))){
