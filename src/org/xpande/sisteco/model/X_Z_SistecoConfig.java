@@ -30,7 +30,7 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170729L;
+	private static final long serialVersionUID = 20180914L;
 
     /** Standard Constructor */
     public X_Z_SistecoConfig (Properties ctx, int Z_SistecoConfig_ID, String trxName)
@@ -104,6 +104,40 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 		return (String)get_Value(COLUMNNAME_ArchivoBatchError);
 	}
 
+	/** Set ArchivoBatchErrorMast.
+		@param ArchivoBatchErrorMast 
+		Nombre de archivo Batch de errores de interface de salida de Sisteco para Maestro
+	  */
+	public void setArchivoBatchErrorMast (String ArchivoBatchErrorMast)
+	{
+		set_Value (COLUMNNAME_ArchivoBatchErrorMast, ArchivoBatchErrorMast);
+	}
+
+	/** Get ArchivoBatchErrorMast.
+		@return Nombre de archivo Batch de errores de interface de salida de Sisteco para Maestro
+	  */
+	public String getArchivoBatchErrorMast () 
+	{
+		return (String)get_Value(COLUMNNAME_ArchivoBatchErrorMast);
+	}
+
+	/** Set ArchivoBatchMast.
+		@param ArchivoBatchMast 
+		Nombre del archivo Batch de interface de salida de Sisteco para Maestro
+	  */
+	public void setArchivoBatchMast (String ArchivoBatchMast)
+	{
+		set_Value (COLUMNNAME_ArchivoBatchMast, ArchivoBatchMast);
+	}
+
+	/** Get ArchivoBatchMast.
+		@return Nombre del archivo Batch de interface de salida de Sisteco para Maestro
+	  */
+	public String getArchivoBatchMast () 
+	{
+		return (String)get_Value(COLUMNNAME_ArchivoBatchMast);
+	}
+
 	/** Set ArchivoCountBatch.
 		@param ArchivoCountBatch 
 		Nombre del archivo CountBatch de interface de salida de Sisteco
@@ -119,6 +153,23 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	public String getArchivoCountBatch () 
 	{
 		return (String)get_Value(COLUMNNAME_ArchivoCountBatch);
+	}
+
+	/** Set ArchivoCountBatchMast.
+		@param ArchivoCountBatchMast 
+		Nombre del archivo CountBatch de interface de salida de Sisteco para Maestro
+	  */
+	public void setArchivoCountBatchMast (String ArchivoCountBatchMast)
+	{
+		set_Value (COLUMNNAME_ArchivoCountBatchMast, ArchivoCountBatchMast);
+	}
+
+	/** Get ArchivoCountBatchMast.
+		@return Nombre del archivo CountBatch de interface de salida de Sisteco para Maestro
+	  */
+	public String getArchivoCountBatchMast () 
+	{
+		return (String)get_Value(COLUMNNAME_ArchivoCountBatchMast);
 	}
 
 	/** Set ArchivoCountOnline.
@@ -197,6 +248,23 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 		return (String)get_Value(COLUMNNAME_RutaHistoricoPazos);
 	}
 
+	/** Set RutaInterfaceMastHist.
+		@param RutaInterfaceMastHist 
+		Ruta para archivos de histórico de maestros de interface con POS Sisteco
+	  */
+	public void setRutaInterfaceMastHist (String RutaInterfaceMastHist)
+	{
+		set_Value (COLUMNNAME_RutaInterfaceMastHist, RutaInterfaceMastHist);
+	}
+
+	/** Get RutaInterfaceMastHist.
+		@return Ruta para archivos de histórico de maestros de interface con POS Sisteco
+	  */
+	public String getRutaInterfaceMastHist () 
+	{
+		return (String)get_Value(COLUMNNAME_RutaInterfaceMastHist);
+	}
+
 	/** Set RutaInterfaceOut.
 		@param RutaInterfaceOut 
 		Ruta donde se crean los archivos de interface de salida para Sisteco
@@ -260,6 +328,26 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	public String getSeparadorArchivoOut () 
 	{
 		return (String)get_Value(COLUMNNAME_SeparadorArchivoOut);
+	}
+
+	/** Set Z_PosVendor ID.
+		@param Z_PosVendor_ID Z_PosVendor ID	  */
+	public void setZ_PosVendor_ID (int Z_PosVendor_ID)
+	{
+		if (Z_PosVendor_ID < 1) 
+			set_Value (COLUMNNAME_Z_PosVendor_ID, null);
+		else 
+			set_Value (COLUMNNAME_Z_PosVendor_ID, Integer.valueOf(Z_PosVendor_ID));
+	}
+
+	/** Get Z_PosVendor ID.
+		@return Z_PosVendor ID	  */
+	public int getZ_PosVendor_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Z_PosVendor_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set Z_SistecoConfig ID.

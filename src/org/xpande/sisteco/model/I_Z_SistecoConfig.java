@@ -89,6 +89,32 @@ public interface I_Z_SistecoConfig
 	  */
 	public String getArchivoBatchError();
 
+    /** Column name ArchivoBatchErrorMast */
+    public static final String COLUMNNAME_ArchivoBatchErrorMast = "ArchivoBatchErrorMast";
+
+	/** Set ArchivoBatchErrorMast.
+	  * Nombre de archivo Batch de errores de interface de salida de Sisteco para Maestro
+	  */
+	public void setArchivoBatchErrorMast(String ArchivoBatchErrorMast);
+
+	/** Get ArchivoBatchErrorMast.
+	  * Nombre de archivo Batch de errores de interface de salida de Sisteco para Maestro
+	  */
+	public String getArchivoBatchErrorMast();
+
+    /** Column name ArchivoBatchMast */
+    public static final String COLUMNNAME_ArchivoBatchMast = "ArchivoBatchMast";
+
+	/** Set ArchivoBatchMast.
+	  * Nombre del archivo Batch de interface de salida de Sisteco para Maestro
+	  */
+	public void setArchivoBatchMast(String ArchivoBatchMast);
+
+	/** Get ArchivoBatchMast.
+	  * Nombre del archivo Batch de interface de salida de Sisteco para Maestro
+	  */
+	public String getArchivoBatchMast();
+
     /** Column name ArchivoCountBatch */
     public static final String COLUMNNAME_ArchivoCountBatch = "ArchivoCountBatch";
 
@@ -101,6 +127,19 @@ public interface I_Z_SistecoConfig
 	  * Nombre del archivo CountBatch de interface de salida de Sisteco
 	  */
 	public String getArchivoCountBatch();
+
+    /** Column name ArchivoCountBatchMast */
+    public static final String COLUMNNAME_ArchivoCountBatchMast = "ArchivoCountBatchMast";
+
+	/** Set ArchivoCountBatchMast.
+	  * Nombre del archivo CountBatch de interface de salida de Sisteco para Maestro
+	  */
+	public void setArchivoCountBatchMast(String ArchivoCountBatchMast);
+
+	/** Get ArchivoCountBatchMast.
+	  * Nombre del archivo CountBatch de interface de salida de Sisteco para Maestro
+	  */
+	public String getArchivoCountBatchMast();
 
     /** Column name ArchivoCountOnline */
     public static final String COLUMNNAME_ArchivoCountOnline = "ArchivoCountOnline";
@@ -184,6 +223,19 @@ public interface I_Z_SistecoConfig
 	/** Get RutaHistoricoPazos	  */
 	public String getRutaHistoricoPazos();
 
+    /** Column name RutaInterfaceMastHist */
+    public static final String COLUMNNAME_RutaInterfaceMastHist = "RutaInterfaceMastHist";
+
+	/** Set RutaInterfaceMastHist.
+	  * Ruta para archivos de histórico de maestros de interface con POS Sisteco
+	  */
+	public void setRutaInterfaceMastHist(String RutaInterfaceMastHist);
+
+	/** Get RutaInterfaceMastHist.
+	  * Ruta para archivos de histórico de maestros de interface con POS Sisteco
+	  */
+	public String getRutaInterfaceMastHist();
+
     /** Column name RutaInterfaceOut */
     public static final String COLUMNNAME_RutaInterfaceOut = "RutaInterfaceOut";
 
@@ -247,6 +299,15 @@ public interface I_Z_SistecoConfig
 	  * User who updated this records
 	  */
 	public int getUpdatedBy();
+
+    /** Column name Z_PosVendor_ID */
+    public static final String COLUMNNAME_Z_PosVendor_ID = "Z_PosVendor_ID";
+
+	/** Set Z_PosVendor ID	  */
+	public void setZ_PosVendor_ID(int Z_PosVendor_ID);
+
+	/** Get Z_PosVendor ID	  */
+	public int getZ_PosVendor_ID();
 
     /** Column name Z_SistecoConfig_ID */
     public static final String COLUMNNAME_Z_SistecoConfig_ID = "Z_SistecoConfig_ID";
