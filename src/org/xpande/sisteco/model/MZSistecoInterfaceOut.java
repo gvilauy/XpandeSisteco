@@ -433,8 +433,10 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                     }
                 }
 
-                if (partnerLocation.getPhone() != null){
-                    telefono = partnerLocation.getPhone().trim().replace(separadorCampos, "_");
+                if (partnerLocation != null){
+                    if (partnerLocation.getPhone() != null){
+                        telefono = partnerLocation.getPhone().trim().replace(separadorCampos, "_");
+                    }
                 }
 
                 if (partner.get_Value("EMail") != null){
