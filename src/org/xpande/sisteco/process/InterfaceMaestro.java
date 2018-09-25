@@ -205,7 +205,7 @@ public class InterfaceMaestro extends SvrProcess {
                 lineaArchivo += product.getDescription().replace(separadorCampos,"_") + separadorCampos;
                 lineaArchivo += "0" + separadorCampos; // codigo entorno no utilizado
 
-                String codigoSubfamilia = "0";
+                String codigoSubfamilia = "9999";
                 if (rs.getString("codigopos") != null){
                     codigoSubfamilia = rs.getString("codigopos").trim();
                 }
