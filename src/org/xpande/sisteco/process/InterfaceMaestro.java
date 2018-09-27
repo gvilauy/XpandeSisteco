@@ -67,7 +67,7 @@ public class InterfaceMaestro extends SvrProcess {
     @Override
     protected String doIt() throws Exception {
 
-        String message = "OK";
+        String message = null;
 
         BufferedWriter bufferedWriterBatch = null;
         BufferedWriter bufferedWriterCount = null;
@@ -155,7 +155,7 @@ public class InterfaceMaestro extends SvrProcess {
             }
         }
 
-        return message;
+        return "OK";
     }
 
 
@@ -169,7 +169,7 @@ public class InterfaceMaestro extends SvrProcess {
      */
     private String executeProducts(BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterCount, String separadorCampos) {
 
-        String message = "OK";
+        String message = null;
 
         String sql = "";
         PreparedStatement pstmt = null;
