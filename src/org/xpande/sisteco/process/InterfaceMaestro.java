@@ -22,6 +22,7 @@ import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.util.HashMap;
 
 /**
  * Product: Adempiere ERP & CRM Smart Business Solution. Localization : Uruguay - Xpande
@@ -41,6 +42,8 @@ public class InterfaceMaestro extends SvrProcess {
     private int contadorLinBatch = 0;
 
     private String fechaHoy;
+
+    private HashMap<Integer, Integer> hashProds = new HashMap<Integer, Integer>();
 
 
     @Override
@@ -176,6 +179,9 @@ public class InterfaceMaestro extends SvrProcess {
         ResultSet rs = null;
 
         try{
+
+            this.hashProds = new HashMap<Integer, Integer>();
+
             sql = " select p.m_product_id, p.z_productosubfamilia_id, sf.codigopos " +
                     " from m_product p " +
                     " left outer join z_productosubfamilia sf on p.z_productosubfamilia_id = sf.z_productosubfamilia_id " +
@@ -276,6 +282,9 @@ public class InterfaceMaestro extends SvrProcess {
 
                 this.contadorLinBatch++;
                 //this.contadorLinCount++;
+
+                this.hashProds.put(product.get_ID(), product.get_ID());
+
             }
         }
         catch (Exception e){
@@ -336,7 +345,7 @@ public class InterfaceMaestro extends SvrProcess {
         ResultSet rs = null;
 
         try{
-            sql = " select a.value as cod_art, b.value as cod_tandem " +
+            sql = " select a.m_product_id, a.value as cod_art, b.value as cod_tandem " +
                     " from m_product a " +
                     " inner join m_product b on a.m_product_tandem_id = b.m_product_id " +
                     " where a.isactive = 'Y' " +
@@ -347,20 +356,23 @@ public class InterfaceMaestro extends SvrProcess {
 
         	while(rs.next()){
 
-                String lineaArchivo = "I" + separadorCampos;
-                lineaArchivo += "TANDEM" + separadorCampos;
-                lineaArchivo += rs.getString("cod_art").trim() + separadorCampos;
-                lineaArchivo += rs.getString("cod_tandem").trim();
+                int mProductID = rs.getInt("m_product_id");
 
-                bufferedWriterBatch.append(lineaArchivo);
-                bufferedWriterCount.append(lineaArchivo);
+                if (this.hashProds.containsKey(mProductID)){
+                    String lineaArchivo = "I" + separadorCampos;
+                    lineaArchivo += "TANDEM" + separadorCampos;
+                    lineaArchivo += rs.getString("cod_art").trim() + separadorCampos;
+                    lineaArchivo += rs.getString("cod_tandem").trim();
 
-                bufferedWriterBatch.newLine();
-                bufferedWriterCount.newLine();
+                    bufferedWriterBatch.append(lineaArchivo);
+                    bufferedWriterCount.append(lineaArchivo);
 
-                this.contadorLinBatch++;
-                //this.contadorLinCount++;
+                    bufferedWriterBatch.newLine();
+                    bufferedWriterCount.newLine();
 
+                    this.contadorLinBatch++;
+                    //this.contadorLinCount++;
+                }
             }
         }
         catch (Exception e){
@@ -392,7 +404,7 @@ public class InterfaceMaestro extends SvrProcess {
         ResultSet rs = null;
 
         try{
-            sql = " select a.value, b.upc " +
+            sql = " select distinct a.m_product_id, a.value, b.upc " +
                     " from m_product a " +
                     " inner join z_productoupc b on a.m_product_id = b.m_product_id " +
                     " where a.isactive = 'Y' " +
@@ -405,20 +417,23 @@ public class InterfaceMaestro extends SvrProcess {
 
             while(rs.next()){
 
-                String lineaArchivo = "I" + separadorCampos;
-                lineaArchivo += "ARTICULOS_EQUIVALENTES" + separadorCampos;
-                lineaArchivo += rs.getString("upc").trim() + separadorCampos;
-                lineaArchivo += rs.getString("value").trim();
+                int mProductID = rs.getInt("m_product_id");
+                if (this.hashProds.containsKey(mProductID)){
 
-                bufferedWriterBatch.append(lineaArchivo);
-                bufferedWriterCount.append(lineaArchivo);
+                    String lineaArchivo = "I" + separadorCampos;
+                    lineaArchivo += "ARTICULOS_EQUIVALENTES" + separadorCampos;
+                    lineaArchivo += rs.getString("upc").trim() + separadorCampos;
+                    lineaArchivo += rs.getString("value").trim();
 
-                bufferedWriterBatch.newLine();
-                bufferedWriterCount.newLine();
+                    bufferedWriterBatch.append(lineaArchivo);
+                    bufferedWriterCount.append(lineaArchivo);
 
-                this.contadorLinBatch++;
-                //this.contadorLinCount++;
+                    bufferedWriterBatch.newLine();
+                    bufferedWriterCount.newLine();
 
+                    this.contadorLinBatch++;
+                    //this.contadorLinCount++;
+                }
             }
         }
         catch (Exception e){
