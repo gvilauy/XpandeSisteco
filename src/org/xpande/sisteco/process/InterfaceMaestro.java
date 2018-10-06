@@ -6,10 +6,12 @@ import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.compiere.util.DB;
 import org.compiere.util.Env;
+import org.compiere.util.TimeUtil;
 import org.eevolution.model.X_C_TaxGroup;
 import org.xpande.core.utils.FileUtils;
 import org.xpande.core.utils.PriceListUtils;
 import org.xpande.sisteco.model.MZSistecoConfig;
+import org.xpande.sisteco.model.MZSistecoInterfaceOut;
 import org.xpande.sisteco.model.MZSistecoRegion;
 import org.xpande.sisteco.utils.SistecoUtils;
 
@@ -180,6 +182,8 @@ public class InterfaceMaestro extends SvrProcess {
 
         try{
 
+            Timestamp fechaHoy = TimeUtil.trunc(new Timestamp(System.currentTimeMillis()), TimeUtil.TRUNC_DAY);
+
             this.hashProds = new HashMap<Integer, Integer>();
 
             sql = " select p.m_product_id, p.z_productosubfamilia_id, sf.codigopos " +
@@ -241,6 +245,19 @@ public class InterfaceMaestro extends SvrProcess {
                 }
 
                 BigDecimal priceSO = productPrice.getPriceStd();
+
+                // Verifico si en este momento no hay una oferta no comunicada al pos para este producto.
+                // Como estoy armando el archivo maestro, si esta oferta esta vigente en fechas, debo mandar este precio de venta.
+                MZSistecoInterfaceOut interfaceOut = MZSistecoInterfaceOut.getRecord(getCtx(), product.get_Table_ID(), product.get_ID(), this.adOrgID, null);
+                if ((interfaceOut != null) && (interfaceOut.get_ID() > 0)){
+                    if (interfaceOut.isWithOfferSO()){
+                        if (interfaceOut.getStartDate().before(fechaHoy)){
+                            if (interfaceOut.getEndDate().after(fechaHoy)){
+                                priceSO = interfaceOut.getPriceSO();
+                            }
+                        }
+                    }
+                }
 
                 String precioSisteco = "0", parteDecimalPrecio ="00";
                 BigDecimal decimalPrecioSO = priceSO.subtract(priceSO.setScale(0, RoundingMode.FLOOR)).movePointRight(priceSO.scale());

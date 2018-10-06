@@ -156,7 +156,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 BigDecimal priceSO = this.getPriceSO();
 
-                // Si es marca de producto en oferta, tomo directo el precio de oferta seteado aqui
+                // Si es marca de producto en oferta, tomo directo el precio de oferta seteado aq
                 if (this.isWithOfferSO()){
                     if ((this.getPriceSO() == null) || (this.getPriceSO().compareTo(Env.ZERO) <= 0)){
                         throw new AdempiereException("No se obtuvo precio de venta de OFERTA para el producto con ID : " + product.get_ID());
