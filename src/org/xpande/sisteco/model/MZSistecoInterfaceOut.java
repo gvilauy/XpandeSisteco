@@ -128,7 +128,10 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 lineaArchivo += product.getValue() + separadorCampos;
                 lineaArchivo += product.getDescription().replace(separadorCampos,"_") + separadorCampos;
                 lineaArchivo += "0" + separadorCampos; // codigo entorno no utilizado
-                lineaArchivo += "0" + separadorCampos; // codigo subfamilia no utilizado
+
+
+                //lineaArchivo += "0" + separadorCampos; // codigo subfamilia no utilizado
+                lineaArchivo += "9999" + separadorCampos; // codigo subfamilia no utilizado
 
                 // Moneda
                 String monedaSisteco = "1";  // Pesos por defecto

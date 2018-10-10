@@ -33,7 +33,8 @@ public class GeneradorProdHexa extends SvrProcess {
             sql = " select m_product_id " +
                     " from m_product " +
                     " where isactive ='Y' " +
-                    " and issold ='Y' ";
+                    " and issold ='Y' " +
+                    " and atributoshexa is null ";
 
         	pstmt = DB.prepareStatement(sql, null);
         	rs = pstmt.executeQuery();

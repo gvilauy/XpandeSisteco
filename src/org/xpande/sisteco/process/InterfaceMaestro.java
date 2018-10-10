@@ -192,15 +192,15 @@ public class InterfaceMaestro extends SvrProcess {
                     " where p.isactive ='Y' and p.issold ='Y' " +
                     " order by p.name ";
 
-        	pstmt = DB.prepareStatement(sql, get_TrxName());
+        	pstmt = DB.prepareStatement(sql, null);
         	rs = pstmt.executeQuery();
 
         	while(rs.next()){
 
-                MProduct product = new MProduct(getCtx(), rs.getInt("m_product_id"), get_TrxName());
-                MPriceList priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 142, true, get_TrxName());
+                MProduct product = new MProduct(getCtx(), rs.getInt("m_product_id"), null);
+                MPriceList priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 142, true, null);
                 if ((priceList == null) || (priceList.get_ID() <= 0)){
-                    priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 100, true, get_TrxName());
+                    priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 100, true, null);
                 }
 
                 if ((priceList == null) || (priceList.get_ID() <= 0)){
@@ -235,7 +235,7 @@ public class InterfaceMaestro extends SvrProcess {
 
                 // Precio de venta
                 MPriceListVersion priceListVersion = priceList.getPriceListVersion(null);
-                MProductPrice productPrice = MProductPrice.get(getCtx(), priceListVersion.get_ID(), product.get_ID(), get_TrxName());
+                MProductPrice productPrice = MProductPrice.get(getCtx(), priceListVersion.get_ID(), product.get_ID(), null);
 
                 // Si no tengo precio de venta, aviso y salgo
                 if (productPrice == null){
@@ -278,7 +278,7 @@ public class InterfaceMaestro extends SvrProcess {
                 lineaArchivo += precioSisteco + separadorCampos;
 
                 // Valor Hexadecimal del producto
-                String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(getCtx(), product, get_TrxName());
+                String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(getCtx(), product, null);
                 lineaArchivo += valorHexadecimal + separadorCampos;
 
                 // Unidades por pack
@@ -429,7 +429,7 @@ public class InterfaceMaestro extends SvrProcess {
                     " and b.isactive ='Y' " +
                     " order by a.value";
 
-            pstmt = DB.prepareStatement(sql, get_TrxName());
+            pstmt = DB.prepareStatement(sql, null);
             rs = pstmt.executeQuery();
 
             while(rs.next()){
