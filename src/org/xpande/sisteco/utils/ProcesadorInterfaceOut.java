@@ -143,9 +143,12 @@ public class ProcesadorInterfaceOut {
             if (this.contadorLinBatch > 0){
                 this.setBatchLines(this.contadorLinBatch);
 
-                // Copio archivo batch a path destino
+                // Copio archivo batch y  count batch, a path destino
                 File fileBatchDest = new File( pathArchivosDestino + sistecoConfig.getArchivoBatch());
                 FileUtils.copyFile(this.fileBatch, fileBatchDest);
+
+                File fileCountBatchDest = new File( pathArchivosDestino + sistecoConfig.getArchivoCountBatch());
+                FileUtils.copyFile(this.fileCountBatch, fileCountBatchDest);
 
             }
 
