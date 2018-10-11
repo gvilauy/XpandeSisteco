@@ -444,6 +444,7 @@ public class ProcesadorInterfaceOut {
     private String executeInterfaceOutProducts(int adOrgID, int zComunicacionPosID, boolean processPrices, BufferedWriter bufferedWriterBatch, BufferedWriter bufferedWriterOnline) {
 
         String message = null;
+        String action = "";
 
         HashMap<Integer, Integer> hashProds = new HashMap<Integer, Integer>();
 
@@ -462,7 +463,11 @@ public class ProcesadorInterfaceOut {
                 interfaceOuts = this.getLinesProdsByComPos(adOrgID, zComunicacionPosID, processPrices);
             }
 
+            int contador = 0;
             for (MZSistecoInterfaceOut interfaceOut: interfaceOuts){
+
+                contador++;
+                System.out.println(contador + " - " + interfaceOuts.size());
 
                 MProduct product = new MProduct(this.ctx, interfaceOut.getRecord_ID(), this.trxName);
 
@@ -478,8 +483,8 @@ public class ProcesadorInterfaceOut {
                     // Solo si el producto tiene unidad de medida o tandem asociado.
                     if ((product.getC_UOM_ID() > 0) || (product.get_ValueAsInt("M_Product_Tandem_ID") > 0)){
                         String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(this.ctx, product, this.trxName);
-                        String action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
-                                " where m_product_id =" + product.get_ID();
+                        action = " update m_product set atributoshexa ='" + valorHexadecimal + "' " +
+                                 " where m_product_id =" + product.get_ID();
                         DB.executeUpdateEx(action, this.trxName);
                     }
                 }
@@ -499,7 +504,7 @@ public class ProcesadorInterfaceOut {
                     }
                 }
 
-                List<String> lineasArchivo = interfaceOut.getLineasArchivoProducto(adOrgID, this.sistecoConfig.getSeparadorArchivoOut());
+                List<String> lineasArchivo = interfaceOut.getLineasArchivoProducto(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), product);
                 for (String lineaArchivo: lineasArchivo){
 
                     bufferedWriterBatch.append(lineaArchivo);
@@ -513,8 +518,10 @@ public class ProcesadorInterfaceOut {
 
                     // Marco el producto como comunicado al POS
                     if (interfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                        product.set_ValueOfColumn("ComunicadoPOS", true);
-                        product.saveEx();
+                        //product.set_ValueOfColumn("ComunicadoPOS", true);
+                        //product.saveEx();
+                        action = " update m_product set ComunicadoPOS ='Y' where m_product_id =" + product.get_ID();
+                        DB.executeUpdateEx(action, this.trxName);
                     }
 
                 }

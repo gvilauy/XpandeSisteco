@@ -83,9 +83,10 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
      * Obtiene y retorna lineas para archivos de interface de salida con información de producto, a partir de la información de este modelo.
      * @param adOrgID
      * @param separadorCampos
+     * @param product
      * @return
      */
-    public List<String> getLineasArchivoProducto(int adOrgID, String separadorCampos) {
+    public List<String> getLineasArchivoProducto(int adOrgID, String separadorCampos, MProduct product) {
 
         List<String> lineas = new ArrayList<String>();
 
@@ -95,7 +96,10 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 return lineas;
             }
 
-            MProduct product = new MProduct(getCtx(), this.getRecord_ID(), get_TrxName());
+            if (product == null){
+                product = new MProduct(getCtx(), this.getRecord_ID(), get_TrxName());
+            }
+
             MPriceList priceList = null;
             if (this.getM_PriceList_ID() > 0){
                 priceList = (MPriceList)this.getM_PriceList();
@@ -189,7 +193,8 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 lineaArchivo += precioSisteco + separadorCampos;
 
                 // Valor Hexadecimal del producto
-                String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(getCtx(), product, get_TrxName());
+                //String valorHexadecimal = SistecoUtils.getHexadecimalAtributos(getCtx(), product, get_TrxName());
+                String valorHexadecimal = product.get_ValueAsString("AtributosHexa");
                 lineaArchivo += valorHexadecimal + separadorCampos;
 
                 // Unidades por pack
