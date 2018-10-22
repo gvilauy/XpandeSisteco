@@ -3,10 +3,12 @@ package org.xpande.sisteco.process;
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
 import org.xpande.sisteco.model.MZSistecoConfig;
+import org.xpande.sisteco.model.MZSistecoConfigOrg;
 import org.xpande.sisteco.model.MZSistecoInterfacePazos;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * Proceso para lectura del archivo pazos de sisteco. Lanzado automaticamente por Schedule del sistema.
@@ -16,6 +18,7 @@ import java.sql.Timestamp;
 public class InterfacePazosAgenda extends SvrProcess{
 
     private Timestamp fechaProceso = null;
+    private int adOrgID = 0;
 
     @Override
     protected void prepare() {
@@ -31,6 +34,9 @@ public class InterfacePazosAgenda extends SvrProcess{
                     if (name.trim().equalsIgnoreCase("DateTrx")){
                         this.fechaProceso = (Timestamp) para[i].getParameter();
                     }
+                    else if (name.trim().equalsIgnoreCase("AD_Org_ID")){
+                        this.adOrgID = ((BigDecimal)para[i].getParameter()).intValueExact();
+                    }
                 }
             }
         }
@@ -42,19 +48,23 @@ public class InterfacePazosAgenda extends SvrProcess{
 
         MZSistecoConfig sistecoConfig = MZSistecoConfig.getDefault(getCtx(), null);
 
-        MZSistecoInterfacePazos interfacePazos = new MZSistecoInterfacePazos(getCtx(), 0, get_TrxName());
-        interfacePazos.set_ValueOfColumn("AD_Client_ID", sistecoConfig.getAD_Client_ID());
-        interfacePazos.setAD_Org_ID(sistecoConfig.getAD_Org_ID());
-        interfacePazos.saveEx();
+        // Si indico organización, proceso solo para esta, sino proceso para todas las que tenga asociadas a SISTECO
+        List<MZSistecoConfigOrg> orgList = sistecoConfig.getOrganizationsByOrg(this.adOrgID);
 
-        String message = interfacePazos.execute(true, this.fechaProceso);
+        for (MZSistecoConfigOrg configOrg: orgList){
+            MZSistecoInterfacePazos interfacePazos = new MZSistecoInterfacePazos(getCtx(), 0, get_TrxName());
+            interfacePazos.set_ValueOfColumn("AD_Client_ID", sistecoConfig.getAD_Client_ID());
+            interfacePazos.setAD_Org_ID(configOrg.getAD_OrgTrx_ID());
+            interfacePazos.saveEx();
 
-        if (message != null){
-            return "@Error@ " + message;
+            String message = interfacePazos.execute(true, this.fechaProceso);
+
+            if (message != null){
+                return "@Error@ " + message;
+            }
         }
 
         return "OK";
-
     }
 
 }
