@@ -470,6 +470,9 @@ public class ProcesadorInterfaceOut {
                 System.out.println(contador + " - " + interfaceOuts.size());
 
                 MProduct product = new MProduct(this.ctx, interfaceOut.getRecord_ID(), this.trxName);
+                if ((product == null) || (product.get_ID() <= 0)){
+                    continue;
+                }
 
                 // Me aseguro que el producto tenga atributos asociados, sino se los creo ahora.
                 // Esto es momentaneo para crear los atributos de los productos migrados.
