@@ -202,9 +202,17 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 // Unidad de medida
                 String unidadSisteco = "1";
+                MUOM unidadMedida = (MUOM) product.getC_UOM();
+                if (unidadMedida.getUOMSymbol().equalsIgnoreCase("Kg")){
+                    unidadSisteco = "2";
+                }
+
+                /*
                 if (product.get_ValueAsBoolean("EsProductoBalanza")){
                     unidadSisteco = "2";
                 }
+                */
+
                 lineaArchivo += unidadSisteco;
 
                 lineas.add(lineaArchivo);
@@ -394,13 +402,22 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 String lineaArchivo = "";
 
-                // Por ahora tanto el crear como el actualizar clientes, tiene como operacion A
+                // I : crear cliente, U : actualizar cliente.
+                if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
+                    lineaArchivo ="I" + separadorCampos;
+                }
+                else{
+                    lineaArchivo ="U" + separadorCampos;
+                }
+
+                /*
                 if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
                     lineaArchivo ="A" + separadorCampos;
                 }
                 else{
                     lineaArchivo ="A" + separadorCampos;
                 }
+                */
 
                 lineaArchivo += "CLIENTES" + separadorCampos;
 
