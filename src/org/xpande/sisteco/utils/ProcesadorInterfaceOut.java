@@ -502,8 +502,8 @@ public class ProcesadorInterfaceOut {
                 // Si la marca para este producto es de CREAR, guardo id de producto en hash para luego ver consideración o no
                 // de códigos de barras.
                 if (interfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                    if (!hashProds.containsKey(interfaceOut.getRecord_ID())){
-                        hashProds.put(interfaceOut.getRecord_ID(), interfaceOut.getRecord_ID());
+                    if (!hashProds.containsKey(product.get_ID())){
+                        hashProds.put(product.get_ID(), product.get_ID());
                     }
                 }
 
