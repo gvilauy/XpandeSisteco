@@ -9,10 +9,7 @@ import org.compiere.util.DB;
 import org.compiere.util.TimeUtil;
 import org.xpande.core.model.I_Z_ProductoUPC;
 import org.xpande.core.utils.FileUtils;
-import org.xpande.sisteco.model.I_Z_SistecoInterfaceOut;
-import org.xpande.sisteco.model.MZSistecoConfig;
-import org.xpande.sisteco.model.MZSistecoInterfaceOut;
-import org.xpande.sisteco.model.X_Z_SistecoInterfaceOut;
+import org.xpande.sisteco.model.*;
 import sun.misc.resources.Messages_pt_BR;
 
 import java.io.*;
@@ -519,16 +516,18 @@ public class ProcesadorInterfaceOut {
                     this.contadorLinBatch++;
                     this.contadorLinOnline++;
 
+                    /*
                     // Marco el producto como comunicado al POS
                     if (interfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                        //product.set_ValueOfColumn("ComunicadoPOS", true);
-                        //product.saveEx();
                         action = " update m_product set ComunicadoPOS ='Y' where m_product_id =" + product.get_ID();
                         DB.executeUpdateEx(action, this.trxName);
                     }
-
+                    */
                 }
+
+                // Si procese lineas para este producto.
                 if (lineasArchivo.size() > 0){
+
                     // Marco linea como ejecutada
                     interfaceOut.setIsExecuted(true);
                     interfaceOut.setDateExecuted(new Timestamp(System.currentTimeMillis()));
@@ -536,6 +535,23 @@ public class ProcesadorInterfaceOut {
                         interfaceOut.setZ_ComunicacionPOS_ID(zComunicacionPosID);
                     }
                     interfaceOut.saveEx();
+
+                    // Guardo auditoria de Comunicacion para organización - producto.
+                    MZSistecoProdOrgCom sistecoProdOrgCom = new MZSistecoProdOrgCom(this.ctx, 0, this.trxName);
+                    sistecoProdOrgCom.setAD_OrgTrx_ID(adOrgID);
+                    sistecoProdOrgCom.setCRUDType(interfaceOut.getCRUDType());
+                    sistecoProdOrgCom.setDateDoc(new Timestamp(System.currentTimeMillis()));
+                    if (this.fileBatch != null){
+                        sistecoProdOrgCom.setFileName(this.fileBatch.getName());
+                    }
+                    sistecoProdOrgCom.setM_Product_ID(product.get_ID());
+                    sistecoProdOrgCom.setPriceSO(interfaceOut.getPriceSO());
+
+                    if (zComunicacionPosID > 0){
+                        sistecoProdOrgCom.setZ_ComunicacionPOS_ID(zComunicacionPosID);
+                    }
+                    sistecoProdOrgCom.setZ_SistecoInterfaceOut_ID(interfaceOut.get_ID());
+                    sistecoProdOrgCom.saveEx();
                 }
             }
 

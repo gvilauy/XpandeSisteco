@@ -111,8 +111,6 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 }
             }
 
-            boolean creaProducto = false;
-
             // Si es marca de create
             if ((this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE))
                     || (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_UPDATE))){
@@ -121,7 +119,6 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
                     lineaArchivo ="I" + separadorCampos;
-                    creaProducto = true;
                 }
                 else{
                     lineaArchivo ="U" + separadorCampos;
@@ -246,11 +243,6 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                         }
                     }
 
-                    // Mardo producto com comunicado pos si es la primera vez que se comunica
-                    if (creaProducto){
-                        String action = " update m_product set comunicadopos ='Y' where m_product_id =" + product.get_ID();
-                        DB.executeUpdateEx(action, get_TrxName());
-                    }
                 }
                 else if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
 
@@ -313,18 +305,20 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 MZProductoUPC productoUPC = new MZProductoUPC(getCtx(), this.getRecord_ID(), get_TrxName());
                 MProduct product = (MProduct) productoUPC.getM_Product();
 
+                boolean comunicadoPOS = MZSistecoProdOrgCom.isComunicadoPOS(getCtx(), product.get_ID(), adOrgID, get_TrxName());
+
                 // Si estoy en la opcion de no procesar cambios de precios
                 if (!processPrices){
 
                     // Debo verificar que el producto asociado a este codigo de barras, haya sido comunicado alguna vez al pos.
-                    if (!product.get_ValueAsBoolean("ComunicadoPOS")){
+                    if (!comunicadoPOS){
                         return lineas;
                     }
                 }
                 else{
                     // Estoy comunicando precios
                     // Si el producto no fue comunicado nunca al pos
-                    if (!product.get_ValueAsBoolean("ComunicadoPOS")){
+                    if (!comunicadoPOS){
                         // Si el producto no esta siendo comunicado en este proceso
                         if (!hashProds.containsKey(product.get_ID())){
                             // No comunico esta barra
