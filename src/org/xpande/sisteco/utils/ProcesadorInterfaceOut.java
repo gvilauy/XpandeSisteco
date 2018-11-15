@@ -107,11 +107,18 @@ public class ProcesadorInterfaceOut {
             this.createFiles();
 
             // IO
-            FileWriter fileWriterBatch = new FileWriter(this.fileBatch, true);
-            FileWriter fileWriterOnline = new FileWriter(this.fileOnline, true);
+            FileWriter fileWriterBatch = null;
+            FileWriter fileWriterOnline = null;
 
-            bufferedWriterBatch = new BufferedWriter(fileWriterBatch);
-            bufferedWriterOnline = new BufferedWriter(fileWriterOnline);
+            if (this.sistecoConfig.isCreateBatchFile()){
+                fileWriterBatch = new FileWriter(this.fileBatch, true);
+                bufferedWriterBatch = new BufferedWriter(fileWriterBatch);
+            }
+
+            if (this.sistecoConfig.isCreateOnlineFile()){
+                fileWriterOnline = new FileWriter(this.fileOnline, true);
+                bufferedWriterOnline = new BufferedWriter(fileWriterOnline);
+            }
 
 
             // Proceso lineas de interface de salida correspondiente a productos
@@ -136,22 +143,34 @@ public class ProcesadorInterfaceOut {
 
             String pathArchivosDestino = sistecoConfig.getRutaInterfaceOut() + File.separator;
 
-            // Si tengo lineas en archivos batch
-            if (this.contadorLinBatch > 0){
-                this.setBatchLines(this.contadorLinBatch);
+            if (this.sistecoConfig.isCreateBatchFile()){
+                // Si tengo lineas en archivos batch
+                if (this.contadorLinBatch > 0){
+                    this.setBatchLines(this.contadorLinBatch);
 
-                // Copio archivo batch y  count batch, a path destino
-                File fileBatchDest = new File( pathArchivosDestino + sistecoConfig.getArchivoBatch());
-                FileUtils.copyFile(this.fileBatch, fileBatchDest);
+                    // Copio archivo batch y  count batch, a path destino
+                    File fileBatchDest = new File( pathArchivosDestino + sistecoConfig.getArchivoBatch());
+                    FileUtils.copyFile(this.fileBatch, fileBatchDest);
 
-                File fileCountBatchDest = new File( pathArchivosDestino + sistecoConfig.getArchivoCountBatch());
-                FileUtils.copyFile(this.fileCountBatch, fileCountBatchDest);
+                    File fileCountBatchDest = new File( pathArchivosDestino + sistecoConfig.getArchivoCountBatch());
+                    FileUtils.copyFile(this.fileCountBatch, fileCountBatchDest);
 
+                }
             }
 
-            // Si tengo lineas en archivos online
-            if (this.contadorLinOnline > 0){
-                this.setOnlineLines(this.contadorLinOnline);
+            if (this.sistecoConfig.isCreateOnlineFile()){
+                // Si tengo lineas en archivos online
+                if (this.contadorLinOnline > 0){
+                    this.setOnlineLines(this.contadorLinOnline);
+
+                    // Copio archivo online y count online, a path destino
+                    File fileOnlineDest = new File( pathArchivosDestino + sistecoConfig.getArchivoOnline());
+                    FileUtils.copyFile(this.fileOnline, fileOnlineDest);
+
+                    File fileCountOnlineDest = new File( pathArchivosDestino + sistecoConfig.getArchivoCountOnline());
+                    FileUtils.copyFile(this.fileCountOnline, fileCountOnlineDest);
+                }
+
             }
 
         }
@@ -240,14 +259,17 @@ public class ProcesadorInterfaceOut {
                 List<String> lineasArchivo = interfaceOut.getLineasArchivoBPartner(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), sistecoConfig);
                 for (String lineaArchivo: lineasArchivo){
 
-                    bufferedWriterBatch.append(lineaArchivo);
-                    bufferedWriterOnline.append(lineaArchivo);
+                    if (this.sistecoConfig.isCreateBatchFile()){
+                        bufferedWriterBatch.append(lineaArchivo);
+                        bufferedWriterBatch.newLine();
+                        this.contadorLinBatch++;
+                    }
 
-                    bufferedWriterBatch.newLine();
-                    bufferedWriterOnline.newLine();
-
-                    this.contadorLinBatch++;
-                    this.contadorLinOnline++;
+                    if (this.sistecoConfig.isCreateOnlineFile()){
+                        bufferedWriterOnline.append(lineaArchivo);
+                        bufferedWriterOnline.newLine();
+                        this.contadorLinOnline++;
+                    }
 
                 }
                 if (lineasArchivo.size() > 0){
@@ -507,22 +529,20 @@ public class ProcesadorInterfaceOut {
                 List<String> lineasArchivo = interfaceOut.getLineasArchivoProducto(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), product);
                 for (String lineaArchivo: lineasArchivo){
 
-                    bufferedWriterBatch.append(lineaArchivo);
-                    bufferedWriterOnline.append(lineaArchivo);
-
-                    bufferedWriterBatch.newLine();
-                    bufferedWriterOnline.newLine();
-
-                    this.contadorLinBatch++;
-                    this.contadorLinOnline++;
-
-                    /*
-                    // Marco el producto como comunicado al POS
-                    if (interfaceOut.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                        action = " update m_product set ComunicadoPOS ='Y' where m_product_id =" + product.get_ID();
-                        DB.executeUpdateEx(action, this.trxName);
+                    if (this.sistecoConfig.isCreateBatchFile()){
+                        if (!this.sistecoConfig.isBatchOnlyPartner()){
+                            bufferedWriterBatch.append(lineaArchivo);
+                            bufferedWriterBatch.newLine();
+                            this.contadorLinBatch++;
+                        }
                     }
-                    */
+
+                    if (this.sistecoConfig.isCreateOnlineFile()){
+                        bufferedWriterOnline.append(lineaArchivo);
+                        bufferedWriterOnline.newLine();
+                        this.contadorLinOnline++;
+                    }
+
                 }
 
                 // Si procese lineas para este producto.
@@ -541,8 +561,13 @@ public class ProcesadorInterfaceOut {
                     sistecoProdOrgCom.setAD_OrgTrx_ID(adOrgID);
                     sistecoProdOrgCom.setCRUDType(interfaceOut.getCRUDType());
                     sistecoProdOrgCom.setDateDoc(new Timestamp(System.currentTimeMillis()));
-                    if (this.fileBatch != null){
-                        sistecoProdOrgCom.setFileName(this.fileBatch.getName());
+                    if (this.fileOnline != null){
+                        sistecoProdOrgCom.setFileName(this.fileOnline.getName());
+                    }
+                    else{
+                        if (this.fileBatch != null){
+                            sistecoProdOrgCom.setFileName(this.fileBatch.getName());
+                        }
                     }
                     sistecoProdOrgCom.setM_Product_ID(product.get_ID());
                     sistecoProdOrgCom.setPriceSO(interfaceOut.getPriceSO());
@@ -569,14 +594,19 @@ public class ProcesadorInterfaceOut {
                 List<String> lineasArchivo = interfaceOut.getLineasArchivoUPC(adOrgID, this.sistecoConfig.getSeparadorArchivoOut(), processPrices, hashProds);
                 for (String lineaArchivo: lineasArchivo){
 
-                    bufferedWriterBatch.append(lineaArchivo);
-                    bufferedWriterOnline.append(lineaArchivo);
+                    if (this.sistecoConfig.isCreateBatchFile()){
+                        if (!this.sistecoConfig.isBatchOnlyPartner()){
+                            bufferedWriterBatch.append(lineaArchivo);
+                            bufferedWriterBatch.newLine();
+                            this.contadorLinBatch++;
+                        }
+                    }
 
-                    bufferedWriterBatch.newLine();
-                    bufferedWriterOnline.newLine();
-
-                    this.contadorLinBatch++;
-                    this.contadorLinOnline++;
+                    if (this.sistecoConfig.isCreateOnlineFile()){
+                        bufferedWriterOnline.append(lineaArchivo);
+                        bufferedWriterOnline.newLine();
+                        this.contadorLinOnline++;
+                    }
 
                 }
                 if (lineasArchivo.size() > 0){
@@ -613,10 +643,15 @@ public class ProcesadorInterfaceOut {
 
             String pathArchivos = sistecoConfig.getRutaInterfaceOutHist() + File.separator + this.fechaHoy;
 
-            fileBatch = new File( pathArchivos + sistecoConfig.getArchivoBatch());
-            fileOnline = new File( pathArchivos + sistecoConfig.getArchivoOnline());
-            fileCountBatch = new File( pathArchivos + sistecoConfig.getArchivoCountBatch());
-            fileCountOnline = new File( pathArchivos + sistecoConfig.getArchivoCountOnline());
+            if (this.sistecoConfig.isCreateBatchFile()){
+                fileBatch = new File( pathArchivos + sistecoConfig.getArchivoBatch());
+                fileCountBatch = new File( pathArchivos + sistecoConfig.getArchivoCountBatch());
+            }
+
+            if (this.sistecoConfig.isCreateOnlineFile()){
+                fileOnline = new File( pathArchivos + sistecoConfig.getArchivoOnline());
+                fileCountOnline = new File( pathArchivos + sistecoConfig.getArchivoCountOnline());
+            }
 
             fileBatchError = new File(sistecoConfig.getRutaInterfaceOutHist() + File.separator + "ArchDeErrores" + File.separator +
                     this.fechaHoy + sistecoConfig.getArchivoBatchError());

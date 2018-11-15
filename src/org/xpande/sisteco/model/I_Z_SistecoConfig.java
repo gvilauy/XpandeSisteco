@@ -167,6 +167,32 @@ public interface I_Z_SistecoConfig
 	  */
 	public String getArchivoOnline();
 
+    /** Column name BatchOnlyPartner */
+    public static final String COLUMNNAME_BatchOnlyPartner = "BatchOnlyPartner";
+
+	/** Set BatchOnlyPartner.
+	  * Si solo se guardan socios de negocio en archivos bath de interface con Sisteco
+	  */
+	public void setBatchOnlyPartner(boolean BatchOnlyPartner);
+
+	/** Get BatchOnlyPartner.
+	  * Si solo se guardan socios de negocio en archivos bath de interface con Sisteco
+	  */
+	public boolean isBatchOnlyPartner();
+
+    /** Column name CreateBatchFile */
+    public static final String COLUMNNAME_CreateBatchFile = "CreateBatchFile";
+
+	/** Set CreateBatchFile.
+	  * Si se debe crear o no archivos batch en interface con Sisteco
+	  */
+	public void setCreateBatchFile(boolean CreateBatchFile);
+
+	/** Get CreateBatchFile.
+	  * Si se debe crear o no archivos batch en interface con Sisteco
+	  */
+	public boolean isCreateBatchFile();
+
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
 
@@ -182,6 +208,19 @@ public interface I_Z_SistecoConfig
 	  * User who created this records
 	  */
 	public int getCreatedBy();
+
+    /** Column name CreateOnlineFile */
+    public static final String COLUMNNAME_CreateOnlineFile = "CreateOnlineFile";
+
+	/** Set CreateOnlineFile.
+	  * Si se debe crear o no archivos online en interface con Sisteco
+	  */
+	public void setCreateOnlineFile(boolean CreateOnlineFile);
+
+	/** Get CreateOnlineFile.
+	  * Si se debe crear o no archivos online en interface con Sisteco
+	  */
+	public boolean isCreateOnlineFile();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";

@@ -30,7 +30,7 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20180914L;
+	private static final long serialVersionUID = 20181115L;
 
     /** Standard Constructor */
     public X_Z_SistecoConfig (Properties ctx, int Z_SistecoConfig_ID, String trxName)
@@ -38,6 +38,12 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
       super (ctx, Z_SistecoConfig_ID, trxName);
       /** if (Z_SistecoConfig_ID == 0)
         {
+			setBatchOnlyPartner (false);
+// N
+			setCreateBatchFile (true);
+// Y
+			setCreateOnlineFile (true);
+// Y
 			setZ_SistecoConfig_ID (0);
         } */
     }
@@ -204,6 +210,78 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	public String getArchivoOnline () 
 	{
 		return (String)get_Value(COLUMNNAME_ArchivoOnline);
+	}
+
+	/** Set BatchOnlyPartner.
+		@param BatchOnlyPartner 
+		Si solo se guardan socios de negocio en archivos bath de interface con Sisteco
+	  */
+	public void setBatchOnlyPartner (boolean BatchOnlyPartner)
+	{
+		set_Value (COLUMNNAME_BatchOnlyPartner, Boolean.valueOf(BatchOnlyPartner));
+	}
+
+	/** Get BatchOnlyPartner.
+		@return Si solo se guardan socios de negocio en archivos bath de interface con Sisteco
+	  */
+	public boolean isBatchOnlyPartner () 
+	{
+		Object oo = get_Value(COLUMNNAME_BatchOnlyPartner);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set CreateBatchFile.
+		@param CreateBatchFile 
+		Si se debe crear o no archivos batch en interface con Sisteco
+	  */
+	public void setCreateBatchFile (boolean CreateBatchFile)
+	{
+		set_Value (COLUMNNAME_CreateBatchFile, Boolean.valueOf(CreateBatchFile));
+	}
+
+	/** Get CreateBatchFile.
+		@return Si se debe crear o no archivos batch en interface con Sisteco
+	  */
+	public boolean isCreateBatchFile () 
+	{
+		Object oo = get_Value(COLUMNNAME_CreateBatchFile);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set CreateOnlineFile.
+		@param CreateOnlineFile 
+		Si se debe crear o no archivos online en interface con Sisteco
+	  */
+	public void setCreateOnlineFile (boolean CreateOnlineFile)
+	{
+		set_Value (COLUMNNAME_CreateOnlineFile, Boolean.valueOf(CreateOnlineFile));
+	}
+
+	/** Get CreateOnlineFile.
+		@return Si se debe crear o no archivos online en interface con Sisteco
+	  */
+	public boolean isCreateOnlineFile () 
+	{
+		Object oo = get_Value(COLUMNNAME_CreateOnlineFile);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set PrefijoArchivoPazos.
