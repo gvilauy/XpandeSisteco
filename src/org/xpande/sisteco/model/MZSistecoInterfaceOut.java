@@ -398,18 +398,18 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 // I : crear cliente, U : actualizar cliente.
                 if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                    lineaArchivo ="I" + separadorCampos;
+                    lineaArchivo ="A" + separadorCampos;
                 }
                 else{
-                    lineaArchivo ="U" + separadorCampos;
+                    lineaArchivo ="A" + separadorCampos;
                 }
 
                 /*
                 if (this.getCRUDType().equalsIgnoreCase(X_Z_SistecoInterfaceOut.CRUDTYPE_CREATE)){
-                    lineaArchivo ="A" + separadorCampos;
+                    lineaArchivo ="I" + separadorCampos;
                 }
                 else{
-                    lineaArchivo ="A" + separadorCampos;
+                    lineaArchivo ="U" + separadorCampos;
                 }
                 */
 
