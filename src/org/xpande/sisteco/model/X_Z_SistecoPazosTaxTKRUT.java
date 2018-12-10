@@ -33,7 +33,7 @@ public class X_Z_SistecoPazosTaxTKRUT extends PO implements I_Z_SistecoPazosTaxT
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170819L;
+	private static final long serialVersionUID = 20181210L;
 
     /** Standard Constructor */
     public X_Z_SistecoPazosTaxTKRUT (Properties ctx, int Z_SistecoPazosTaxTKRUT_ID, String trxName)
@@ -258,6 +258,31 @@ public class X_Z_SistecoPazosTaxTKRUT extends PO implements I_Z_SistecoPazosTaxT
 	public int getZ_SistecoPazosTaxTKRUT_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_Z_SistecoPazosTaxTKRUT_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_Z_Sisteco_TK_CVta getZ_Sisteco_TK_CVta() throws RuntimeException
+    {
+		return (I_Z_Sisteco_TK_CVta)MTable.get(getCtx(), I_Z_Sisteco_TK_CVta.Table_Name)
+			.getPO(getZ_Sisteco_TK_CVta_ID(), get_TrxName());	}
+
+	/** Set Z_Sisteco_TK_CVta ID.
+		@param Z_Sisteco_TK_CVta_ID Z_Sisteco_TK_CVta ID	  */
+	public void setZ_Sisteco_TK_CVta_ID (int Z_Sisteco_TK_CVta_ID)
+	{
+		if (Z_Sisteco_TK_CVta_ID < 1) 
+			set_Value (COLUMNNAME_Z_Sisteco_TK_CVta_ID, null);
+		else 
+			set_Value (COLUMNNAME_Z_Sisteco_TK_CVta_ID, Integer.valueOf(Z_Sisteco_TK_CVta_ID));
+	}
+
+	/** Get Z_Sisteco_TK_CVta ID.
+		@return Z_Sisteco_TK_CVta ID	  */
+	public int getZ_Sisteco_TK_CVta_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_Z_Sisteco_TK_CVta_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

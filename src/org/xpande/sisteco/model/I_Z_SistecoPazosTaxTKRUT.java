@@ -221,4 +221,15 @@ public interface I_Z_SistecoPazosTaxTKRUT
 
 	/** Get Z_SistecoPazosTaxTKRUT ID	  */
 	public int getZ_SistecoPazosTaxTKRUT_ID();
+
+    /** Column name Z_Sisteco_TK_CVta_ID */
+    public static final String COLUMNNAME_Z_Sisteco_TK_CVta_ID = "Z_Sisteco_TK_CVta_ID";
+
+	/** Set Z_Sisteco_TK_CVta ID	  */
+	public void setZ_Sisteco_TK_CVta_ID(int Z_Sisteco_TK_CVta_ID);
+
+	/** Get Z_Sisteco_TK_CVta ID	  */
+	public int getZ_Sisteco_TK_CVta_ID();
+
+	public I_Z_Sisteco_TK_CVta getZ_Sisteco_TK_CVta() throws RuntimeException;
 }
