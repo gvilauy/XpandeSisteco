@@ -391,7 +391,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
             while(rs.next()){
                 MZSistecoPazosTaxTKRUT taxTKRUT = new MZSistecoPazosTaxTKRUT(getCtx(), 0, get_TrxName());
-                taxTKRUT.setAD_Org_ID(this.sistecoConfig.getAD_Org_ID());
+                taxTKRUT.setAD_Org_ID(this.getAD_Org_ID());
                 taxTKRUT.set_ValueOfColumn("AD_Client_ID", this.sistecoConfig.getAD_Client_ID());
                 taxTKRUT.setZ_SistecoInterfacePazos_ID(this.get_ID());
                 taxTKRUT.setAmtSubtotal(rs.getBigDecimal("amtsubtotal"));
