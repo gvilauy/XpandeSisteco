@@ -89,6 +89,7 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
     public List<String> getLineasArchivoProducto(int adOrgID, String separadorCampos, MProduct product) {
 
         List<String> lineas = new ArrayList<String>();
+        String sql = "";
 
         try{
 
@@ -142,8 +143,24 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
                 lineaArchivo += monedaSisteco + separadorCampos;
 
-                // Codigo IVA
-                lineaArchivo += ((MTaxCategory) product.getC_TaxCategory()).getCommodityCode() + separadorCampos;
+                // Codigo IVA.
+                // Por defacto el IVA normal de venta
+                String codigoIVA = ((MTaxCategory) product.getC_TaxCategory()).getCommodityCode();
+
+                // Verifico si este producto-organización no tiene impuesto diferencial de venta y/o venta a contribuyentes
+                sql = " select c_taxcategory_id " +
+                        " from z_productotaxorg " +
+                        " where m_product_id =" + product.get_ID() +
+                        " and ad_orgtrx_id =" + adOrgID +
+                        " and isactive ='Y' ";
+                int taxCategoryID_Aux = DB.getSQLValueEx(null, sql);
+                if (taxCategoryID_Aux > 0){
+                    // Codigo de IVA ventas diferencial
+                    MTaxCategory taxCategoryAux = new MTaxCategory(getCtx(), taxCategoryID_Aux, null);
+                    codigoIVA = taxCategoryAux.getCommodityCode();
+                }
+
+                lineaArchivo += codigoIVA + separadorCampos;
 
                 // Precio de venta
                 MPriceListVersion priceListVersion = priceList.getPriceListVersion(null);
