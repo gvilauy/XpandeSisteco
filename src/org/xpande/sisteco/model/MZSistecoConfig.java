@@ -116,4 +116,19 @@ public class MZSistecoConfig extends X_Z_SistecoConfig {
         return lines;
     }
 
+
+    /***
+     * Obtiene y retorna lista de usuarios para notificaciones de email de interfaces de sisteco.
+     * Xpande. Created by Gabriel Vila on 1/9/19.
+     * @return
+     */
+    public List<MZSistecoEmail> getEmailUsers(){
+
+        String whereClause = X_Z_SistecoEmail.COLUMNNAME_Z_SistecoConfig_ID + " =" + this.get_ID();
+
+        List<MZSistecoEmail> lines = new Query(getCtx(), I_Z_SistecoEmail.Table_Name, whereClause, get_TrxName()).setOnlyActiveRecords(true).list();
+
+        return lines;
+    }
+
 }

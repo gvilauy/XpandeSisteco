@@ -4,11 +4,10 @@ import org.adempiere.exceptions.AdempiereException;
 import org.compiere.Adempiere;
 import org.compiere.impexp.ImpFormat;
 import org.compiere.impexp.MImpFormat;
-import org.compiere.model.MEXPFormat;
-import org.compiere.model.MSequence;
-import org.compiere.model.MTable;
+import org.compiere.model.*;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
+import org.compiere.util.EMail;
 import org.compiere.util.Env;
 
 import java.io.BufferedReader;
@@ -178,6 +177,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 this.setFileName(foundFiles[0].getAbsolutePath());
             }
             else{
+                // Envio email de Notificación y salgo con exception.
+                this.sendEmailNoFile(fechaProceso, nombreFile);
+
                 throw new AdempiereException("No se obtuvo archivo a procesar para : " +
                         this.sistecoConfig.getRutaOrigenPazos() + "/" + nombreFile);
             }
@@ -185,6 +187,51 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         }
         catch (Exception e){
             throw new AdempiereException(e);
+        }
+    }
+
+
+    /***
+     * Metodo que envía emails a determinados usuarios avisando el no proceso de la interface pazos de este día.
+     * Xpande. Created by Gabriel Vila on 1/9/19.
+     * @param fechaProceso
+     * @param nombreFile
+     */
+    private void sendEmailNoFile(Timestamp fechaProceso, String nombreFile) {
+
+        try{
+
+            String message = "No se pudo procesar las ventas del día : " + fechaProceso.toString() +
+                    ", ya que no se pudo encontrar el archivo de Sisteco : " + nombreFile;
+
+            MClient client = MClient.get(getCtx());
+            if (client == null) return;
+
+            // Obtengo lista de usuarios a notificar
+            List<MZSistecoEmail> sistecoEmailList = this.sistecoConfig.getEmailUsers();
+
+
+            for (MZSistecoEmail sistecoEmail: sistecoEmailList){
+
+                MUser userTo = (MUser) sistecoEmail.getAD_User();
+                if ((userTo.getEMail() != null) && (!userTo.getEMail().trim().equalsIgnoreCase(""))){
+
+                    EMail email = client.createEMail(userTo.getEMail(), "Error en Interface Ventas Sisteco", message);
+                    email.setFrom(client.getRequestUser());
+                    email.createAuthenticator(client.getRequestUser(), client.getRequestUserPW());
+
+                    String result = email.send();
+                    if (!EMail.SENT_OK.equalsIgnoreCase(result))
+                    {
+                        log.log(Level.SEVERE, result);
+                    }
+                }
+
+            }
+
+        }
+        catch (Exception e){
+            log.log(Level.SEVERE, "No se puedo enviar Email de Notificación en Interface Pazos Agenda.");
         }
     }
 
