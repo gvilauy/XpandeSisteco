@@ -212,11 +212,18 @@ public class ProcesadorInterfaceOut {
 
             String pathArchivosDestino = sistecoConfig.getRutaInterfaceOut() + File.separator;
 
+            // Valido archivo batch
             File fileBatchDest = new File( pathArchivosDestino + sistecoConfig.getArchivoBatch());
-
             if (fileBatchDest.exists()){
                 return "Existe un archivo de interface generado y no procesado aún por Sisteco.\n" + "Debe procesarlo antes de generar uno nuevo.";
             }
+
+            // Valido archivo online
+            File fileOnlineDest = new File( pathArchivosDestino + sistecoConfig.getArchivoOnline());
+            if (fileOnlineDest.exists()){
+                return "Existe un archivo de interface generado y no procesado aún por Sisteco.\n" + "Debe procesarlo antes de generar uno nuevo.";
+            }
+
 
         }
         catch (Exception e){
