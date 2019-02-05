@@ -45,7 +45,7 @@ public class MZSistecoProdOrgCom extends X_Z_SistecoProdOrgCom {
                     "from z_sistecoprodorgcom " +
                     "where ad_orgtrx_id =" + adOrgTrxID +
                     "and m_product_id =" + mProductID +
-                    "and crudtype ='C'";
+                    "and crudtype IN('C','U') ";
 
         	pstmt = DB.prepareStatement(sql, trxName);
         	rs = pstmt.executeQuery();

@@ -5,10 +5,9 @@ import org.compiere.Adempiere;
 import org.compiere.impexp.ImpFormat;
 import org.compiere.impexp.MImpFormat;
 import org.compiere.model.*;
-import org.compiere.util.CLogger;
-import org.compiere.util.DB;
-import org.compiere.util.EMail;
-import org.compiere.util.Env;
+import org.compiere.process.DocAction;
+import org.compiere.util.*;
+import org.xpande.core.utils.PriceListUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -109,6 +108,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             // Otengo y guardo detalle de ventas por RUT y Ticket desglozadas por Impuestos
             this.setDesgloceRUTImpuestos();
 
+            // Obtengo y guardo ventas a credito y cuenta corriente
+            this.setVentasCredito();
+
             // Tiempo final de proceso
             this.setEndDate(new Timestamp(System.currentTimeMillis()));
 
@@ -123,6 +125,160 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         return message;
 
     }
+
+    /***
+     * Obtengo ventas a credito y cuenta corriente desde POS y genero los documentos correspondientes en ADempiere.
+     * Xpande. Created by Gabriel Vila on 2/5/19.
+     */
+    private void setVentasCredito() {
+
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+
+            // Producto a considerar en los documentos de venta
+            if (this.sistecoConfig.getProdVtasCredPOS_ID() <= 0){
+                return;
+            }
+            MProduct product = new MProduct(getCtx(), this.sistecoConfig.getProdVtasCredPOS_ID(), null);
+            if ((product == null) || (product.get_ID() <= 0)){
+                return;
+            }
+
+            sql = " select a.ad_client_id, a.ad_org_id, cvta.st_numeroticket, cvta.datetrx, cfe.st_descripcioncfe, " +
+                    " coalesce(cfe.st_seriecfe,'') as st_seriecfe, cfe.st_numerocfe, coalesce(cfe.st_tipocfe,'') as st_tipocfe, " +
+                    " a.st_montopagocc, a.st_codigocc, a.st_nombrecc " +
+                    " from z_sisteco_tk_vtacliente a " +
+                    " inner join z_sisteco_tk_cvta cvta on a.z_sisteco_tk_cvta_id = cvta.z_sisteco_tk_cvta_id " +
+                    " inner join z_sisteco_tk_cfecab cfe on cvta.z_sisteco_tk_cvta_id = cfe.z_sisteco_tk_cvta_id " +
+                    " where cvta.st_estadoticket::text = 'F' " +
+                    " and cvta.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " ORDER BY a.datetrx, cvta.st_numeroticket ";
+
+        	pstmt = DB.prepareStatement(sql, get_TrxName());
+        	rs = pstmt.executeQuery();
+
+        	while(rs.next()){
+
+        	    BigDecimal amtTotal = rs.getBigDecimal("st_montopagocc");
+        	    if (amtTotal == null) amtTotal = Env.ZERO;
+        	    if (amtTotal.compareTo(Env.ZERO) == 0){
+        	        continue;
+                }
+        	    if (amtTotal.compareTo(Env.ZERO) < 0){
+        	        amtTotal = amtTotal.negate();
+                }
+
+        	    // Determino tipo de documento segun tipo cfe obtenido
+                int cDocTypeID = 0;
+        	    String tipoCFE = rs.getString("st_tipocfe").trim();
+
+        	    // e-ticket o e-factura
+        	    if ((tipoCFE.equalsIgnoreCase("101")) || (tipoCFE.equalsIgnoreCase("111"))){
+        	        cDocTypeID = this.sistecoConfig.getDefaultDocPosARI_ID();
+                }
+        	    // e-ticket nc o e-factura nc
+        	    else if ((tipoCFE.equalsIgnoreCase("102")) || (tipoCFE.equalsIgnoreCase("112"))){
+                    cDocTypeID = this.sistecoConfig.getDefaultDocPosARC_ID();
+                }
+
+        	    if (cDocTypeID <= 0){
+        	        continue;
+                }
+        	    MDocType docType = new MDocType(getCtx(), cDocTypeID, null);
+
+        	    int cBParnterID = 0;
+                String taxID = rs.getString("st_codigocc").trim();
+                String whereClause = " AND taxID ='" + taxID + "'";
+                int[] partnersIDs = MBPartner.getAllIDs(I_C_BPartner.Table_Name, whereClause, null);
+                if (partnersIDs.length <= 0){
+                    continue;
+                }
+                cBParnterID = partnersIDs[0];
+                MBPartner partner = new MBPartner(getCtx(), cBParnterID, null);
+
+
+                MBPartnerLocation[] partnerLocations = partner.getLocations(true);
+                if (partnerLocations.length <= 0){
+                    continue;
+                }
+                MBPartnerLocation partnerLocation = partnerLocations[0];
+
+                MPaymentTerm paymentTerm = MPaymentTerm.getPaymentTermByDefault(getCtx(), null);
+                if ((paymentTerm == null) || (paymentTerm.get_ID() <= 0)){
+                    continue;
+                }
+
+                MInvoice invoice = new MInvoice(getCtx(), 0, get_TrxName());
+                invoice.set_ValueOfColumn("AD_Client_ID", this.sistecoConfig.getAD_Client_ID());
+                invoice.setAD_Org_ID(rs.getInt("AD_Org_ID"));
+                invoice.setIsSOTrx(true);
+                invoice.setC_DocTypeTarget_ID(cDocTypeID);
+                invoice.setC_DocType_ID(cDocTypeID);
+                String documentNo = rs.getString("st_seriecfe") + rs.getString("st_numerocfe");
+                invoice.setDocumentNo(documentNo);
+                invoice.setDescription("Generado desde POS. Numero de Ticket : " + rs.getString("st_numeroticket"));
+
+
+                Timestamp fechaDoc = TimeUtil.trunc(rs.getTimestamp("datetrx"), TimeUtil.TRUNC_DAY);
+                invoice.setDateInvoiced(fechaDoc);
+                invoice.setDateAcct(fechaDoc);
+                invoice.setC_BPartner_ID(partner.get_ID());
+                invoice.setC_BPartner_Location_ID(partnerLocation.get_ID());
+                invoice.setC_Currency_ID(142);
+                invoice.setPaymentRule(X_C_Invoice.PAYMENTRULE_OnCredit);
+                invoice.setC_PaymentTerm_ID(paymentTerm.get_ID());
+                invoice.setTotalLines(amtTotal);
+                invoice.setGrandTotal(amtTotal);
+
+                MPriceList priceList = PriceListUtils.getPriceListByOrg(getCtx(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID(),
+                                                            invoice.getC_Currency_ID(), true, null);
+                if ((priceList == null) || (priceList.get_ID() <= 0)){
+                    continue;
+                }
+
+                invoice.setM_PriceList_ID(priceList.get_ID());
+                invoice.setIsTaxIncluded(priceList.isTaxIncluded());
+                invoice.set_ValueOfColumn("AmtSubtotal", amtTotal);
+                invoice.set_ValueOfColumn("DocBaseType", docType.getDocBaseType());
+                invoice.set_ValueOfColumn("EstadoAprobacion", "APROBADO");
+                invoice.set_ValueOfColumn("TipoFormaPago", "CREDITO");
+                invoice.saveEx();
+
+
+                // Linea de Factura
+                MInvoiceLine line = new MInvoiceLine(invoice);
+                line.set_ValueOfColumn("AD_Client_ID", invoice.getAD_Client_ID());
+                line.setAD_Org_ID(invoice.getAD_Org_ID());
+                line.setM_Product_ID(product.get_ID());
+                line.setC_UOM_ID(product.getC_UOM_ID());
+                line.setQtyEntered(Env.ONE);
+                line.setQtyInvoiced(Env.ONE);
+                line.setPriceEntered(invoice.getTotalLines());
+                line.setPriceActual(invoice.getTotalLines());
+                line.setLineNetAmt(invoice.getTotalLines());
+                line.set_ValueOfColumn("AmtSubTotal", invoice.getTotalLines());
+                line.setTax();
+                line.setTaxAmt();
+                line.setLineNetAmt();
+                line.saveEx();
+
+                if (!invoice.processIt(DocAction.ACTION_Complete)){
+                    // No hago nada.
+                }
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+        	rs = null; pstmt = null;
+        }
+    }
+
 
     /***
      * Seteo fecha POS si es que no la tengo.

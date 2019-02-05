@@ -30,7 +30,7 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181115L;
+	private static final long serialVersionUID = 20190205L;
 
     /** Standard Constructor */
     public X_Z_SistecoConfig (Properties ctx, int Z_SistecoConfig_ID, String trxName)
@@ -284,6 +284,52 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 		return false;
 	}
 
+	/** Set DefaultDocPosARC_ID.
+		@param DefaultDocPosARC_ID 
+		ID de documento para migración de notas de crédito de venta crédito desde POS
+	  */
+	public void setDefaultDocPosARC_ID (int DefaultDocPosARC_ID)
+	{
+		if (DefaultDocPosARC_ID < 1) 
+			set_Value (COLUMNNAME_DefaultDocPosARC_ID, null);
+		else 
+			set_Value (COLUMNNAME_DefaultDocPosARC_ID, Integer.valueOf(DefaultDocPosARC_ID));
+	}
+
+	/** Get DefaultDocPosARC_ID.
+		@return ID de documento para migración de notas de crédito de venta crédito desde POS
+	  */
+	public int getDefaultDocPosARC_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DefaultDocPosARC_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set DefaultDocPosARI_ID.
+		@param DefaultDocPosARI_ID 
+		ID de documento para migración de facturas de venta crédito desde POS
+	  */
+	public void setDefaultDocPosARI_ID (int DefaultDocPosARI_ID)
+	{
+		if (DefaultDocPosARI_ID < 1) 
+			set_Value (COLUMNNAME_DefaultDocPosARI_ID, null);
+		else 
+			set_Value (COLUMNNAME_DefaultDocPosARI_ID, Integer.valueOf(DefaultDocPosARI_ID));
+	}
+
+	/** Get DefaultDocPosARI_ID.
+		@return ID de documento para migración de facturas de venta crédito desde POS
+	  */
+	public int getDefaultDocPosARI_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DefaultDocPosARI_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set PrefijoArchivoPazos.
 		@param PrefijoArchivoPazos PrefijoArchivoPazos	  */
 	public void setPrefijoArchivoPazos (String PrefijoArchivoPazos)
@@ -296,6 +342,29 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	public String getPrefijoArchivoPazos () 
 	{
 		return (String)get_Value(COLUMNNAME_PrefijoArchivoPazos);
+	}
+
+	/** Set ProdVtasCredPOS_ID.
+		@param ProdVtasCredPOS_ID 
+		Producto para Migración de Ventas Crédito desde POS
+	  */
+	public void setProdVtasCredPOS_ID (int ProdVtasCredPOS_ID)
+	{
+		if (ProdVtasCredPOS_ID < 1) 
+			set_Value (COLUMNNAME_ProdVtasCredPOS_ID, null);
+		else 
+			set_Value (COLUMNNAME_ProdVtasCredPOS_ID, Integer.valueOf(ProdVtasCredPOS_ID));
+	}
+
+	/** Get ProdVtasCredPOS_ID.
+		@return Producto para Migración de Ventas Crédito desde POS
+	  */
+	public int getProdVtasCredPOS_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ProdVtasCredPOS_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set RutaDestinoSistema.

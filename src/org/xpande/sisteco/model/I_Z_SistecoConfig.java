@@ -222,6 +222,32 @@ public interface I_Z_SistecoConfig
 	  */
 	public boolean isCreateOnlineFile();
 
+    /** Column name DefaultDocPosARC_ID */
+    public static final String COLUMNNAME_DefaultDocPosARC_ID = "DefaultDocPosARC_ID";
+
+	/** Set DefaultDocPosARC_ID.
+	  * ID de documento para migración de notas de crédito de venta crédito desde POS
+	  */
+	public void setDefaultDocPosARC_ID(int DefaultDocPosARC_ID);
+
+	/** Get DefaultDocPosARC_ID.
+	  * ID de documento para migración de notas de crédito de venta crédito desde POS
+	  */
+	public int getDefaultDocPosARC_ID();
+
+    /** Column name DefaultDocPosARI_ID */
+    public static final String COLUMNNAME_DefaultDocPosARI_ID = "DefaultDocPosARI_ID";
+
+	/** Set DefaultDocPosARI_ID.
+	  * ID de documento para migración de facturas de venta crédito desde POS
+	  */
+	public void setDefaultDocPosARI_ID(int DefaultDocPosARI_ID);
+
+	/** Get DefaultDocPosARI_ID.
+	  * ID de documento para migración de facturas de venta crédito desde POS
+	  */
+	public int getDefaultDocPosARI_ID();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 
@@ -243,6 +269,19 @@ public interface I_Z_SistecoConfig
 
 	/** Get PrefijoArchivoPazos	  */
 	public String getPrefijoArchivoPazos();
+
+    /** Column name ProdVtasCredPOS_ID */
+    public static final String COLUMNNAME_ProdVtasCredPOS_ID = "ProdVtasCredPOS_ID";
+
+	/** Set ProdVtasCredPOS_ID.
+	  * Producto para Migración de Ventas Crédito desde POS
+	  */
+	public void setProdVtasCredPOS_ID(int ProdVtasCredPOS_ID);
+
+	/** Get ProdVtasCredPOS_ID.
+	  * Producto para Migración de Ventas Crédito desde POS
+	  */
+	public int getProdVtasCredPOS_ID();
 
     /** Column name RutaDestinoSistema */
     public static final String COLUMNNAME_RutaDestinoSistema = "RutaDestinoSistema";
