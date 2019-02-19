@@ -2,6 +2,7 @@ package org.xpande.sisteco.model;
 
 import org.adempiere.exceptions.AdempiereException;
 import org.compiere.Adempiere;
+import org.compiere.acct.Doc;
 import org.compiere.impexp.ImpFormat;
 import org.compiere.impexp.MImpFormat;
 import org.compiere.model.*;
@@ -192,7 +193,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
         	    int cBParnterID = 0;
                 String taxID = rs.getString("st_rut").trim();
-                String whereClause = " AND taxID ='" + taxID + "'";
+                String whereClause = " c_bpartner.taxID ='" + taxID + "'";
                 int[] partnersIDs = MBPartner.getAllIDs(I_C_BPartner.Table_Name, whereClause, null);
                 if (partnersIDs.length <= 0){
                     continue;
@@ -222,6 +223,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 invoice.setDocumentNo(documentNo);
                 invoice.setDescription("Generado desde POS. Numero de Ticket : " + rs.getString("st_numeroticket"));
 
+                if (docType.getDocBaseType().equalsIgnoreCase(Doc.DOCTYPE_ARCredit)){
+                    invoice.set_ValueOfColumn("ReferenciaCFE", "Referencia Comprobante SISTECO");
+                }
 
                 Timestamp fechaDoc = TimeUtil.trunc(rs.getTimestamp("datetrx"), TimeUtil.TRUNC_DAY);
                 invoice.setDateInvoiced(fechaDoc);
