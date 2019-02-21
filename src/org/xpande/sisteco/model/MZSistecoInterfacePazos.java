@@ -150,12 +150,15 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
             sql = " select a.ad_client_id, a.ad_org_id, cvta.st_numeroticket, cvta.datetrx, cfe.st_descripcioncfe, " +
                     " coalesce(cfe.st_seriecfe,'') as st_seriecfe, cfe.st_numerocfe, coalesce(cfe.st_tipocfe,'') as st_tipocfe, " +
-                    " a.st_montopagocc, cfel.st_rut, a.st_nombrecc " +
-                    " from z_sisteco_tk_vtacliente a " +
+                    " a.st_totalmppagomoneda as st_montopagocc, cfel.st_rut, bp.name as st_nombrecc " +
+                    //" a.st_montopagocc, cfel.st_rut, a.st_nombrecc " +
+                    //" from z_sisteco_tk_vtacliente a " +
+                    " from z_sisteco_tk_vtactacte a " +
                     " inner join z_sisteco_tk_cvta cvta on a.z_sisteco_tk_cvta_id = cvta.z_sisteco_tk_cvta_id " +
                     " inner join z_sisteco_tk_cfecab cfe on cvta.z_sisteco_tk_cvta_id = cfe.z_sisteco_tk_cvta_id " +
                     " inner join z_sisteco_tk_cfelinea cfel on cvta.z_sisteco_tk_cvta_id = cfel.z_sisteco_tk_cvta_id " +
-                    " where cvta.st_estadoticket::text = 'F' " +
+                    " left outer join c_bpartner bp on cfel.st_rut = bp.taxid " +
+                     " where cvta.st_estadoticket::text = 'F' " +
                     " and cvta.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " ORDER BY a.datetrx, cvta.st_numeroticket ";
 
