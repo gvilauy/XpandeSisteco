@@ -397,6 +397,11 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
 
             // Instancio modelo de socio y localización.
             MBPartner partner = new MBPartner(getCtx(), this.getRecord_ID(), get_TrxName());
+
+            if ((partner == null) || (partner.get_ID() <= 0)){
+                return lineas;
+            }
+
             MBPartnerLocation[] partnerLocations = partner.getLocations(true);
             MBPartnerLocation partnerLocation = null;
             MLocation location = null;
