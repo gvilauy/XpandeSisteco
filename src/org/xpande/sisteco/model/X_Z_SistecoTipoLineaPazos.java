@@ -31,7 +31,7 @@ public class X_Z_SistecoTipoLineaPazos extends PO implements I_Z_SistecoTipoLine
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170601L;
+	private static final long serialVersionUID = 20190521L;
 
     /** Standard Constructor */
     public X_Z_SistecoTipoLineaPazos (Properties ctx, int Z_SistecoTipoLineaPazos_ID, String trxName)
@@ -39,7 +39,11 @@ public class X_Z_SistecoTipoLineaPazos extends PO implements I_Z_SistecoTipoLine
       super (ctx, Z_SistecoTipoLineaPazos_ID, trxName);
       /** if (Z_SistecoTipoLineaPazos_ID == 0)
         {
+			setIsAsientoVtaPOS (true);
+// Y
 			setIsCabezalArchivo (false);
+// N
+			setIsCredito (false);
 // N
 			setName (null);
 			setValue (null);
@@ -118,6 +122,30 @@ public class X_Z_SistecoTipoLineaPazos extends PO implements I_Z_SistecoTipoLine
 		return (String)get_Value(COLUMNNAME_Description);
 	}
 
+	/** Set IsAsientoVtaPOS.
+		@param IsAsientoVtaPOS 
+		Si se utiliza o no para asiento de venta POS
+	  */
+	public void setIsAsientoVtaPOS (boolean IsAsientoVtaPOS)
+	{
+		set_Value (COLUMNNAME_IsAsientoVtaPOS, Boolean.valueOf(IsAsientoVtaPOS));
+	}
+
+	/** Get IsAsientoVtaPOS.
+		@return Si se utiliza o no para asiento de venta POS
+	  */
+	public boolean isAsientoVtaPOS () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsAsientoVtaPOS);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
 	/** Set IsCabezalArchivo.
 		@param IsCabezalArchivo IsCabezalArchivo	  */
 	public void setIsCabezalArchivo (boolean IsCabezalArchivo)
@@ -130,6 +158,30 @@ public class X_Z_SistecoTipoLineaPazos extends PO implements I_Z_SistecoTipoLine
 	public boolean isCabezalArchivo () 
 	{
 		Object oo = get_Value(COLUMNNAME_IsCabezalArchivo);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
+	}
+
+	/** Set IsCredito.
+		@param IsCredito 
+		Si se comporta como un crédito para la contabilidad o no
+	  */
+	public void setIsCredito (boolean IsCredito)
+	{
+		set_Value (COLUMNNAME_IsCredito, Boolean.valueOf(IsCredito));
+	}
+
+	/** Get IsCredito.
+		@return Si se comporta como un crédito para la contabilidad o no
+	  */
+	public boolean isCredito () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsCredito);
 		if (oo != null) 
 		{
 			 if (oo instanceof Boolean) 

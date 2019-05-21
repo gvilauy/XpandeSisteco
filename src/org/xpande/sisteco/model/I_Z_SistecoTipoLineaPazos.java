@@ -116,6 +116,19 @@ public interface I_Z_SistecoTipoLineaPazos
 	  */
 	public boolean isActive();
 
+    /** Column name IsAsientoVtaPOS */
+    public static final String COLUMNNAME_IsAsientoVtaPOS = "IsAsientoVtaPOS";
+
+	/** Set IsAsientoVtaPOS.
+	  * Si se utiliza o no para asiento de venta POS
+	  */
+	public void setIsAsientoVtaPOS(boolean IsAsientoVtaPOS);
+
+	/** Get IsAsientoVtaPOS.
+	  * Si se utiliza o no para asiento de venta POS
+	  */
+	public boolean isAsientoVtaPOS();
+
     /** Column name IsCabezalArchivo */
     public static final String COLUMNNAME_IsCabezalArchivo = "IsCabezalArchivo";
 
@@ -124,6 +137,19 @@ public interface I_Z_SistecoTipoLineaPazos
 
 	/** Get IsCabezalArchivo	  */
 	public boolean isCabezalArchivo();
+
+    /** Column name IsCredito */
+    public static final String COLUMNNAME_IsCredito = "IsCredito";
+
+	/** Set IsCredito.
+	  * Si se comporta como un crédito para la contabilidad o no
+	  */
+	public void setIsCredito(boolean IsCredito);
+
+	/** Get IsCredito.
+	  * Si se comporta como un crédito para la contabilidad o no
+	  */
+	public boolean isCredito();
 
     /** Column name Name */
     public static final String COLUMNNAME_Name = "Name";
