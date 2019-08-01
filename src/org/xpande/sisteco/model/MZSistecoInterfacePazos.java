@@ -150,15 +150,15 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
             sql = " select a.ad_client_id, a.ad_org_id, cvta.st_numeroticket, cvta.datetrx, cfe.st_descripcioncfe, " +
                     " coalesce(cfe.st_seriecfe,'') as st_seriecfe, cfe.st_numerocfe, coalesce(cfe.st_tipocfe,'') as st_tipocfe, " +
-                    " a.st_totalmppagomoneda as st_montopagocc, cfel.st_rut, bp.name as st_nombrecc " +
-                    //" a.st_montopagocc, cfel.st_rut, a.st_nombrecc " +
-                    //" from z_sisteco_tk_vtacliente a " +
+                    " a.st_totalmppagomoneda as st_montopagocc, cfel.st_rut, vcli.ST_CodigoCC, coalesce(bp.name, bpcc.name) as st_nombrecc " +
                     " from z_sisteco_tk_vtactacte a " +
                     " inner join z_sisteco_tk_cvta cvta on a.z_sisteco_tk_cvta_id = cvta.z_sisteco_tk_cvta_id " +
                     " inner join z_sisteco_tk_cfecab cfe on cvta.z_sisteco_tk_cvta_id = cfe.z_sisteco_tk_cvta_id " +
-                    " inner join z_sisteco_tk_cfelinea cfel on cvta.z_sisteco_tk_cvta_id = cfel.z_sisteco_tk_cvta_id " +
+                    " left outer join z_sisteco_tk_cfelinea cfel on cvta.z_sisteco_tk_cvta_id = cfel.z_sisteco_tk_cvta_id " +
+                    " left outer join z_sisteco_tk_vtacliente vcli on cvta.z_sisteco_tk_cvta_id = vcli.z_sisteco_tk_cvta_id " +
                     " left outer join c_bpartner bp on cfel.st_rut = bp.taxid " +
-                     " where cvta.st_estadoticket::text = 'F' " +
+                    " left outer join c_bpartner bpcc on cast(vcli.st_codigocc as character varying(40)) = bpcc.value " +
+                    " where cvta.st_estadoticket::text = 'F' " +
                     " and cvta.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " ORDER BY a.datetrx, cvta.st_numeroticket ";
 
@@ -195,8 +195,19 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         	    MDocType docType = new MDocType(getCtx(), cDocTypeID, null);
 
         	    int cBParnterID = 0;
-                String taxID = rs.getString("st_rut").trim();
-                String whereClause = " c_bpartner.taxID ='" + taxID + "'";
+                String whereClause = "";
+
+                String taxID = rs.getString("st_rut");
+
+                if ((taxID != null) && (!taxID.trim().equalsIgnoreCase(""))){
+                    whereClause = " c_bpartner.taxID ='" + taxID + "'";
+                }
+                else{
+                    if (rs.getInt("ST_CodigoCC") > 0){
+                        whereClause = " c_bpartner.value ='" + String.valueOf(rs.getInt("ST_CodigoCC")) + "'";
+                    }
+                }
+
                 int[] partnersIDs = MBPartner.getAllIDs(I_C_BPartner.Table_Name, whereClause, null);
                 if (partnersIDs.length <= 0){
                     continue;
@@ -242,7 +253,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 invoice.setGrandTotal(amtTotal);
 
                 MPriceList priceList = PriceListUtils.getPriceListByOrg(getCtx(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID(),
-                                                            invoice.getC_Currency_ID(), true, null);
+                                                            invoice.getC_Currency_ID(), true, null, null);
                 if ((priceList == null) || (priceList.get_ID() <= 0)){
                     continue;
                 }

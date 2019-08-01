@@ -106,9 +106,9 @@ public class MZSistecoInterfaceOut extends X_Z_SistecoInterfaceOut {
                 priceList = (MPriceList)this.getM_PriceList();
             }
             else{
-                priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 142, true, get_TrxName());
+                priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 142, true, null, get_TrxName());
                 if ((priceList == null) || (priceList.get_ID() <= 0)){
-                    priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 100, true, get_TrxName());
+                    priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 100, true, null, get_TrxName());
                 }
             }
 

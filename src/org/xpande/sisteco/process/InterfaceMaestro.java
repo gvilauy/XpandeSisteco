@@ -198,9 +198,9 @@ public class InterfaceMaestro extends SvrProcess {
         	while(rs.next()){
 
                 MProduct product = new MProduct(getCtx(), rs.getInt("m_product_id"), null);
-                MPriceList priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 142, true, null);
+                MPriceList priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 142, true, null, null);
                 if ((priceList == null) || (priceList.get_ID() <= 0)){
-                    priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 100, true, null);
+                    priceList = PriceListUtils.getPriceListByOrg(getCtx(), this.getAD_Client_ID(), adOrgID, 100, true, null, null);
                 }
 
                 if ((priceList == null) || (priceList.get_ID() <= 0)){
