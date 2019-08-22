@@ -210,7 +210,16 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
                 int[] partnersIDs = MBPartner.getAllIDs(I_C_BPartner.Table_Name, whereClause, null);
                 if (partnersIDs.length <= 0){
-                    continue;
+                    if (rs.getInt("ST_CodigoCC") > 0){
+                        whereClause = " c_bpartner.taxid ='" + String.valueOf(rs.getInt("ST_CodigoCC")) + "'";
+                        partnersIDs = MBPartner.getAllIDs(I_C_BPartner.Table_Name, whereClause, null);
+                        if (partnersIDs.length <= 0){
+                            continue;
+                        }
+                    }
+                    else{
+                        continue;
+                    }
                 }
                 cBParnterID = partnersIDs[0];
                 MBPartner partner = new MBPartner(getCtx(), cBParnterID, null);
