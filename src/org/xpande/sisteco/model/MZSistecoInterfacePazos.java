@@ -294,7 +294,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 line.saveEx();
 
                 if (!invoice.processIt(DocAction.ACTION_Complete)){
-                    // No hago nada.
+                    String message = "";
+                    if (invoice.getProcessMsg() != null) message = invoice.getProcessMsg();
+                    System.out.println("No se pudo completar Invoice en Venta Cuenta Corriente Sisteco : " + message);
                 }
             }
         }
