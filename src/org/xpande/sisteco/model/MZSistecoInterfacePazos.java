@@ -139,12 +139,15 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
         try{
 
+            System.out.println("----------Entrando a setVentasCredito");
+
             // Producto a considerar en los documentos de venta
             if (this.sistecoConfig.getProdVtasCredPOS_ID() <= 0){
                 return;
             }
             MProduct product = new MProduct(getCtx(), this.sistecoConfig.getProdVtasCredPOS_ID(), null);
             if ((product == null) || (product.get_ID() <= 0)){
+                System.out.println("----------Sale en 1");
                 return;
             }
 
@@ -170,6 +173,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         	    BigDecimal amtTotal = rs.getBigDecimal("st_montopagocc");
         	    if (amtTotal == null) amtTotal = Env.ZERO;
         	    if (amtTotal.compareTo(Env.ZERO) == 0){
+                    System.out.println("----------Sale en 2");
         	        continue;
                 }
         	    if (amtTotal.compareTo(Env.ZERO) < 0){
@@ -190,6 +194,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 }
 
         	    if (cDocTypeID <= 0){
+                    System.out.println("----------Sale en 3");
         	        continue;
                 }
         	    MDocType docType = new MDocType(getCtx(), cDocTypeID, null);
@@ -214,10 +219,12 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                         whereClause = " c_bpartner.taxid ='" + String.valueOf(rs.getInt("ST_CodigoCC")) + "'";
                         partnersIDs = MBPartner.getAllIDs(I_C_BPartner.Table_Name, whereClause, null);
                         if (partnersIDs.length <= 0){
+                            System.out.println("----------Sale en 4");
                             continue;
                         }
                     }
                     else{
+                        System.out.println("----------Sale en 5");
                         continue;
                     }
                 }
@@ -227,12 +234,14 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
                 MBPartnerLocation[] partnerLocations = partner.getLocations(true);
                 if (partnerLocations.length <= 0){
+                    System.out.println("----------Sale en 6");
                     continue;
                 }
                 MBPartnerLocation partnerLocation = partnerLocations[0];
 
                 MPaymentTerm paymentTerm = MPaymentTerm.getPaymentTermByDefault(getCtx(), null);
                 if ((paymentTerm == null) || (paymentTerm.get_ID() <= 0)){
+                    System.out.println("----------Sale en 7");
                     continue;
                 }
 
@@ -264,6 +273,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 MPriceList priceList = PriceListUtils.getPriceListByOrg(getCtx(), invoice.getAD_Client_ID(), invoice.getAD_Org_ID(),
                                                             invoice.getC_Currency_ID(), true, null, null);
                 if ((priceList == null) || (priceList.get_ID() <= 0)){
+                    System.out.println("----------Sale en 8");
                     continue;
                 }
 
@@ -296,6 +306,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 if (!invoice.processIt(DocAction.ACTION_Complete)){
                     String message = "";
                     if (invoice.getProcessMsg() != null) message = invoice.getProcessMsg();
+                    System.out.println("----------Sale en 9");
                     System.out.println("No se pudo completar Invoice en Venta Cuenta Corriente Sisteco : " + message);
                 }
             }
@@ -307,6 +318,8 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             DB.close(rs, pstmt);
         	rs = null; pstmt = null;
         }
+
+        System.out.println("----------TERMINA setVentasCredito");
     }
 
 
