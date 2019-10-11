@@ -9,6 +9,7 @@ import org.compiere.model.*;
 import org.compiere.process.DocAction;
 import org.compiere.util.*;
 import org.xpande.core.utils.PriceListUtils;
+import org.xpande.financial.utils.FinancialUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -239,7 +240,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 }
                 MBPartnerLocation partnerLocation = partnerLocations[0];
 
-                MPaymentTerm paymentTerm = MPaymentTerm.getPaymentTermByDefault(getCtx(), null);
+                MPaymentTerm paymentTerm = FinancialUtils.getPaymentTermByDefault(getCtx(), null);
                 if ((paymentTerm == null) || (paymentTerm.get_ID() <= 0)){
                     System.out.println("----------Sale en 7");
                     continue;
