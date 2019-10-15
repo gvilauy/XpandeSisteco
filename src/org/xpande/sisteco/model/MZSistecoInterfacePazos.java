@@ -286,7 +286,6 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 invoice.set_ValueOfColumn("TipoFormaPago", "CREDITO");
                 invoice.saveEx();
 
-
                 // Linea de Factura
                 MInvoiceLine line = new MInvoiceLine(invoice);
                 line.set_ValueOfColumn("AD_Client_ID", invoice.getAD_Client_ID());

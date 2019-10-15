@@ -2,6 +2,7 @@ package org.xpande.sisteco.process;
 
 import org.compiere.process.ProcessInfoParameter;
 import org.compiere.process.SvrProcess;
+import org.compiere.util.Env;
 import org.xpande.sisteco.model.MZSistecoConfig;
 import org.xpande.sisteco.model.MZSistecoConfigOrg;
 import org.xpande.sisteco.model.MZSistecoInterfacePazos;
@@ -51,7 +52,14 @@ public class InterfacePazosAgenda extends SvrProcess{
         // Si indico organización, proceso solo para esta, sino proceso para todas las que tenga asociadas a SISTECO
         List<MZSistecoConfigOrg> orgList = sistecoConfig.getOrganizationsByOrg(this.adOrgID);
 
+        // Seteo info de contexto
+        Env.setContext(getCtx(), "AD_Client_ID", sistecoConfig.getAD_Client_ID());
+
         for (MZSistecoConfigOrg configOrg: orgList){
+
+            // Seteo info de contexto
+            Env.setContext(getCtx(), "AD_Org_ID", configOrg.getAD_OrgTrx_ID());
+
             MZSistecoInterfacePazos interfacePazos = new MZSistecoInterfacePazos(getCtx(), 0, get_TrxName());
             interfacePazos.set_ValueOfColumn("AD_Client_ID", sistecoConfig.getAD_Client_ID());
             interfacePazos.setAD_Org_ID(configOrg.getAD_OrgTrx_ID());
