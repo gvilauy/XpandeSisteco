@@ -30,7 +30,7 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20190205L;
+	private static final long serialVersionUID = 20191017L;
 
     /** Standard Constructor */
     public X_Z_SistecoConfig (Properties ctx, int Z_SistecoConfig_ID, String trxName)
@@ -44,6 +44,8 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 // Y
 			setCreateOnlineFile (true);
 // Y
+			setIsEmployee (false);
+// N
 			setZ_SistecoConfig_ID (0);
         } */
     }
@@ -328,6 +330,30 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 		if (ii == null)
 			 return 0;
 		return ii.intValue();
+	}
+
+	/** Set Employee.
+		@param IsEmployee 
+		Indicates if  this Business Partner is an employee
+	  */
+	public void setIsEmployee (boolean IsEmployee)
+	{
+		set_Value (COLUMNNAME_IsEmployee, Boolean.valueOf(IsEmployee));
+	}
+
+	/** Get Employee.
+		@return Indicates if  this Business Partner is an employee
+	  */
+	public boolean isEmployee () 
+	{
+		Object oo = get_Value(COLUMNNAME_IsEmployee);
+		if (oo != null) 
+		{
+			 if (oo instanceof Boolean) 
+				 return ((Boolean)oo).booleanValue(); 
+			return "Y".equals(oo);
+		}
+		return false;
 	}
 
 	/** Set PrefijoArchivoPazos.

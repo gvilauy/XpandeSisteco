@@ -261,6 +261,19 @@ public interface I_Z_SistecoConfig
 	  */
 	public boolean isActive();
 
+    /** Column name IsEmployee */
+    public static final String COLUMNNAME_IsEmployee = "IsEmployee";
+
+	/** Set Employee.
+	  * Indicates if  this Business Partner is an employee
+	  */
+	public void setIsEmployee(boolean IsEmployee);
+
+	/** Get Employee.
+	  * Indicates if  this Business Partner is an employee
+	  */
+	public boolean isEmployee();
+
     /** Column name PrefijoArchivoPazos */
     public static final String COLUMNNAME_PrefijoArchivoPazos = "PrefijoArchivoPazos";
 

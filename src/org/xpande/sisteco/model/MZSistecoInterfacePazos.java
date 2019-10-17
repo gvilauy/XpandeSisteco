@@ -152,6 +152,20 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 return;
             }
 
+            // Impuesto asociado al producto
+            MTaxCategory taxCategory = (MTaxCategory) product.getC_TaxCategory();
+            if ((taxCategory == null) || (taxCategory.get_ID() <= 0)){
+                System.out.println("----------Sale en 1a");
+                return;
+            }
+
+            // Obtengo impuesto asociado al producto para este tipo de documentos
+            MTax taxProduct = taxCategory.getDefaultTax();
+            if ((taxProduct == null) || (taxProduct.get_ID() <= 0)){
+                System.out.println("----------Sale en 1b");
+                return;
+            }
+
             sql = " select a.ad_client_id, a.ad_org_id, cvta.st_numeroticket, cvta.datetrx, cfe.st_descripcioncfe, " +
                     " coalesce(cfe.st_seriecfe,'') as st_seriecfe, cfe.st_numerocfe, coalesce(cfe.st_tipocfe,'') as st_tipocfe, " +
                     " a.st_totalmppagomoneda as st_montopagocc, cfel.st_rut, vcli.ST_CodigoCC, coalesce(bp.name, bpcc.name) as st_nombrecc " +
@@ -232,6 +246,15 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 cBParnterID = partnersIDs[0];
                 MBPartner partner = new MBPartner(getCtx(), cBParnterID, null);
 
+                // Si no debo considera empleados (según configuración de sisteco)
+                if (!this.sistecoConfig.isEmployee()){
+                    // Si este socio de negocio esta marcado como empleado
+                    if (partner.isEmployee()){
+                        // No hago nada
+                        System.out.println("----------Sale en 5a");
+                        continue;
+                    }
+                }
 
                 MBPartnerLocation[] partnerLocations = partner.getLocations(true);
                 if (partnerLocations.length <= 0){
@@ -298,7 +321,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 line.setPriceActual(invoice.getTotalLines());
                 line.setLineNetAmt(invoice.getTotalLines());
                 line.set_ValueOfColumn("AmtSubTotal", invoice.getTotalLines());
-                line.setTax();
+                line.setC_Tax_ID(taxProduct.get_ID());
                 line.setTaxAmt();
                 line.setLineNetAmt();
                 line.saveEx();
