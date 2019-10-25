@@ -332,6 +332,10 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     System.out.println("----------Sale en 9");
                     System.out.println("No se pudo completar Invoice en Venta Cuenta Corriente Sisteco : " + message);
                 }
+                else{
+                    invoice.saveEx();
+                }
+
             }
         }
         catch (Exception e){
