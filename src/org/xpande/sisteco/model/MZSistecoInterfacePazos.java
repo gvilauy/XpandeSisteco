@@ -504,8 +504,6 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
             pstmt = DB.prepareStatement(sql1 + " union " + sql2, get_TrxName());
 
-            System.out.println(sql1 + " union " + sql2);
-
             String nombreImpuestoAux = "AUX";
             MZSistecoPazosTax pazosTax = null;
             BigDecimal acumulaTaxAmt = Env.ZERO, acumulaSubTotal = Env.ZERO;
@@ -544,6 +542,88 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 acumulaTaxAmt = acumulaTaxAmt.add(rs.getBigDecimal("impuestos"));
         	    acumulaSubTotal = acumulaSubTotal.add(rs.getBigDecimal("neto"));
         	}
+
+            if (pazosTax != null){
+                pazosTax.setTaxAmt(acumulaTaxAmt);
+                pazosTax.setTaxBaseAmt(acumulaSubTotal);
+                pazosTax.saveEx();
+            }
+
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+        	rs = null; pstmt = null;
+        }
+   }
+
+   private void setImpuestosAstoVta(){
+
+       String sql1 = "", sql2 = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql1 = " select hdr.ad_client_id, hdr.ad_org_id, hdr.datetrx::date as datetrx, a.st_codigoiva, simp.c_taxcategory_id, simp.c_tax_id, " +
+                    " sum(a.st_ivadescuentototal) as impuestos, sum(a.st_preciodescuentototal) as neto " +
+                    " from z_sisteco_tk_lvta a " +
+                    " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
+                    " left outer join z_sistecoimpuesto simp on a.st_codigoiva = simp.st_codigoiva " +
+                    " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and hdr.st_estadoticket ='F' " +
+                    " and a.st_lineacancelada = 0 " +
+                    " group by hdr.ad_client_id, hdr.ad_org_id, hdr.datetrx::date, a.st_codigoiva, simp.c_taxcategory_id, simp.c_tax_id ";
+
+            sql2 = " select hdr.ad_client_id, hdr.ad_org_id, hdr.datetrx::date as datetrx, a.st_codigoiva, simp.c_taxcategory_id, simp.c_tax_id, " +
+                    " sum(a.st_iva) as impuestos, sum(a.st_precio) as neto " +
+                    " from z_sisteco_tk_ldev a " +
+                    " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
+                    " left outer join z_sistecoimpuesto simp on a.st_codigoiva = simp.st_codigoiva " +
+                    " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and hdr.st_estadoticket ='F' " +
+                    " and a.st_lineacancelada = 0  " +
+                    " group by hdr.ad_client_id, hdr.ad_org_id, hdr.datetrx::date, a.st_codigoiva, simp.c_taxcategory_id, simp.c_tax_id " +
+                    " order by c_tax_id ";
+
+            pstmt = DB.prepareStatement(sql1 + " union " + sql2, get_TrxName());
+
+            int cTaxIDAux = 0;
+            MZSistecoPazosTax pazosTax = null;
+            BigDecimal acumulaTaxAmt = Env.ZERO, acumulaSubTotal = Env.ZERO;
+
+            rs = pstmt.executeQuery();
+
+            while(rs.next()){
+
+                if (rs.getInt("c_tax_id") != cTaxIDAux){
+
+                    if (pazosTax != null){
+                        pazosTax.setTaxAmt(acumulaTaxAmt);
+                        pazosTax.setTaxBaseAmt(acumulaSubTotal);
+                        pazosTax.saveEx();
+                    }
+
+                    cTaxIDAux = rs.getInt("c_tax_id");
+                    acumulaTaxAmt = Env.ZERO;
+                    acumulaSubTotal = Env.ZERO;
+
+                    pazosTax = new MZSistecoPazosTax(getCtx(), 0, get_TrxName());
+                    pazosTax.set_ValueOfColumn("AD_Client_ID", rs.getInt("ad_client_id"));
+                    pazosTax.setAD_Org_ID(rs.getInt("ad_org_id"));
+                    pazosTax.setZ_SistecoInterfacePazos_ID(this.get_ID());
+                    pazosTax.setC_TaxCategory_ID(rs.getInt("c_taxcategory_id"));
+                    pazosTax.setDateTrx(rs.getTimestamp("datetrx"));
+                    pazosTax.setName(rs.getString("nomcateg"));
+                    pazosTax.setTaxAmt(acumulaTaxAmt);
+                    pazosTax.setTaxBaseAmt(acumulaSubTotal);
+                    pazosTax.saveEx();
+                }
+
+                acumulaTaxAmt = acumulaTaxAmt.add(rs.getBigDecimal("impuestos"));
+                acumulaSubTotal = acumulaSubTotal.add(rs.getBigDecimal("neto"));
+            }
 
             if (pazosTax != null){
                 pazosTax.setTaxAmt(acumulaTaxAmt);
