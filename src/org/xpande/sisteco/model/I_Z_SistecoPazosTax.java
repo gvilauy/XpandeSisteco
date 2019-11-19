@@ -148,6 +148,15 @@ public interface I_Z_SistecoPazosTax
 	  */
 	public String getName();
 
+    /** Column name ST_CodigoIVA */
+    public static final String COLUMNNAME_ST_CodigoIVA = "ST_CodigoIVA";
+
+	/** Set ST_CodigoIVA	  */
+	public void setST_CodigoIVA(String ST_CodigoIVA);
+
+	/** Get ST_CodigoIVA	  */
+	public String getST_CodigoIVA();
+
     /** Column name TaxAmt */
     public static final String COLUMNNAME_TaxAmt = "TaxAmt";
 

@@ -33,7 +33,7 @@ public class X_Z_SistecoPazosTax extends PO implements I_Z_SistecoPazosTax, I_Pe
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170814L;
+	private static final long serialVersionUID = 20191119L;
 
     /** Standard Constructor */
     public X_Z_SistecoPazosTax (Properties ctx, int Z_SistecoPazosTax_ID, String trxName)
@@ -165,6 +165,20 @@ public class X_Z_SistecoPazosTax extends PO implements I_Z_SistecoPazosTax, I_Pe
 	public String getName () 
 	{
 		return (String)get_Value(COLUMNNAME_Name);
+	}
+
+	/** Set ST_CodigoIVA.
+		@param ST_CodigoIVA ST_CodigoIVA	  */
+	public void setST_CodigoIVA (String ST_CodigoIVA)
+	{
+		set_Value (COLUMNNAME_ST_CodigoIVA, ST_CodigoIVA);
+	}
+
+	/** Get ST_CodigoIVA.
+		@return ST_CodigoIVA	  */
+	public String getST_CodigoIVA () 
+	{
+		return (String)get_Value(COLUMNNAME_ST_CodigoIVA);
 	}
 
 	/** Set Tax Amount.

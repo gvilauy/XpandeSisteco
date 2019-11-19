@@ -102,13 +102,15 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             this.setTotals();
 
             // Obtengo y guardo desgloce de ventas por Impuesto
-            this.setDesgloceImpuestos();
+            //this.setDesgloceImpuestos();
+            this.setImpuestosAstoVta();
 
             // Otengo y guardo detalle de ventas por RUT y Ticket
             this.setVentasRUTxTicket();
 
             // Otengo y guardo detalle de ventas por RUT y Ticket desglozadas por Impuestos
-            this.setDesgloceRUTImpuestos();
+            //this.setDesgloceRUTImpuestos();
+            this.setImpuestosXRUTAstoVta();
 
             // Obtengo y guardo ventas a credito y cuenta corriente
             this.setVentasCredito();
@@ -559,6 +561,10 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         }
    }
 
+    /***
+     * Setea impuestos para asientos de venta.
+     * Xpande. Created by Gabriel Vila on 11/19/19
+     */
    private void setImpuestosAstoVta(){
 
        String sql1 = "", sql2 = "";
@@ -618,6 +624,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     pazosTax.setName(rs.getString("nomcateg"));
                     pazosTax.setTaxAmt(acumulaTaxAmt);
                     pazosTax.setTaxBaseAmt(acumulaSubTotal);
+                    pazosTax.setST_CodigoIVA(rs.getString("st_codigoiva"));
                     pazosTax.saveEx();
                 }
 
@@ -768,6 +775,72 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         }
     }
 
+    private void setImpuestosXRUTAstoVta() {
+
+        String sql1 = "", sql2 = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql1 = " select datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg, sum(impuestos) as taxamt, sum(neto) as amtsubtotal " +
+                    " from( " +
+                    " select hdr.datetrx::date as datetrx, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, " +
+                    " simp.c_taxcategory_id, categ.name as nomcateg, sum(a.st_ivadescuentototal) as impuestos, sum(a.st_preciodescuentototal) as neto " +
+                    " from z_sisteco_tk_lvta a " +
+                    " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
+                    " inner join zv_sisteco_vtasrut_tk vr on (hdr.z_sistecointerfacepazos_id = vr.z_sistecointerfacepazos_id AND hdr.st_numeroticket = vr.st_numeroticket) " +
+                    " left outer join z_sistecoimpuesto simp on a.st_codigoiva = simp.st_codigoiva " +
+                    " left outer join c_taxcategory categ on simp.c_taxcategory_id = categ.c_taxcategory_id " +
+                    " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and hdr.st_estadoticket ='F' " +
+                    " and a.st_lineacancelada =0 " +
+                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, simp.c_taxcategory_id, categ.name ";
+
+            sql2 = " select hdr.datetrx::date as datetrx, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, " +
+                    " simp.c_taxcategory_id, categ.name as nomcateg, sum(a.st_iva) as impuestos, sum(a.st_precio) as neto " +
+                    " from z_sisteco_tk_ldev a " +
+                    " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
+                    " inner join zv_sisteco_vtasrut_tk vr on (hdr.z_sistecointerfacepazos_id = vr.z_sistecointerfacepazos_id AND hdr.st_numeroticket = vr.st_numeroticket) " +
+                    " left outer join z_sistecoimpuesto simp on a.st_codigoiva = simp.st_codigoiva " +
+                    " left outer join c_taxcategory categ on simp.c_taxcategory_id = categ.c_taxcategory_id " +
+                    " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and hdr.st_estadoticket ='F' " +
+                    " and a.st_lineacancelada =0 " +
+                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, simp.c_taxcategory_id, categ.name " +
+                    " group by datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg " +
+                    " order by datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg ";
+
+            pstmt = DB.prepareStatement(sql1 + " union " + sql2, get_TrxName());
+
+            System.out.println(sql1 + " union " + sql2);
+
+            rs = pstmt.executeQuery();
+
+            while(rs.next()){
+                MZSistecoPazosTaxTKRUT taxTKRUT = new MZSistecoPazosTaxTKRUT(getCtx(), 0, get_TrxName());
+                taxTKRUT.setAD_Org_ID(this.getAD_Org_ID());
+                taxTKRUT.set_ValueOfColumn("AD_Client_ID", this.sistecoConfig.getAD_Client_ID());
+                taxTKRUT.setZ_SistecoInterfacePazos_ID(this.get_ID());
+                taxTKRUT.setAmtSubtotal(rs.getBigDecimal("amtsubtotal"));
+                taxTKRUT.setC_TaxCategory_ID(rs.getInt("c_taxcategory_id"));
+                taxTKRUT.setDateTrx(rs.getTimestamp("datetrx"));
+                taxTKRUT.setName(rs.getString("nomcateg"));
+                taxTKRUT.setST_DocumentoReceptor(rs.getString("st_documentoreceptor"));
+                taxTKRUT.setST_NombreReceptor(rs.getString("st_nombrereceptor"));
+                taxTKRUT.setST_NumeroTicket(rs.getString("st_numeroticket"));
+                taxTKRUT.setTaxAmt(rs.getBigDecimal("taxamt"));
+                taxTKRUT.setZ_Sisteco_TK_CVta_ID(rs.getInt("Z_Sisteco_TK_CVta_ID"));
+                taxTKRUT.saveEx();
+            }
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+    }
 
     /***
      * Lee archivo a procesar y va guardando información en base de datos.
