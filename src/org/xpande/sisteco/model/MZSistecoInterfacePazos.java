@@ -615,13 +615,15 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     acumulaTaxAmt = Env.ZERO;
                     acumulaSubTotal = Env.ZERO;
 
+                    MTax tax = new MTax(getCtx(), rs.getInt("c_tax_id"), null);
+
                     pazosTax = new MZSistecoPazosTax(getCtx(), 0, get_TrxName());
                     pazosTax.set_ValueOfColumn("AD_Client_ID", rs.getInt("ad_client_id"));
                     pazosTax.setAD_Org_ID(rs.getInt("ad_org_id"));
                     pazosTax.setZ_SistecoInterfacePazos_ID(this.get_ID());
                     pazosTax.setC_TaxCategory_ID(rs.getInt("c_taxcategory_id"));
                     pazosTax.setDateTrx(rs.getTimestamp("datetrx"));
-                    pazosTax.setName(rs.getString("nomcateg"));
+                    pazosTax.setName(tax.getName());
                     pazosTax.setTaxAmt(acumulaTaxAmt);
                     pazosTax.setTaxBaseAmt(acumulaSubTotal);
                     pazosTax.setST_CodigoIVA(rs.getString("st_codigoiva"));
