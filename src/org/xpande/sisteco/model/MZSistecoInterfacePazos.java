@@ -808,7 +808,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " and hdr.st_estadoticket ='F' " +
                     " and a.st_lineacancelada =0 " +
-                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, simp.c_taxcategory_id, categ.name " +
+                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, simp.c_taxcategory_id, categ.name) as info " +
                     " group by datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg " +
                     " order by datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg ";
 
