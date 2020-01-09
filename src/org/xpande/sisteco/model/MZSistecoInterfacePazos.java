@@ -170,7 +170,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
             sql = " select a.ad_client_id, a.ad_org_id, cvta.st_numeroticket, cvta.datetrx, cfe.st_descripcioncfe, " +
                     " coalesce(cfe.st_seriecfe,'') as st_seriecfe, cfe.st_numerocfe, coalesce(cfe.st_tipocfe,'') as st_tipocfe, " +
-                    " a.st_totalmppagomoneda as st_montopagocc, cfel.st_rut, vcli.ST_CodigoCC, coalesce(bp.name, bpcc.name) as st_nombrecc " +
+                    " coalesce(a.st_totalentregado, a.st_totalmppagomoneda) as st_montopagocc, cfel.st_rut, vcli.ST_CodigoCC, coalesce(bp.name, bpcc.name) as st_nombrecc " +
                     " from z_sisteco_tk_vtactacte a " +
                     " inner join z_sisteco_tk_cvta cvta on a.z_sisteco_tk_cvta_id = cvta.z_sisteco_tk_cvta_id " +
                     " inner join z_sisteco_tk_cfecab cfe on cvta.z_sisteco_tk_cvta_id = cfe.z_sisteco_tk_cvta_id " +
