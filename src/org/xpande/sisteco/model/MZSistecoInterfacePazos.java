@@ -724,7 +724,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " left outer join c_taxcategory categ on prod.c_taxcategory_id = categ.c_taxcategory_id " +
                     " left outer join z_productorubrotax rubtax on (prod.z_productorubro_id = rubtax.z_productorubro_id and prod.c_taxcategory_id = rubtax.c_taxcategory_id) " +
                     " left outer join c_taxcategory categrubro on categrubro.c_taxcategory_id = rubtax.c_taxcategory_to_id " +
-                    " where hdr.z_sistecointerfacepazos_id =" + + this.get_ID() +
+                    " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " and hdr.st_estadoticket ='F' " +
                     " and a.st_lineacancelada =0 " +
                     " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, idcateg, nomcateg ";
@@ -889,7 +889,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
                 contLineas++;
 
+                // CARACTER DEBE SER PARAMETRIZABLE: para covadonga es |  y ahora para planeta es #
                 String nodos[] = lineaArchivo.split("\\|");
+                //String nodos[] = lineaArchivo.split("\\#");
 
                 if (this.IsLineaArchivoCabezal(lineaArchivo)) {
 
