@@ -30,7 +30,7 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20191017L;
+	private static final long serialVersionUID = 20200331L;
 
     /** Standard Constructor */
     public X_Z_SistecoConfig (Properties ctx, int Z_SistecoConfig_ID, String trxName)
@@ -238,6 +238,29 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 		return false;
 	}
 
+	/** Set BPCobroDomPOS_ID.
+		@param BPCobroDomPOS_ID 
+		Socio de Negocio para Migración de Ventas por Cobros a Domicilio desde POS
+	  */
+	public void setBPCobroDomPOS_ID (int BPCobroDomPOS_ID)
+	{
+		if (BPCobroDomPOS_ID < 1) 
+			set_Value (COLUMNNAME_BPCobroDomPOS_ID, null);
+		else 
+			set_Value (COLUMNNAME_BPCobroDomPOS_ID, Integer.valueOf(BPCobroDomPOS_ID));
+	}
+
+	/** Get BPCobroDomPOS_ID.
+		@return Socio de Negocio para Migración de Ventas por Cobros a Domicilio desde POS
+	  */
+	public int getBPCobroDomPOS_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_BPCobroDomPOS_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set CreateBatchFile.
 		@param CreateBatchFile 
 		Si se debe crear o no archivos batch en interface con Sisteco
@@ -368,6 +391,29 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	public String getPrefijoArchivoPazos () 
 	{
 		return (String)get_Value(COLUMNNAME_PrefijoArchivoPazos);
+	}
+
+	/** Set ProdCobroDomPOS_ID.
+		@param ProdCobroDomPOS_ID 
+		Producto para Migración de Ventas por Cobros a Domicilio desde POS
+	  */
+	public void setProdCobroDomPOS_ID (int ProdCobroDomPOS_ID)
+	{
+		if (ProdCobroDomPOS_ID < 1) 
+			set_Value (COLUMNNAME_ProdCobroDomPOS_ID, null);
+		else 
+			set_Value (COLUMNNAME_ProdCobroDomPOS_ID, Integer.valueOf(ProdCobroDomPOS_ID));
+	}
+
+	/** Get ProdCobroDomPOS_ID.
+		@return Producto para Migración de Ventas por Cobros a Domicilio desde POS
+	  */
+	public int getProdCobroDomPOS_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ProdCobroDomPOS_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
 	}
 
 	/** Set ProdVtasCredPOS_ID.

@@ -180,6 +180,19 @@ public interface I_Z_SistecoConfig
 	  */
 	public boolean isBatchOnlyPartner();
 
+    /** Column name BPCobroDomPOS_ID */
+    public static final String COLUMNNAME_BPCobroDomPOS_ID = "BPCobroDomPOS_ID";
+
+	/** Set BPCobroDomPOS_ID.
+	  * Socio de Negocio para Migración de Ventas por Cobros a Domicilio desde POS
+	  */
+	public void setBPCobroDomPOS_ID(int BPCobroDomPOS_ID);
+
+	/** Get BPCobroDomPOS_ID.
+	  * Socio de Negocio para Migración de Ventas por Cobros a Domicilio desde POS
+	  */
+	public int getBPCobroDomPOS_ID();
+
     /** Column name CreateBatchFile */
     public static final String COLUMNNAME_CreateBatchFile = "CreateBatchFile";
 
@@ -282,6 +295,19 @@ public interface I_Z_SistecoConfig
 
 	/** Get PrefijoArchivoPazos	  */
 	public String getPrefijoArchivoPazos();
+
+    /** Column name ProdCobroDomPOS_ID */
+    public static final String COLUMNNAME_ProdCobroDomPOS_ID = "ProdCobroDomPOS_ID";
+
+	/** Set ProdCobroDomPOS_ID.
+	  * Producto para Migración de Ventas por Cobros a Domicilio desde POS
+	  */
+	public void setProdCobroDomPOS_ID(int ProdCobroDomPOS_ID);
+
+	/** Get ProdCobroDomPOS_ID.
+	  * Producto para Migración de Ventas por Cobros a Domicilio desde POS
+	  */
+	public int getProdCobroDomPOS_ID();
 
     /** Column name ProdVtasCredPOS_ID */
     public static final String COLUMNNAME_ProdVtasCredPOS_ID = "ProdVtasCredPOS_ID";
