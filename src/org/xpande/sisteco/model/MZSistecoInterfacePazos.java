@@ -115,6 +115,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             // Obtengo y guardo ventas a credito y cuenta corriente
             this.setVentasCredito();
 
+            // Obtengo y guardo ventas por cobros a domicilio
+            this.setVentasCobroDomicilio();
+
             // Tiempo final de proceso
             this.setEndDate(new Timestamp(System.currentTimeMillis()));
 
@@ -356,6 +359,12 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 return;
             }
 
+            // Socio de Negocio a considerar
+            MBPartner partner = new MBPartner(getCtx(), this.sistecoConfig.getBPCobroDomPOS_ID(), null);
+            if ((partner == null) || (partner.get_ID() <= 0)){
+                return;
+            }
+
             // Impuesto asociado al producto
             MTaxCategory taxCategory = (MTaxCategory) product.getC_TaxCategory();
             if ((taxCategory == null) || (taxCategory.get_ID() <= 0)){
@@ -370,15 +379,12 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
             sql = " select a.ad_client_id, a.ad_org_id, cvta.st_numeroticket, cvta.datetrx, cfe.st_descripcioncfe, " +
                     " coalesce(cfe.st_seriecfe,'') as st_seriecfe, cfe.st_numerocfe, coalesce(cfe.st_tipocfe,'') as st_tipocfe, " +
-                    " coalesce(a.st_totalentregado, a.st_totalmppagomoneda) as st_montopagocc, cfel.st_rut, vcli.ST_CodigoCC, coalesce(bp.name, bpcc.name) as st_nombrecc " +
-                    " from z_sisteco_tk_vtactacte a " +
+                    " coalesce(a.st_totalentregado, a.st_totalmppagomoneda) as st_montopagocc " +
+                    " from z_sisteco_tk_vtaefectivo a " +
                     " inner join z_sisteco_tk_cvta cvta on a.z_sisteco_tk_cvta_id = cvta.z_sisteco_tk_cvta_id " +
                     " inner join z_sisteco_tk_cfecab cfe on cvta.z_sisteco_tk_cvta_id = cfe.z_sisteco_tk_cvta_id " +
-                    " left outer join z_sisteco_tk_cfelinea cfel on cvta.z_sisteco_tk_cvta_id = cfel.z_sisteco_tk_cvta_id " +
-                    " left outer join z_sisteco_tk_vtacliente vcli on cvta.z_sisteco_tk_cvta_id = vcli.z_sisteco_tk_cvta_id " +
-                    " left outer join c_bpartner bp on cfel.st_rut = bp.taxid " +
-                    " left outer join c_bpartner bpcc on cast(vcli.st_codigocc as character varying(40)) = bpcc.value " +
                     " where cvta.st_estadoticket::text = 'F' " +
+                    " and a.st_codigomediopago='9' " +
                     " and cvta.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " ORDER BY a.datetrx, cvta.st_numeroticket ";
 
@@ -414,35 +420,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 }
                 MDocType docType = new MDocType(getCtx(), cDocTypeID, null);
 
-                int cBParnterID = 0;
                 String whereClause = "";
-
-                String taxID = rs.getString("st_rut");
-
-                if ((taxID != null) && (!taxID.trim().equalsIgnoreCase(""))){
-                    whereClause = " c_bpartner.taxID ='" + taxID + "'";
-                }
-                else{
-                    if (rs.getInt("ST_CodigoCC") > 0){
-                        whereClause = " c_bpartner.value ='" + String.valueOf(rs.getInt("ST_CodigoCC")) + "'";
-                    }
-                }
-
-                int[] partnersIDs = MBPartner.getAllIDs(I_C_BPartner.Table_Name, whereClause, null);
-                if (partnersIDs.length <= 0){
-                    if (rs.getInt("ST_CodigoCC") > 0){
-                        whereClause = " c_bpartner.taxid ='" + String.valueOf(rs.getInt("ST_CodigoCC")) + "'";
-                        partnersIDs = MBPartner.getAllIDs(I_C_BPartner.Table_Name, whereClause, null);
-                        if (partnersIDs.length <= 0){
-                            continue;
-                        }
-                    }
-                    else{
-                        continue;
-                    }
-                }
-                cBParnterID = partnersIDs[0];
-                MBPartner partner = new MBPartner(getCtx(), cBParnterID, null);
 
                 // Si no debo considera empleados (según configuración de sisteco)
                 if (!this.sistecoConfig.isEmployee()){
