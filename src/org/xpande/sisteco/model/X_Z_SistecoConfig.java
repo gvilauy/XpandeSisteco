@@ -30,7 +30,7 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200331L;
+	private static final long serialVersionUID = 20200415L;
 
     /** Standard Constructor */
     public X_Z_SistecoConfig (Properties ctx, int Z_SistecoConfig_ID, String trxName)
@@ -261,6 +261,29 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set BPEnvasePOS_ID.
+		@param BPEnvasePOS_ID 
+		Socio de Negocio para Migración de Ventas por Envases desde POS
+	  */
+	public void setBPEnvasePOS_ID (int BPEnvasePOS_ID)
+	{
+		if (BPEnvasePOS_ID < 1) 
+			set_Value (COLUMNNAME_BPEnvasePOS_ID, null);
+		else 
+			set_Value (COLUMNNAME_BPEnvasePOS_ID, Integer.valueOf(BPEnvasePOS_ID));
+	}
+
+	/** Get BPEnvasePOS_ID.
+		@return Socio de Negocio para Migración de Ventas por Envases desde POS
+	  */
+	public int getBPEnvasePOS_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_BPEnvasePOS_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set CreateBatchFile.
 		@param CreateBatchFile 
 		Si se debe crear o no archivos batch en interface con Sisteco
@@ -411,6 +434,29 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 	public int getProdCobroDomPOS_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_ProdCobroDomPOS_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set ProdEnvasePOS_ID.
+		@param ProdEnvasePOS_ID 
+		Producto para Migración de Ventas por Envases desde POS
+	  */
+	public void setProdEnvasePOS_ID (int ProdEnvasePOS_ID)
+	{
+		if (ProdEnvasePOS_ID < 1) 
+			set_Value (COLUMNNAME_ProdEnvasePOS_ID, null);
+		else 
+			set_Value (COLUMNNAME_ProdEnvasePOS_ID, Integer.valueOf(ProdEnvasePOS_ID));
+	}
+
+	/** Get ProdEnvasePOS_ID.
+		@return Producto para Migración de Ventas por Envases desde POS
+	  */
+	public int getProdEnvasePOS_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_ProdEnvasePOS_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

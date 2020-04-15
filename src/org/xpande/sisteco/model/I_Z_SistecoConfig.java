@@ -56,7 +56,7 @@ public interface I_Z_SistecoConfig
 	/** Set Organization.
 	  * Organizational entity within client
 	  */
-	public void setAD_Org_ID(int AD_Org_ID);
+	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
 	  * Organizational entity within client
@@ -69,7 +69,7 @@ public interface I_Z_SistecoConfig
 	/** Set ArchivoBatch.
 	  * Nombre del archivo Batch de interface de salida de Sisteco
 	  */
-	public void setArchivoBatch(String ArchivoBatch);
+	public void setArchivoBatch (String ArchivoBatch);
 
 	/** Get ArchivoBatch.
 	  * Nombre del archivo Batch de interface de salida de Sisteco
@@ -82,7 +82,7 @@ public interface I_Z_SistecoConfig
 	/** Set ArchivoBatchError.
 	  * Nombre de archivo Batch de errores de interface de salida de Sisteco
 	  */
-	public void setArchivoBatchError(String ArchivoBatchError);
+	public void setArchivoBatchError (String ArchivoBatchError);
 
 	/** Get ArchivoBatchError.
 	  * Nombre de archivo Batch de errores de interface de salida de Sisteco
@@ -95,7 +95,7 @@ public interface I_Z_SistecoConfig
 	/** Set ArchivoBatchErrorMast.
 	  * Nombre de archivo Batch de errores de interface de salida de Sisteco para Maestro
 	  */
-	public void setArchivoBatchErrorMast(String ArchivoBatchErrorMast);
+	public void setArchivoBatchErrorMast (String ArchivoBatchErrorMast);
 
 	/** Get ArchivoBatchErrorMast.
 	  * Nombre de archivo Batch de errores de interface de salida de Sisteco para Maestro
@@ -108,7 +108,7 @@ public interface I_Z_SistecoConfig
 	/** Set ArchivoBatchMast.
 	  * Nombre del archivo Batch de interface de salida de Sisteco para Maestro
 	  */
-	public void setArchivoBatchMast(String ArchivoBatchMast);
+	public void setArchivoBatchMast (String ArchivoBatchMast);
 
 	/** Get ArchivoBatchMast.
 	  * Nombre del archivo Batch de interface de salida de Sisteco para Maestro
@@ -121,7 +121,7 @@ public interface I_Z_SistecoConfig
 	/** Set ArchivoCountBatch.
 	  * Nombre del archivo CountBatch de interface de salida de Sisteco
 	  */
-	public void setArchivoCountBatch(String ArchivoCountBatch);
+	public void setArchivoCountBatch (String ArchivoCountBatch);
 
 	/** Get ArchivoCountBatch.
 	  * Nombre del archivo CountBatch de interface de salida de Sisteco
@@ -134,7 +134,7 @@ public interface I_Z_SistecoConfig
 	/** Set ArchivoCountBatchMast.
 	  * Nombre del archivo CountBatch de interface de salida de Sisteco para Maestro
 	  */
-	public void setArchivoCountBatchMast(String ArchivoCountBatchMast);
+	public void setArchivoCountBatchMast (String ArchivoCountBatchMast);
 
 	/** Get ArchivoCountBatchMast.
 	  * Nombre del archivo CountBatch de interface de salida de Sisteco para Maestro
@@ -147,7 +147,7 @@ public interface I_Z_SistecoConfig
 	/** Set ArchivoCountOnline.
 	  * Nombre del archivo CountOnline de interface de salida de Sisteco
 	  */
-	public void setArchivoCountOnline(String ArchivoCountOnline);
+	public void setArchivoCountOnline (String ArchivoCountOnline);
 
 	/** Get ArchivoCountOnline.
 	  * Nombre del archivo CountOnline de interface de salida de Sisteco
@@ -160,7 +160,7 @@ public interface I_Z_SistecoConfig
 	/** Set ArchivoOnline.
 	  * Nombre del archivo Online de interface de salida de Sisteco
 	  */
-	public void setArchivoOnline(String ArchivoOnline);
+	public void setArchivoOnline (String ArchivoOnline);
 
 	/** Get ArchivoOnline.
 	  * Nombre del archivo Online de interface de salida de Sisteco
@@ -173,7 +173,7 @@ public interface I_Z_SistecoConfig
 	/** Set BatchOnlyPartner.
 	  * Si solo se guardan socios de negocio en archivos bath de interface con Sisteco
 	  */
-	public void setBatchOnlyPartner(boolean BatchOnlyPartner);
+	public void setBatchOnlyPartner (boolean BatchOnlyPartner);
 
 	/** Get BatchOnlyPartner.
 	  * Si solo se guardan socios de negocio en archivos bath de interface con Sisteco
@@ -186,12 +186,25 @@ public interface I_Z_SistecoConfig
 	/** Set BPCobroDomPOS_ID.
 	  * Socio de Negocio para Migración de Ventas por Cobros a Domicilio desde POS
 	  */
-	public void setBPCobroDomPOS_ID(int BPCobroDomPOS_ID);
+	public void setBPCobroDomPOS_ID (int BPCobroDomPOS_ID);
 
 	/** Get BPCobroDomPOS_ID.
 	  * Socio de Negocio para Migración de Ventas por Cobros a Domicilio desde POS
 	  */
 	public int getBPCobroDomPOS_ID();
+
+    /** Column name BPEnvasePOS_ID */
+    public static final String COLUMNNAME_BPEnvasePOS_ID = "BPEnvasePOS_ID";
+
+	/** Set BPEnvasePOS_ID.
+	  * Socio de Negocio para Migración de Ventas por Envases desde POS
+	  */
+	public void setBPEnvasePOS_ID (int BPEnvasePOS_ID);
+
+	/** Get BPEnvasePOS_ID.
+	  * Socio de Negocio para Migración de Ventas por Envases desde POS
+	  */
+	public int getBPEnvasePOS_ID();
 
     /** Column name CreateBatchFile */
     public static final String COLUMNNAME_CreateBatchFile = "CreateBatchFile";
@@ -199,7 +212,7 @@ public interface I_Z_SistecoConfig
 	/** Set CreateBatchFile.
 	  * Si se debe crear o no archivos batch en interface con Sisteco
 	  */
-	public void setCreateBatchFile(boolean CreateBatchFile);
+	public void setCreateBatchFile (boolean CreateBatchFile);
 
 	/** Get CreateBatchFile.
 	  * Si se debe crear o no archivos batch en interface con Sisteco
@@ -228,7 +241,7 @@ public interface I_Z_SistecoConfig
 	/** Set CreateOnlineFile.
 	  * Si se debe crear o no archivos online en interface con Sisteco
 	  */
-	public void setCreateOnlineFile(boolean CreateOnlineFile);
+	public void setCreateOnlineFile (boolean CreateOnlineFile);
 
 	/** Get CreateOnlineFile.
 	  * Si se debe crear o no archivos online en interface con Sisteco
@@ -241,7 +254,7 @@ public interface I_Z_SistecoConfig
 	/** Set DefaultDocPosARC_ID.
 	  * ID de documento para migración de notas de crédito de venta crédito desde POS
 	  */
-	public void setDefaultDocPosARC_ID(int DefaultDocPosARC_ID);
+	public void setDefaultDocPosARC_ID (int DefaultDocPosARC_ID);
 
 	/** Get DefaultDocPosARC_ID.
 	  * ID de documento para migración de notas de crédito de venta crédito desde POS
@@ -254,7 +267,7 @@ public interface I_Z_SistecoConfig
 	/** Set DefaultDocPosARI_ID.
 	  * ID de documento para migración de facturas de venta crédito desde POS
 	  */
-	public void setDefaultDocPosARI_ID(int DefaultDocPosARI_ID);
+	public void setDefaultDocPosARI_ID (int DefaultDocPosARI_ID);
 
 	/** Get DefaultDocPosARI_ID.
 	  * ID de documento para migración de facturas de venta crédito desde POS
@@ -267,7 +280,7 @@ public interface I_Z_SistecoConfig
 	/** Set Active.
 	  * The record is active in the system
 	  */
-	public void setIsActive(boolean IsActive);
+	public void setIsActive (boolean IsActive);
 
 	/** Get Active.
 	  * The record is active in the system
@@ -280,7 +293,7 @@ public interface I_Z_SistecoConfig
 	/** Set Employee.
 	  * Indicates if  this Business Partner is an employee
 	  */
-	public void setIsEmployee(boolean IsEmployee);
+	public void setIsEmployee (boolean IsEmployee);
 
 	/** Get Employee.
 	  * Indicates if  this Business Partner is an employee
@@ -291,7 +304,7 @@ public interface I_Z_SistecoConfig
     public static final String COLUMNNAME_PrefijoArchivoPazos = "PrefijoArchivoPazos";
 
 	/** Set PrefijoArchivoPazos	  */
-	public void setPrefijoArchivoPazos(String PrefijoArchivoPazos);
+	public void setPrefijoArchivoPazos (String PrefijoArchivoPazos);
 
 	/** Get PrefijoArchivoPazos	  */
 	public String getPrefijoArchivoPazos();
@@ -302,12 +315,25 @@ public interface I_Z_SistecoConfig
 	/** Set ProdCobroDomPOS_ID.
 	  * Producto para Migración de Ventas por Cobros a Domicilio desde POS
 	  */
-	public void setProdCobroDomPOS_ID(int ProdCobroDomPOS_ID);
+	public void setProdCobroDomPOS_ID (int ProdCobroDomPOS_ID);
 
 	/** Get ProdCobroDomPOS_ID.
 	  * Producto para Migración de Ventas por Cobros a Domicilio desde POS
 	  */
 	public int getProdCobroDomPOS_ID();
+
+    /** Column name ProdEnvasePOS_ID */
+    public static final String COLUMNNAME_ProdEnvasePOS_ID = "ProdEnvasePOS_ID";
+
+	/** Set ProdEnvasePOS_ID.
+	  * Producto para Migración de Ventas por Envases desde POS
+	  */
+	public void setProdEnvasePOS_ID (int ProdEnvasePOS_ID);
+
+	/** Get ProdEnvasePOS_ID.
+	  * Producto para Migración de Ventas por Envases desde POS
+	  */
+	public int getProdEnvasePOS_ID();
 
     /** Column name ProdVtasCredPOS_ID */
     public static final String COLUMNNAME_ProdVtasCredPOS_ID = "ProdVtasCredPOS_ID";
@@ -315,7 +341,7 @@ public interface I_Z_SistecoConfig
 	/** Set ProdVtasCredPOS_ID.
 	  * Producto para Migración de Ventas Crédito desde POS
 	  */
-	public void setProdVtasCredPOS_ID(int ProdVtasCredPOS_ID);
+	public void setProdVtasCredPOS_ID (int ProdVtasCredPOS_ID);
 
 	/** Get ProdVtasCredPOS_ID.
 	  * Producto para Migración de Ventas Crédito desde POS
@@ -326,7 +352,7 @@ public interface I_Z_SistecoConfig
     public static final String COLUMNNAME_RutaDestinoSistema = "RutaDestinoSistema";
 
 	/** Set RutaDestinoSistema	  */
-	public void setRutaDestinoSistema(String RutaDestinoSistema);
+	public void setRutaDestinoSistema (String RutaDestinoSistema);
 
 	/** Get RutaDestinoSistema	  */
 	public String getRutaDestinoSistema();
@@ -335,7 +361,7 @@ public interface I_Z_SistecoConfig
     public static final String COLUMNNAME_RutaHistoricoPazos = "RutaHistoricoPazos";
 
 	/** Set RutaHistoricoPazos	  */
-	public void setRutaHistoricoPazos(String RutaHistoricoPazos);
+	public void setRutaHistoricoPazos (String RutaHistoricoPazos);
 
 	/** Get RutaHistoricoPazos	  */
 	public String getRutaHistoricoPazos();
@@ -346,7 +372,7 @@ public interface I_Z_SistecoConfig
 	/** Set RutaInterfaceMastHist.
 	  * Ruta para archivos de histórico de maestros de interface con POS Sisteco
 	  */
-	public void setRutaInterfaceMastHist(String RutaInterfaceMastHist);
+	public void setRutaInterfaceMastHist (String RutaInterfaceMastHist);
 
 	/** Get RutaInterfaceMastHist.
 	  * Ruta para archivos de histórico de maestros de interface con POS Sisteco
@@ -359,7 +385,7 @@ public interface I_Z_SistecoConfig
 	/** Set RutaInterfaceOut.
 	  * Ruta donde se crean los archivos de interface de salida para Sisteco
 	  */
-	public void setRutaInterfaceOut(String RutaInterfaceOut);
+	public void setRutaInterfaceOut (String RutaInterfaceOut);
 
 	/** Get RutaInterfaceOut.
 	  * Ruta donde se crean los archivos de interface de salida para Sisteco
@@ -372,7 +398,7 @@ public interface I_Z_SistecoConfig
 	/** Set RutaInterfaceOutHist.
 	  * Ruta donde dejar archivos de historico de interface de salida a Sisteco
 	  */
-	public void setRutaInterfaceOutHist(String RutaInterfaceOutHist);
+	public void setRutaInterfaceOutHist (String RutaInterfaceOutHist);
 
 	/** Get RutaInterfaceOutHist.
 	  * Ruta donde dejar archivos de historico de interface de salida a Sisteco
@@ -383,7 +409,7 @@ public interface I_Z_SistecoConfig
     public static final String COLUMNNAME_RutaOrigenPazos = "RutaOrigenPazos";
 
 	/** Set RutaOrigenPazos	  */
-	public void setRutaOrigenPazos(String RutaOrigenPazos);
+	public void setRutaOrigenPazos (String RutaOrigenPazos);
 
 	/** Get RutaOrigenPazos	  */
 	public String getRutaOrigenPazos();
@@ -394,7 +420,7 @@ public interface I_Z_SistecoConfig
 	/** Set SeparadorArchivoOut.
 	  * Separador de campos del archivo de interface de salida de Sisteco
 	  */
-	public void setSeparadorArchivoOut(String SeparadorArchivoOut);
+	public void setSeparadorArchivoOut (String SeparadorArchivoOut);
 
 	/** Get SeparadorArchivoOut.
 	  * Separador de campos del archivo de interface de salida de Sisteco
@@ -421,7 +447,7 @@ public interface I_Z_SistecoConfig
     public static final String COLUMNNAME_Z_PosVendor_ID = "Z_PosVendor_ID";
 
 	/** Set Z_PosVendor ID	  */
-	public void setZ_PosVendor_ID(int Z_PosVendor_ID);
+	public void setZ_PosVendor_ID (int Z_PosVendor_ID);
 
 	/** Get Z_PosVendor ID	  */
 	public int getZ_PosVendor_ID();
@@ -430,7 +456,7 @@ public interface I_Z_SistecoConfig
     public static final String COLUMNNAME_Z_SistecoConfig_ID = "Z_SistecoConfig_ID";
 
 	/** Set Z_SistecoConfig ID	  */
-	public void setZ_SistecoConfig_ID(int Z_SistecoConfig_ID);
+	public void setZ_SistecoConfig_ID (int Z_SistecoConfig_ID);
 
 	/** Get Z_SistecoConfig ID	  */
 	public int getZ_SistecoConfig_ID();
