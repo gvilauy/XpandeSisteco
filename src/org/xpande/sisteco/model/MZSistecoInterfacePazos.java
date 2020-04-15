@@ -598,11 +598,11 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
                     // e-ticket o e-factura
                     if ((tipoCFE.equalsIgnoreCase("101")) || (tipoCFE.equalsIgnoreCase("111"))){
-                        cDocTypeID = this.sistecoConfig.getDefaultDocPosARI_ID();
+                        cDocTypeID = this.sistecoConfig.getDocIntPosARI_ID();
                     }
                     // e-ticket nc o e-factura nc
                     else if ((tipoCFE.equalsIgnoreCase("102")) || (tipoCFE.equalsIgnoreCase("112"))){
-                        cDocTypeID = this.sistecoConfig.getDefaultDocPosARC_ID();
+                        cDocTypeID = this.sistecoConfig.getDocIntPosARC_ID();
                     }
 
                     if (cDocTypeID <= 0){

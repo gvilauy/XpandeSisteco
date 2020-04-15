@@ -274,6 +274,32 @@ public interface I_Z_SistecoConfig
 	  */
 	public int getDefaultDocPosARI_ID();
 
+    /** Column name DocIntPosARC_ID */
+    public static final String COLUMNNAME_DocIntPosARC_ID = "DocIntPosARC_ID";
+
+	/** Set DocIntPosARC_ID.
+	  * ID de Documento Interno NC para migraciones desde POS
+	  */
+	public void setDocIntPosARC_ID (int DocIntPosARC_ID);
+
+	/** Get DocIntPosARC_ID.
+	  * ID de Documento Interno NC para migraciones desde POS
+	  */
+	public int getDocIntPosARC_ID();
+
+    /** Column name DocIntPosARI_ID */
+    public static final String COLUMNNAME_DocIntPosARI_ID = "DocIntPosARI_ID";
+
+	/** Set DocIntPosARI_ID.
+	  * ID de Documento Interno para migraciones desde POS
+	  */
+	public void setDocIntPosARI_ID (int DocIntPosARI_ID);
+
+	/** Get DocIntPosARI_ID.
+	  * ID de Documento Interno para migraciones desde POS
+	  */
+	public int getDocIntPosARI_ID();
+
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
 

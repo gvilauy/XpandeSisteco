@@ -378,6 +378,52 @@ public class X_Z_SistecoConfig extends PO implements I_Z_SistecoConfig, I_Persis
 		return ii.intValue();
 	}
 
+	/** Set DocIntPosARC_ID.
+		@param DocIntPosARC_ID 
+		ID de Documento Interno NC para migraciones desde POS
+	  */
+	public void setDocIntPosARC_ID (int DocIntPosARC_ID)
+	{
+		if (DocIntPosARC_ID < 1) 
+			set_Value (COLUMNNAME_DocIntPosARC_ID, null);
+		else 
+			set_Value (COLUMNNAME_DocIntPosARC_ID, Integer.valueOf(DocIntPosARC_ID));
+	}
+
+	/** Get DocIntPosARC_ID.
+		@return ID de Documento Interno NC para migraciones desde POS
+	  */
+	public int getDocIntPosARC_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DocIntPosARC_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	/** Set DocIntPosARI_ID.
+		@param DocIntPosARI_ID 
+		ID de Documento Interno para migraciones desde POS
+	  */
+	public void setDocIntPosARI_ID (int DocIntPosARI_ID)
+	{
+		if (DocIntPosARI_ID < 1) 
+			set_Value (COLUMNNAME_DocIntPosARI_ID, null);
+		else 
+			set_Value (COLUMNNAME_DocIntPosARI_ID, Integer.valueOf(DocIntPosARI_ID));
+	}
+
+	/** Get DocIntPosARI_ID.
+		@return ID de Documento Interno para migraciones desde POS
+	  */
+	public int getDocIntPosARI_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_DocIntPosARI_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Employee.
 		@param IsEmployee 
 		Indicates if  this Business Partner is an employee
