@@ -32,7 +32,7 @@ public class X_Z_SistecoPazosTotal extends PO implements I_Z_SistecoPazosTotal, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20170606L;
+	private static final long serialVersionUID = 20200421L;
 
     /** Standard Constructor */
     public X_Z_SistecoPazosTotal (Properties ctx, int Z_SistecoPazosTotal_ID, String trxName)
@@ -187,6 +187,26 @@ public class X_Z_SistecoPazosTotal extends PO implements I_Z_SistecoPazosTotal, 
 	public BigDecimal getST_TotalServicios () 
 	{
 		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ST_TotalServicios);
+		if (bd == null)
+			 return Env.ZERO;
+		return bd;
+	}
+
+	/** Set ST_TotalTarjOffLine.
+		@param ST_TotalTarjOffLine 
+		Total de ventas tarjeta offline para POS Sisteco
+	  */
+	public void setST_TotalTarjOffLine (BigDecimal ST_TotalTarjOffLine)
+	{
+		set_Value (COLUMNNAME_ST_TotalTarjOffLine, ST_TotalTarjOffLine);
+	}
+
+	/** Get ST_TotalTarjOffLine.
+		@return Total de ventas tarjeta offline para POS Sisteco
+	  */
+	public BigDecimal getST_TotalTarjOffLine () 
+	{
+		BigDecimal bd = (BigDecimal)get_Value(COLUMNNAME_ST_TotalTarjOffLine);
 		if (bd == null)
 			 return Env.ZERO;
 		return bd;

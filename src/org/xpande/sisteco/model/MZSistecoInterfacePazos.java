@@ -1560,6 +1560,14 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " and Z_Sisteco_TK_VtaTarjeta.st_codigomediopago is not null ";
             DB.executeUpdateEx(action, get_TrxName());
 
+            // Actualizo medio de pago para lineas de venta con tarjeta offline (tipo linea 85)
+            action = " update Z_Sisteco_TK_LVtaOffLine set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_LVtaOffLine.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_LVtaOffLine.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LVtaOffLine.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
             // Actualizo medio de pago para lineas de venta con luncheon
             action = " update Z_Sisteco_TK_VtaLuncheon set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
                     " from z_sistecomediopago mp " +
@@ -1765,6 +1773,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             stTotales.setST_TotalVtaCheque(this.getTotalVtaCheque());
             stTotales.setST_TotalVtaChequeUSD(this.getTotalVtaChequeUSD());
             stTotales.setST_TotalVtaTarjeta(this.getTotalVtaTarjeta());
+            stTotales.setST_TotalTarjOffLine(this.getTotalVtaTarjetaOffLine());
             stTotales.setST_TotalVtaTarjetaUSD(this.getTotalVtaTarjetaUSD());
             stTotales.setST_TotalVtaTarjetaManual(this.getTotalVtaTarjetaManual());
             stTotales.setST_TotalVtaTarjetaCuota(this.getTotalVtaTarjetaCuota());
@@ -2484,6 +2493,44 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 value = rs.getBigDecimal("monto");
                 if (value == null) value = Env.ZERO;
             }        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+
+        return value;
+
+    }
+
+    /***
+     * Obtiene y retorna total de ventas tarjeta offline.
+     * Xpande. Created by Gabriel Vila on 4/21/20.
+     * @return Monto obtenido
+     */
+    private BigDecimal getTotalVtaTarjetaOffLine() {
+
+        BigDecimal value = Env.ZERO;
+        String sql = "";
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+            sql = " select coalesce(sum(coalesce(a.st_totalpagado,0)),0) as monto " +
+                    " from Z_Sisteco_TK_LVtaOffLine a " +
+                    " where  a.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and a.st_codigomoneda ='1'";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                value = rs.getBigDecimal("monto");
+                if (value == null) value = Env.ZERO;
+            }
+        }
         catch (Exception e){
             throw new AdempiereException(e);
         }

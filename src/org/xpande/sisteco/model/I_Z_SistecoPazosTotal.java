@@ -56,7 +56,7 @@ public interface I_Z_SistecoPazosTotal
 	/** Set Organization.
 	  * Organizational entity within client
 	  */
-	public void setAD_Org_ID(int AD_Org_ID);
+	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
 	  * Organizational entity within client
@@ -85,7 +85,7 @@ public interface I_Z_SistecoPazosTotal
 	/** Set Active.
 	  * The record is active in the system
 	  */
-	public void setIsActive(boolean IsActive);
+	public void setIsActive (boolean IsActive);
 
 	/** Get Active.
 	  * The record is active in the system
@@ -96,7 +96,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalDevEnvases = "ST_TotalDevEnvases";
 
 	/** Set ST_TotalDevEnvases	  */
-	public void setST_TotalDevEnvases(BigDecimal ST_TotalDevEnvases);
+	public void setST_TotalDevEnvases (BigDecimal ST_TotalDevEnvases);
 
 	/** Get ST_TotalDevEnvases	  */
 	public BigDecimal getST_TotalDevEnvases();
@@ -105,7 +105,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalEdenred = "ST_TotalEdenred";
 
 	/** Set ST_TotalEdenred	  */
-	public void setST_TotalEdenred(BigDecimal ST_TotalEdenred);
+	public void setST_TotalEdenred (BigDecimal ST_TotalEdenred);
 
 	/** Get ST_TotalEdenred	  */
 	public BigDecimal getST_TotalEdenred();
@@ -114,7 +114,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalFacturas = "ST_TotalFacturas";
 
 	/** Set ST_TotalFacturas	  */
-	public void setST_TotalFacturas(BigDecimal ST_TotalFacturas);
+	public void setST_TotalFacturas (BigDecimal ST_TotalFacturas);
 
 	/** Get ST_TotalFacturas	  */
 	public BigDecimal getST_TotalFacturas();
@@ -123,7 +123,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalFondeo = "ST_TotalFondeo";
 
 	/** Set ST_TotalFondeo	  */
-	public void setST_TotalFondeo(BigDecimal ST_TotalFondeo);
+	public void setST_TotalFondeo (BigDecimal ST_TotalFondeo);
 
 	/** Get ST_TotalFondeo	  */
 	public BigDecimal getST_TotalFondeo();
@@ -132,7 +132,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalFondeoUSD = "ST_TotalFondeoUSD";
 
 	/** Set ST_TotalFondeoUSD	  */
-	public void setST_TotalFondeoUSD(BigDecimal ST_TotalFondeoUSD);
+	public void setST_TotalFondeoUSD (BigDecimal ST_TotalFondeoUSD);
 
 	/** Get ST_TotalFondeoUSD	  */
 	public BigDecimal getST_TotalFondeoUSD();
@@ -141,7 +141,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalRetiros = "ST_TotalRetiros";
 
 	/** Set ST_TotalRetiros	  */
-	public void setST_TotalRetiros(BigDecimal ST_TotalRetiros);
+	public void setST_TotalRetiros (BigDecimal ST_TotalRetiros);
 
 	/** Get ST_TotalRetiros	  */
 	public BigDecimal getST_TotalRetiros();
@@ -150,16 +150,29 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalServicios = "ST_TotalServicios";
 
 	/** Set ST_TotalServicios	  */
-	public void setST_TotalServicios(BigDecimal ST_TotalServicios);
+	public void setST_TotalServicios (BigDecimal ST_TotalServicios);
 
 	/** Get ST_TotalServicios	  */
 	public BigDecimal getST_TotalServicios();
+
+    /** Column name ST_TotalTarjOffLine */
+    public static final String COLUMNNAME_ST_TotalTarjOffLine = "ST_TotalTarjOffLine";
+
+	/** Set ST_TotalTarjOffLine.
+	  * Total de ventas tarjeta offline para POS Sisteco
+	  */
+	public void setST_TotalTarjOffLine (BigDecimal ST_TotalTarjOffLine);
+
+	/** Get ST_TotalTarjOffLine.
+	  * Total de ventas tarjeta offline para POS Sisteco
+	  */
+	public BigDecimal getST_TotalTarjOffLine();
 
     /** Column name ST_TotalVtaCheque */
     public static final String COLUMNNAME_ST_TotalVtaCheque = "ST_TotalVtaCheque";
 
 	/** Set ST_TotalVtaCheque	  */
-	public void setST_TotalVtaCheque(BigDecimal ST_TotalVtaCheque);
+	public void setST_TotalVtaCheque (BigDecimal ST_TotalVtaCheque);
 
 	/** Get ST_TotalVtaCheque	  */
 	public BigDecimal getST_TotalVtaCheque();
@@ -168,7 +181,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaChequeUSD = "ST_TotalVtaChequeUSD";
 
 	/** Set ST_TotalVtaChequeUSD	  */
-	public void setST_TotalVtaChequeUSD(BigDecimal ST_TotalVtaChequeUSD);
+	public void setST_TotalVtaChequeUSD (BigDecimal ST_TotalVtaChequeUSD);
 
 	/** Get ST_TotalVtaChequeUSD	  */
 	public BigDecimal getST_TotalVtaChequeUSD();
@@ -177,7 +190,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaClientes = "ST_TotalVtaClientes";
 
 	/** Set ST_TotalVtaClientes	  */
-	public void setST_TotalVtaClientes(BigDecimal ST_TotalVtaClientes);
+	public void setST_TotalVtaClientes (BigDecimal ST_TotalVtaClientes);
 
 	/** Get ST_TotalVtaClientes	  */
 	public BigDecimal getST_TotalVtaClientes();
@@ -186,7 +199,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaCredito = "ST_TotalVtaCredito";
 
 	/** Set ST_TotalVtaCredito	  */
-	public void setST_TotalVtaCredito(BigDecimal ST_TotalVtaCredito);
+	public void setST_TotalVtaCredito (BigDecimal ST_TotalVtaCredito);
 
 	/** Get ST_TotalVtaCredito	  */
 	public BigDecimal getST_TotalVtaCredito();
@@ -195,7 +208,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaCreditoUSD = "ST_TotalVtaCreditoUSD";
 
 	/** Set ST_TotalVtaCreditoUSD	  */
-	public void setST_TotalVtaCreditoUSD(BigDecimal ST_TotalVtaCreditoUSD);
+	public void setST_TotalVtaCreditoUSD (BigDecimal ST_TotalVtaCreditoUSD);
 
 	/** Get ST_TotalVtaCreditoUSD	  */
 	public BigDecimal getST_TotalVtaCreditoUSD();
@@ -204,7 +217,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaEfectivo = "ST_TotalVtaEfectivo";
 
 	/** Set ST_TotalVtaEfectivo	  */
-	public void setST_TotalVtaEfectivo(BigDecimal ST_TotalVtaEfectivo);
+	public void setST_TotalVtaEfectivo (BigDecimal ST_TotalVtaEfectivo);
 
 	/** Get ST_TotalVtaEfectivo	  */
 	public BigDecimal getST_TotalVtaEfectivo();
@@ -213,7 +226,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaEfectivoUSD = "ST_TotalVtaEfectivoUSD";
 
 	/** Set ST_TotalVtaEfectivoUSD	  */
-	public void setST_TotalVtaEfectivoUSD(BigDecimal ST_TotalVtaEfectivoUSD);
+	public void setST_TotalVtaEfectivoUSD (BigDecimal ST_TotalVtaEfectivoUSD);
 
 	/** Get ST_TotalVtaEfectivoUSD	  */
 	public BigDecimal getST_TotalVtaEfectivoUSD();
@@ -222,7 +235,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaLuncheon = "ST_TotalVtaLuncheon";
 
 	/** Set ST_TotalVtaLuncheon	  */
-	public void setST_TotalVtaLuncheon(BigDecimal ST_TotalVtaLuncheon);
+	public void setST_TotalVtaLuncheon (BigDecimal ST_TotalVtaLuncheon);
 
 	/** Get ST_TotalVtaLuncheon	  */
 	public BigDecimal getST_TotalVtaLuncheon();
@@ -231,7 +244,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaSodexo = "ST_TotalVtaSodexo";
 
 	/** Set ST_TotalVtaSodexo	  */
-	public void setST_TotalVtaSodexo(BigDecimal ST_TotalVtaSodexo);
+	public void setST_TotalVtaSodexo (BigDecimal ST_TotalVtaSodexo);
 
 	/** Get ST_TotalVtaSodexo	  */
 	public BigDecimal getST_TotalVtaSodexo();
@@ -240,7 +253,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaTarjeta = "ST_TotalVtaTarjeta";
 
 	/** Set ST_TotalVtaTarjeta	  */
-	public void setST_TotalVtaTarjeta(BigDecimal ST_TotalVtaTarjeta);
+	public void setST_TotalVtaTarjeta (BigDecimal ST_TotalVtaTarjeta);
 
 	/** Get ST_TotalVtaTarjeta	  */
 	public BigDecimal getST_TotalVtaTarjeta();
@@ -249,7 +262,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaTarjetaCuota = "ST_TotalVtaTarjetaCuota";
 
 	/** Set ST_TotalVtaTarjetaCuota	  */
-	public void setST_TotalVtaTarjetaCuota(BigDecimal ST_TotalVtaTarjetaCuota);
+	public void setST_TotalVtaTarjetaCuota (BigDecimal ST_TotalVtaTarjetaCuota);
 
 	/** Get ST_TotalVtaTarjetaCuota	  */
 	public BigDecimal getST_TotalVtaTarjetaCuota();
@@ -258,7 +271,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaTarjetaManual = "ST_TotalVtaTarjetaManual";
 
 	/** Set ST_TotalVtaTarjetaManual	  */
-	public void setST_TotalVtaTarjetaManual(BigDecimal ST_TotalVtaTarjetaManual);
+	public void setST_TotalVtaTarjetaManual (BigDecimal ST_TotalVtaTarjetaManual);
 
 	/** Get ST_TotalVtaTarjetaManual	  */
 	public BigDecimal getST_TotalVtaTarjetaManual();
@@ -267,7 +280,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_ST_TotalVtaTarjetaUSD = "ST_TotalVtaTarjetaUSD";
 
 	/** Set ST_TotalVtaTarjetaUSD	  */
-	public void setST_TotalVtaTarjetaUSD(BigDecimal ST_TotalVtaTarjetaUSD);
+	public void setST_TotalVtaTarjetaUSD (BigDecimal ST_TotalVtaTarjetaUSD);
 
 	/** Get ST_TotalVtaTarjetaUSD	  */
 	public BigDecimal getST_TotalVtaTarjetaUSD();
@@ -292,7 +305,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_Z_SistecoInterfacePazos_ID = "Z_SistecoInterfacePazos_ID";
 
 	/** Set Z_SistecoInterfacePazos ID	  */
-	public void setZ_SistecoInterfacePazos_ID(int Z_SistecoInterfacePazos_ID);
+	public void setZ_SistecoInterfacePazos_ID (int Z_SistecoInterfacePazos_ID);
 
 	/** Get Z_SistecoInterfacePazos ID	  */
 	public int getZ_SistecoInterfacePazos_ID();
@@ -303,7 +316,7 @@ public interface I_Z_SistecoPazosTotal
     public static final String COLUMNNAME_Z_SistecoPazosTotal_ID = "Z_SistecoPazosTotal_ID";
 
 	/** Set Z_SistecoPazosTotal ID	  */
-	public void setZ_SistecoPazosTotal_ID(int Z_SistecoPazosTotal_ID);
+	public void setZ_SistecoPazosTotal_ID (int Z_SistecoPazosTotal_ID);
 
 	/** Get Z_SistecoPazosTotal ID	  */
 	public int getZ_SistecoPazosTotal_ID();
