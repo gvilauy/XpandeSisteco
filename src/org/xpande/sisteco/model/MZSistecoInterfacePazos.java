@@ -562,46 +562,71 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 return;
             }
 
-            sql = " SELECT a.ad_client_id, a.ad_org_id, cvta.datetrx, cfe.st_descripcioncfe, " +
-                    " coalesce(cfe.st_seriecfe,'') as st_seriecfe, cfe.st_numerocfe, coalesce(cfe.st_tipocfe,'') as st_tipocfe, " +
-                    " coalesce(a.st_totalentregado, a.st_totalmppagomoneda) as totalamt, " +
-                    " case " +
-                    " WHEN a.st_codigomoneda::text = '1'::text THEN 142 "  +
-                    " WHEN a.st_codigomoneda::text = '2'::text THEN 100 " +
-                    " ELSE 142 " +
-                    " END AS c_currency_id " +
+            sql = " SELECT a.ad_client_id, a.ad_org_id, doc.docbasetype, a.st_codigomediopago, a.st_codigomoneda, " +
+                    " sum(coalesce(a.st_totalentregado, a.st_totalmppagomoneda)) as totalamt " +
                     " from z_sisteco_tk_vtaefectivo a " +
                     " inner join z_sisteco_tk_cvta cvta on a.z_sisteco_tk_cvta_id = cvta.z_sisteco_tk_cvta_id " +
                     " inner join z_sisteco_tk_cfecab cfe on cvta.z_sisteco_tk_cvta_id = cfe.z_sisteco_tk_cvta_id " +
+                    " inner join z_sistecointerfacepazos ipz on cvta.z_sistecointerfacepazos_id = ipz.z_sistecointerfacepazos_id " +
+                    " inner join z_cfe_configdocdgi dgi on cfe.st_tipocfe = dgi.codigodgi " +
+                    " inner join z_cfe_configdocsend docsend on (docsend.z_cfe_configdocdgi_id = dgi.z_cfe_configdocdgi_id and a.ad_org_id = docsend.ad_org_id) " +
+                    " inner join c_doctype doc on docsend.c_doctype_id = doc.c_doctype_id " +
                     " where cvta.st_estadoticket::text = 'F' " +
                     " and a.st_lineacancelada = 0 " +
                     " and a.st_codigomediopago in ('4','13') " +
                     " and cvta.z_sistecointerfacepazos_id =" + this.get_ID() +
-                    " order by a.datetrx, cvta.st_numeroticket ";
+                    " group by a.ad_client_id, a.ad_org_id, doc.docbasetype, a.st_codigomediopago, a.st_codigomoneda " +
+                    " order by a.ad_client_id, a.ad_org_id, doc.docbasetype, a.st_codigomediopago, a.st_codigomoneda ";
 
             pstmt = DB.prepareStatement(sql, get_TrxName());
             rs = pstmt.executeQuery();
 
-            boolean firstRow = true;
             MInvoice invoice = null;
             BigDecimal amtTotal = Env.ZERO;
+            String docBaseTypeAux = "-";
 
             while(rs.next()){
 
-                if (firstRow){
+                // Corte por documento base.
+                if (!rs.getString("docbasetype").equalsIgnoreCase(docBaseTypeAux)){
 
-                    firstRow = false;
+                    // Si ya tengo una invoice seteada
+                    if ((invoice != null) && (invoice.get_ID() > 0)){
 
-                    // Determino tipo de documento segun tipo cfe obtenido
+                        // Finalizo datos de invoice actual y la completo
+                        if (amtTotal.compareTo(Env.ZERO) > 0){
+
+                            invoice.setTotalLines(amtTotal);
+                            invoice.setGrandTotal(amtTotal);
+                            invoice.set_ValueOfColumn("AmtSubtotal", amtTotal);
+                            invoice.saveEx();
+
+                            if (!invoice.processIt(DocAction.ACTION_Complete)){
+                                String message = "";
+                                if (invoice.getProcessMsg() != null) message = invoice.getProcessMsg();
+                                System.out.println("No se pudo completar Invoice en Ventas de Envases Sisteco : " + message);
+                            }
+                            else{
+                                invoice.saveEx();
+                            }
+                        }
+                    }
+
+                    // Nueva invoice
+                    docBaseTypeAux = rs.getString("docbasetype");
+                    amtTotal = Env.ZERO;
+                    invoice = null;
+
+                    // Determino tipo de documento segun docbasetype
                     int cDocTypeID = 0;
-                    String tipoCFE = rs.getString("st_tipocfe").trim();
+                    String docBaseType = rs.getString("docbasetype").trim();
 
                     // e-ticket o e-factura
-                    if ((tipoCFE.equalsIgnoreCase("101")) || (tipoCFE.equalsIgnoreCase("111"))){
+                    if (docBaseType.equalsIgnoreCase("ARI")){
                         cDocTypeID = this.sistecoConfig.getDocIntPosARI_ID();
                     }
                     // e-ticket nc o e-factura nc
-                    else if ((tipoCFE.equalsIgnoreCase("102")) || (tipoCFE.equalsIgnoreCase("112"))){
+                    else if (docBaseType.equalsIgnoreCase("ARC")){
                         cDocTypeID = this.sistecoConfig.getDocIntPosARC_ID();
                     }
 
@@ -638,20 +663,23 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     invoice.setIsSOTrx(true);
                     invoice.setC_DocTypeTarget_ID(cDocTypeID);
                     invoice.setC_DocType_ID(cDocTypeID);
-                    String documentNo = rs.getString("st_seriecfe") + rs.getString("st_numerocfe");
-                    invoice.setDocumentNo(documentNo);
-                    invoice.setDescription("Generado desde POS. Numero de Ticket : " + rs.getString("st_numeroticket"));
+                    invoice.setDescription("Generado desde POS");
 
                     if (docType.getDocBaseType().equalsIgnoreCase(Doc.DOCTYPE_ARCredit)){
                         invoice.set_ValueOfColumn("ReferenciaCFE", "Referencia Comprobante SISTECO");
                     }
 
-                    Timestamp fechaDoc = TimeUtil.trunc(rs.getTimestamp("datetrx"), TimeUtil.TRUNC_DAY);
+                    int cCurrencyID = 142;
+                    if (!rs.getString("st_codigomoneda").equalsIgnoreCase("1")){
+                        cCurrencyID= 100;
+                    }
+
+                    Timestamp fechaDoc = this.getDateTrx();
                     invoice.setDateInvoiced(fechaDoc);
                     invoice.setDateAcct(fechaDoc);
                     invoice.setC_BPartner_ID(partner.get_ID());
                     invoice.setC_BPartner_Location_ID(partnerLocation.get_ID());
-                    invoice.setC_Currency_ID(rs.getInt("c_currency_id"));
+                    invoice.setC_Currency_ID(cCurrencyID);
                     invoice.setPaymentRule(X_C_Invoice.PAYMENTRULE_OnCredit);
                     invoice.setC_PaymentTerm_ID(paymentTerm.get_ID());
                     invoice.setTotalLines(Env.ZERO);
@@ -670,6 +698,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     invoice.set_ValueOfColumn("EstadoAprobacion", "APROBADO");
                     invoice.set_ValueOfColumn("TipoFormaPago", "CREDITO");
                     invoice.saveEx();
+
                 }
 
                 BigDecimal amtLinea = rs.getBigDecimal("totalamt");
@@ -692,6 +721,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 line.setQtyEntered(Env.ONE);
                 line.setQtyInvoiced(Env.ONE);
                 line.setPriceEntered(amtLinea);
+                line.setDescription("Medio de Pago Sisteco : " + rs.getString("st_codigomediopago"));
                 line.setPriceActual(amtLinea);
                 line.setLineNetAmt(amtLinea);
                 line.set_ValueOfColumn("AmtSubTotal", amtLinea);
