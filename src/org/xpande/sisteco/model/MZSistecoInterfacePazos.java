@@ -2791,6 +2791,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
         try{
 
+            // Instancio modelo de configuración del proceso de Interface
+            if (this.sistecoConfig == null) this.sistecoConfig = MZSistecoConfig.getDefault(getCtx(), null);
+
             // Elimino info anterior
             String action = " delete from Z_Sisteco_TK_LVtaOffLine where z_sistecointerfacepazos_id =" + this.get_ID();
             DB.executeUpdateEx(action, get_TrxName());
@@ -2860,11 +2863,11 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
                 if (this.IsLineaArchivoCabezal(lineaArchivo)) {
 
-                    String tipoLineaCabezal = nodos[2].toString().trim();
+                    String tipoLineaCabezal = nodos[1].toString().trim();
 
                     // Tiene que ser ticket de venta o devolucion
                     if ((tipoLineaCabezal != null) && (tipoLineaCabezal.equalsIgnoreCase("1") || tipoLineaCabezal.equalsIgnoreCase("3"))){
-                        String numeroTicket = nodos[4].toString().trim();
+                        String numeroTicket = nodos[3].toString().trim();
                         if ((numeroTicket == null) || (numeroTicket.trim().equalsIgnoreCase(""))){
                             mensaje = "No se obtiene numero de Ticket en linea : " + lineaArchivo;
                             throw new AdempiereException(mensaje);
@@ -2908,7 +2911,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                                         " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID + ", " +
                                         " st_positionfile ='" + String.valueOf(contLineas) + "', " +
                                         X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + ", " +
-                                        " datetrx = (select to_timestamp('" + fechaTicket + " ' || st_timestamplinea, 'YYYYMMDDHH24MISS')) , " +
+                                        " datetrx ='" + fechaTicket + "', " +
                                         " ad_client_id =" + this.getAD_Client_ID() + ", " +
                                         " ad_org_id =" + this.getAD_Org_ID() +
                                         " where " + tablaFormato.getTableName() + "_ID = " + ID;
