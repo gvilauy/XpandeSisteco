@@ -1313,11 +1313,11 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
                         // Seteo ID del proceso de interface en el cabezal
                         action = " update " + I_Z_Sisteco_TK_CVta.Table_Name +
-                                 " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + ", " +
-                                 " datetrx = (select to_timestamp(st_timestampticket, 'YYYYMMDDHH24MISS')) , " +
-                                 " ad_client_id =" + this.getAD_Client_ID() + ", " +
-                                 " ad_org_id =" + this.getAD_Org_ID() +
-                                 " where " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID;
+                                " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + ", " +
+                                " datetrx = (select to_timestamp(st_timestampticket, 'YYYYMMDDHH24MISS')) , " +
+                                " ad_client_id =" + this.getAD_Client_ID() + ", " +
+                                " ad_org_id =" + this.getAD_Org_ID() +
+                                " where " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID;
                         DB.executeUpdateEx(action, get_TrxName());
 
                         // Instancio modelo de este cabezal
@@ -2760,5 +2760,199 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         return value;
     }
 
+    /***
+     * Obtiene y retorna modelo segun organización y fecha pos recibidos.
+     * Xpande. Created by Gabriel Vila on 4/22/20.
+     * @param ctx
+     * @param adOrgID
+     * @param fechaPOS
+     * @param trxName
+     * @return
+     */
+    public static MZSistecoInterfacePazos getByOrgDate(Properties ctx, int adOrgID, Timestamp fechaPOS, String trxName){
+
+        String whereClause = X_Z_SistecoInterfacePazos.COLUMNNAME_AD_Org_ID + " =" + adOrgID +
+                " AND " + X_Z_SistecoInterfacePazos.COLUMNNAME_DateTrx + " ='" + fechaPOS + "'";
+
+        MZSistecoInterfacePazos model = new Query(ctx, I_Z_SistecoInterfacePazos.Table_Name, whereClause, trxName).first();
+
+        return model;
+    }
+
+    /***
+     * Ejecuta proceso solamente para un determinado tipo de linea en una interface ya existente.
+     * Xpande. Created by Gabriel Vila on 4/22/20.
+     * @param tipoLinea
+     * @return
+     */
+    public String executeTipoLinea(String tipoLinea) {
+
+        String message = null;
+
+        try{
+
+            // Elimino info anterior
+            String action = " delete from Z_Sisteco_TK_LVtaOffLine where z_sistecointerfacepazos_id =" + this.get_ID();
+            DB.executeUpdateEx(action, get_TrxName());
+
+            // Obengo información leyendo el archivo seleccionado para el tipo de linea
+            this.getDataFromFileTipoLinea(tipoLinea);
+
+            // Actualizo datos
+            // Actualizo medio de pago para lineas de venta con tarjeta offline (tipo linea 85)
+            action = " update Z_Sisteco_TK_LVtaOffLine set z_sistecomediopago_id = mp.z_sistecomediopago_id " +
+                    " from z_sistecomediopago mp " +
+                    " where Z_Sisteco_TK_LVtaOffLine.st_codigomediopago = mp.value " +
+                    " and Z_Sisteco_TK_LVtaOffLine.z_sistecointerfacepazos_id =" + this.get_ID() +
+                    " and Z_Sisteco_TK_LVtaOffLine.st_codigomediopago is not null ";
+            DB.executeUpdateEx(action, get_TrxName());
+
+            BigDecimal totalOffLine = this.getTotalVtaTarjetaOffLine();
+            action = "update Z_SistecoPazosTotal set ST_TotalTarjOffLine =" + totalOffLine +
+                    " where z_sistecointerfacepazos_id =" + this.get_ID();
+            DB.executeUpdateEx(action, get_TrxName());
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+
+        return message;
+    }
+
+    /***
+     * Lee archivo a procesar y procesa solo para un determinado tipo de linea del archivo de interface.
+     * Xpande. Created by Gabriel Vila on 4/22/20.
+     * @param tipoLineaForzado
+     */
+    private void getDataFromFileTipoLinea(String tipoLineaForzado) {
+
+        FileReader fReader = null;
+        BufferedReader bReader = null;
+
+        HashMap<String, ImpFormat> hashFormatosImp = new HashMap<String, ImpFormat>();
+        String mensaje = "";
+        String lineaArchivo = null;
+
+        try {
+
+            // Obtengo formatos de importación desde configuración del proceso de Interface
+            hashFormatosImp = this.getFormatosImp();
+
+            // Abro archivo
+            File archivoPazos = new File(this.getFileName());
+            fReader = new FileReader(archivoPazos);
+            bReader = new BufferedReader(fReader);
+
+            int zSistecoTkCVtaID = 0;
+            Timestamp fechaTicket = null;
+            String action = "";
+            int contLineas = 0;
+
+            // Leo lineas del archivo
+            lineaArchivo = bReader.readLine();
+
+            while (lineaArchivo != null) {
+
+                contLineas++;
+
+                // CARACTER DEBE SER PARAMETRIZABLE: para covadonga es |  y ahora para planeta es #
+                String nodos[] = lineaArchivo.split("\\|");
+
+                if (this.IsLineaArchivoCabezal(lineaArchivo)) {
+
+                    String tipoLineaCabezal = nodos[2].toString().trim();
+
+                    // Tiene que ser ticket de venta o devolucion
+                    if ((tipoLineaCabezal != null) && (tipoLineaCabezal.equalsIgnoreCase("1") || tipoLineaCabezal.equalsIgnoreCase("3"))){
+                        String numeroTicket = nodos[4].toString().trim();
+                        if ((numeroTicket == null) || (numeroTicket.trim().equalsIgnoreCase(""))){
+                            mensaje = "No se obtiene numero de Ticket en linea : " + lineaArchivo;
+                            throw new AdempiereException(mensaje);
+                        }
+                        MZSistecoTKCVta sistecoTKCVta = MZSistecoTKCVta.getByInterfaceTicket(getCtx(), this.get_ID(), numeroTicket, get_TrxName());
+                        if ((sistecoTKCVta == null) || (sistecoTKCVta.get_ID() <= 0)){
+                            mensaje = "No se pudo obtener cabezal para linea : " + lineaArchivo;
+                            throw new AdempiereException(mensaje);
+                        }
+                        zSistecoTkCVtaID = sistecoTKCVta.get_ID();
+                        fechaTicket = sistecoTKCVta.getDateTrx();
+                    }
+                    else {
+                        zSistecoTkCVtaID = 0;
+                        fechaTicket = null;
+                    }
+                }
+                // Es una tipo de linea que no es Cabezal
+                else {
+
+                    if (zSistecoTkCVtaID > 0){
+                        // Obtengo formato de importación según tipo de linea indicado en esta linea de archivo
+                        String tipoLinea = nodos[2].toString().trim();
+
+                        if (tipoLinea.equalsIgnoreCase(tipoLineaForzado)){
+
+                            ImpFormat formatoImpLinea = hashFormatosImp.get(tipoLinea);
+                            if (formatoImpLinea != null) {
+
+                                // Proceso formato de importación para esta linea en la tabla asociada al formato
+                                MTable tablaFormato = new MTable(getCtx(), formatoImpLinea.getAD_Table_ID(), null);
+                                int ID = formatoImpLinea.updateDB(lineaArchivo, getCtx(), get_TrxName());
+
+                                if (ID <= 0) {
+                                    mensaje = "Falla en linea " + contLineas + " : " + lineaArchivo;
+                                    throw new AdempiereException(mensaje);
+                                }
+
+                                // Seteo ID de cabezal y demas campos en tabla de linea
+                                action = " update " + tablaFormato.getTableName() +
+                                        " set " + X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_Sisteco_TK_CVta_ID + " = " + zSistecoTkCVtaID + ", " +
+                                        " st_positionfile ='" + String.valueOf(contLineas) + "', " +
+                                        X_Z_Sisteco_TK_CVta.COLUMNNAME_Z_SistecoInterfacePazos_ID + " = " + this.get_ID() + ", " +
+                                        " datetrx = (select to_timestamp('" + fechaTicket + " ' || st_timestamplinea, 'YYYYMMDDHH24MISS')) , " +
+                                        " ad_client_id =" + this.getAD_Client_ID() + ", " +
+                                        " ad_org_id =" + this.getAD_Org_ID() +
+                                        " where " + tablaFormato.getTableName() + "_ID = " + ID;
+                                DB.executeUpdateEx(action, get_TrxName());
+
+                            }
+                            else {
+                                // Formato desconocido, guardo excepción
+                                MZSistecoTKLineaError lineaError = new MZSistecoTKLineaError(getCtx(), 0, get_TrxName());
+                                lineaError.setST_LineaArchivo(lineaArchivo);
+                                lineaError.setST_TipoLinea(tipoLinea);
+                                lineaError.setST_PositionFile(String.valueOf(contLineas));
+                                lineaError.setZ_Sisteco_TK_CVta_ID(zSistecoTkCVtaID);
+                                lineaError.setFileName(this.getFileName());
+                                lineaError.setZ_SistecoInterfacePazos_ID(this.get_ID());
+                                lineaError.saveEx();
+                            }
+                        }
+                    }
+                }
+                lineaArchivo = bReader.readLine();
+            }
+
+        }
+        catch (Exception e){
+            if (lineaArchivo == null){
+                lineaArchivo="";
+            }
+            log.log(Level.SEVERE, e.getMessage() + "\nLinea Archivo :" + lineaArchivo);
+            throw new AdempiereException(e);
+        }
+        finally {
+            if (bReader != null){
+                try{
+                    bReader.close();
+                    if (fReader != null){
+                        fReader.close();
+                    }
+                }
+                catch (Exception e){
+                    log.log(Level.SEVERE, e.getMessage());
+                }
+            }
+        }
+    }
 
 }
