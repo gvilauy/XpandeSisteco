@@ -569,7 +569,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " inner join z_sisteco_tk_cfecab cfe on cvta.z_sisteco_tk_cvta_id = cfe.z_sisteco_tk_cvta_id " +
                     " inner join z_sistecointerfacepazos ipz on cvta.z_sistecointerfacepazos_id = ipz.z_sistecointerfacepazos_id " +
                     " inner join z_cfe_configdocdgi dgi on cfe.st_tipocfe = dgi.codigodgi " +
-                    " inner join z_cfe_configdocsend docsend on (docsend.z_cfe_configdocdgi_id = dgi.z_cfe_configdocdgi_id and a.ad_org_id = docsend.ad_org_id) " +
+                    " inner join z_cfe_configdocsend docsend on (docsend.z_cfe_configdocdgi_id = dgi.z_cfe_configdocdgi_id and a.ad_org_id = docsend.ad_orgtrx_id) " +
                     " inner join c_doctype doc on docsend.c_doctype_id = doc.c_doctype_id " +
                     " where cvta.st_estadoticket::text = 'F' " +
                     " and a.st_lineacancelada = 0 " +
