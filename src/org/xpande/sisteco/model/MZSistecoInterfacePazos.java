@@ -309,6 +309,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 line.set_ValueOfColumn("AD_Client_ID", invoice.getAD_Client_ID());
                 line.setAD_Org_ID(invoice.getAD_Org_ID());
                 line.setM_Product_ID(product.get_ID());
+                line.set_ValueOfColumn("IsBySelection", true);
                 line.setC_UOM_ID(product.getC_UOM_ID());
                 line.setQtyEntered(Env.ONE);
                 line.setQtyInvoiced(Env.ONE);
@@ -490,6 +491,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 line.setAD_Org_ID(invoice.getAD_Org_ID());
                 line.setM_Product_ID(product.get_ID());
                 line.setC_UOM_ID(product.getC_UOM_ID());
+                line.set_ValueOfColumn("IsBySelection", true);
                 line.setQtyEntered(Env.ONE);
                 line.setQtyInvoiced(Env.ONE);
                 line.setPriceEntered(invoice.getTotalLines());
@@ -718,6 +720,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 line.setAD_Org_ID(invoice.getAD_Org_ID());
                 line.setM_Product_ID(product.get_ID());
                 line.setC_UOM_ID(product.getC_UOM_ID());
+                line.set_ValueOfColumn("IsBySelection", true);
                 line.setQtyEntered(Env.ONE);
                 line.setQtyInvoiced(Env.ONE);
                 line.setPriceEntered(amtLinea);
