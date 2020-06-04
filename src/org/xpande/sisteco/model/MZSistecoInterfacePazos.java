@@ -169,7 +169,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 return;
             }
 
-            sql = " select a.ad_client_id, a.ad_org_id, cvta.st_numeroticket, cvta.datetrx, cfe.st_descripcioncfe, " +
+            sql = " select a.ad_client_id, a.ad_org_id, cvta.st_numeroticket, cvta.datetrx, cfe.st_descripcioncfe, a.z_sisteco_tk_cvta_id, " +
                     " coalesce(cfe.st_seriecfe,'') as st_seriecfe, cfe.st_numerocfe, coalesce(cfe.st_tipocfe,'') as st_tipocfe, " +
                     " coalesce(a.st_totalentregado, a.st_totalmppagomoneda) as st_montopagocc, cfel.st_rut, vcli.ST_CodigoCC, coalesce(bp.name, bpcc.name) as st_nombrecc " +
                     " from z_sisteco_tk_vtactacte a " +
@@ -331,6 +331,25 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     invoice.saveEx();
                 }
 
+                // Guardo registro en tabla de venta a credito de sisteco
+                MZSistecoVtaCtaCte vtaCtaCte = new MZSistecoVtaCtaCte(getCtx(), 0, get_TrxName());
+                vtaCtaCte.set_ValueOfColumn("AD_Client_ID", invoice.getAD_Client_ID());
+                vtaCtaCte.setAD_Org_ID(invoice.getAD_Org_ID());
+                vtaCtaCte.setC_BPartner_ID(invoice.getC_BPartner_ID());
+                vtaCtaCte.setC_BPartner_Location_ID(invoice.getC_BPartner_Location_ID());
+                vtaCtaCte.setC_DocType_ID(invoice.getC_DocTypeTarget_ID());
+                vtaCtaCte.setC_Invoice_ID(invoice.get_ID());
+                vtaCtaCte.setDateTrx(invoice.getDateInvoiced());
+                vtaCtaCte.setST_DescripcionCFE(rs.getString("st_descripcioncfe"));
+                vtaCtaCte.setST_Importe(invoice.getGrandTotal());
+                vtaCtaCte.setST_NumeroCFE(rs.getString("st_numerocfe"));
+                vtaCtaCte.setST_NumeroTicket(rs.getString("st_numeroticket"));
+                vtaCtaCte.setST_SerieCFE(rs.getString("st_seriecfe"));
+                vtaCtaCte.setST_TipoCFE(rs.getString("tipocfe"));
+                vtaCtaCte.setTaxID(partner.getTaxID());
+                vtaCtaCte.setZ_Sisteco_TK_CVta_ID(rs.getInt("Z_Sisteco_TK_CVta_ID"));
+                vtaCtaCte.setZ_SistecoInterfacePazos_ID(this.get_ID());
+                vtaCtaCte.saveEx();
             }
         }
         catch (Exception e){
