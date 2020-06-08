@@ -93,6 +93,21 @@ public interface I_Z_SistecoVtaCtaCte
 
 	public I_C_BPartner_Location getC_BPartner_Location() throws RuntimeException;
 
+    /** Column name C_Currency_ID */
+    public static final String COLUMNNAME_C_Currency_ID = "C_Currency_ID";
+
+	/** Set Currency.
+	  * The Currency for this record
+	  */
+	public void setC_Currency_ID (int C_Currency_ID);
+
+	/** Get Currency.
+	  * The Currency for this record
+	  */
+	public int getC_Currency_ID();
+
+	public I_C_Currency getC_Currency() throws RuntimeException;
+
     /** Column name C_DocType_ID */
     public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
 
@@ -164,6 +179,24 @@ public interface I_Z_SistecoVtaCtaCte
 	  * The record is active in the system
 	  */
 	public boolean isActive();
+
+    /** Column name ST_Caja */
+    public static final String COLUMNNAME_ST_Caja = "ST_Caja";
+
+	/** Set ST_Caja	  */
+	public void setST_Caja (String ST_Caja);
+
+	/** Get ST_Caja	  */
+	public String getST_Caja();
+
+    /** Column name ST_CodigoCajera */
+    public static final String COLUMNNAME_ST_CodigoCajera = "ST_CodigoCajera";
+
+	/** Set ST_CodigoCajera	  */
+	public void setST_CodigoCajera (String ST_CodigoCajera);
+
+	/** Get ST_CodigoCajera	  */
+	public String getST_CodigoCajera();
 
     /** Column name ST_DescripcionCFE */
     public static final String COLUMNNAME_ST_DescripcionCFE = "ST_DescripcionCFE";

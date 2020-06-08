@@ -33,7 +33,7 @@ public class X_Z_SistecoVtaCtaCte extends PO implements I_Z_SistecoVtaCtaCte, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200604L;
+	private static final long serialVersionUID = 20200608L;
 
     /** Standard Constructor */
     public X_Z_SistecoVtaCtaCte (Properties ctx, int Z_SistecoVtaCtaCte_ID, String trxName)
@@ -131,6 +131,34 @@ public class X_Z_SistecoVtaCtaCte extends PO implements I_Z_SistecoVtaCtaCte, I_
 		return ii.intValue();
 	}
 
+	public I_C_Currency getC_Currency() throws RuntimeException
+    {
+		return (I_C_Currency)MTable.get(getCtx(), I_C_Currency.Table_Name)
+			.getPO(getC_Currency_ID(), get_TrxName());	}
+
+	/** Set Currency.
+		@param C_Currency_ID 
+		The Currency for this record
+	  */
+	public void setC_Currency_ID (int C_Currency_ID)
+	{
+		if (C_Currency_ID < 1) 
+			set_Value (COLUMNNAME_C_Currency_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_Currency_ID, Integer.valueOf(C_Currency_ID));
+	}
+
+	/** Get Currency.
+		@return The Currency for this record
+	  */
+	public int getC_Currency_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_Currency_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_C_DocType getC_DocType() throws RuntimeException
     {
 		return (I_C_DocType)MTable.get(getCtx(), I_C_DocType.Table_Name)
@@ -202,6 +230,34 @@ public class X_Z_SistecoVtaCtaCte extends PO implements I_Z_SistecoVtaCtaCte, I_
 	public Timestamp getDateTrx () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateTrx);
+	}
+
+	/** Set ST_Caja.
+		@param ST_Caja ST_Caja	  */
+	public void setST_Caja (String ST_Caja)
+	{
+		set_Value (COLUMNNAME_ST_Caja, ST_Caja);
+	}
+
+	/** Get ST_Caja.
+		@return ST_Caja	  */
+	public String getST_Caja () 
+	{
+		return (String)get_Value(COLUMNNAME_ST_Caja);
+	}
+
+	/** Set ST_CodigoCajera.
+		@param ST_CodigoCajera ST_CodigoCajera	  */
+	public void setST_CodigoCajera (String ST_CodigoCajera)
+	{
+		set_Value (COLUMNNAME_ST_CodigoCajera, ST_CodigoCajera);
+	}
+
+	/** Get ST_CodigoCajera.
+		@return ST_CodigoCajera	  */
+	public String getST_CodigoCajera () 
+	{
+		return (String)get_Value(COLUMNNAME_ST_CodigoCajera);
 	}
 
 	/** Set ST_DescripcionCFE.
