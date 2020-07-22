@@ -1106,17 +1106,24 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
         try{
             sql = " SELECT a.ad_client_id, a.ad_org_id, b.st_documentoreceptor, upper(b.st_nombrereceptor::text) AS st_nombrereceptor, a.st_numeroticket," +
+                    " date_trunc('day'::text, b.datetrx) AS datetrx, b.st_tipocfe, b.st_seriecfe, b.st_numerocfe, " +
+                    " bp.c_bpartner_id, bp.c_taxgroup_id, sdgi.c_doctype_id, " +
                     " sum(c.st_totaltcktsinpagoserv - c.st_ivatotaltcktsinpagoserv) AS amtsubtotal, " +
                     " sum(c.st_ivatotaltcktsinpagoserv) AS taxamt, sum(c.st_totaltcktsinpagoserv) AS totalamt," +
-                    " sum(a.st_totalapagar) AS payamt, date_trunc('day'::text, b.datetrx) AS datetrx " +
+                    " sum(a.st_totalapagar) AS payamt " +
                     " FROM z_sisteco_tk_cvta a " +
                     " JOIN z_sisteco_tk_cfecab b ON a.z_sisteco_tk_cvta_id = b.z_sisteco_tk_cvta_id " +
                     " JOIN z_sisteco_tk_totalticket c ON a.z_sisteco_tk_cvta_id = c.z_sisteco_tk_cvta_id " +
+                    " left outer join c_bpartner bp on b.st_documentoreceptor = bp.taxid " +
+                    " left outer join z_cfe_configdocdgi dgi on b.st_tipocfe = dgi.codigodgi " +
+                    " left outer join z_cfe_configdocsend sdgi on (dgi.z_cfe_configdocdgi_id = sdgi.z_cfe_configdocdgi_id and sdgi.ad_orgtrx_id = a.ad_org_id) " +
                     " WHERE a.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " AND a.st_estadoticket::text ='F' " +
                     " AND a.st_tipolinea::text ='1' " +
                     " AND b.st_tipodocumentoreceptor='2' " +
-                    " GROUP BY a.ad_client_id, a.ad_org_id, b.st_documentoreceptor, b.st_nombrereceptor, a.st_numeroticket, date_trunc('day'::text, b.datetrx) ";
+                    " GROUP BY a.ad_client_id, a.ad_org_id, b.st_documentoreceptor, b.st_nombrereceptor, a.st_numeroticket, " +
+                    " date_trunc('day'::text, b.datetrx), b.st_tipocfe, b.st_seriecfe, b.st_numerocfe, " +
+                    " bp.c_bpartner_id, bp.c_taxgroup_id, sdgi.c_doctype_id ";
 
         	pstmt = DB.prepareStatement(sql, get_TrxName());
         	rs = pstmt.executeQuery();
@@ -1134,6 +1141,20 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 tkrut.setTotalAmt(rs.getBigDecimal("totalamt"));
                 tkrut.setPayAmt(rs.getBigDecimal("payamt"));
                 tkrut.setDateTrx(rs.getTimestamp("datetrx"));
+                tkrut.setST_TipoCFE(rs.getString("st_tipocfe"));
+                tkrut.setST_SerieCFE(rs.getString("st_seriecfe"));
+                tkrut.setST_NumeroCFE(rs.getString("st_numerocfe"));
+
+                if (rs.getInt("c_bpartner_id") > 0){
+                    tkrut.setC_BPartner_ID(rs.getInt("c_bpartner_id"));
+                }
+                if (rs.getInt("c_doctype_id") > 0){
+                    tkrut.setC_DocType_ID(rs.getInt("c_doctype_id"));
+                }
+                if (rs.getInt("c_taxgroup_id") > 0){
+                    tkrut.setC_TaxGroup_ID(rs.getInt("c_taxgroup_id"));
+                }
+
                 tkrut.saveEx();
         	}
         }
@@ -1157,10 +1178,14 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
         ResultSet rs = null;
 
         try{
-            sql1 = " select datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg, sum(impuestos) as taxamt, sum(neto) as amtsubtotal " +
+            sql1 = " select datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg, " +
+                    " st_tipocfe, st_seriecfe, st_numerocfe, c_bpartner_id, c_taxgroup_id, c_doctype_id, " +
+                    " sum(impuestos) as taxamt, sum(neto) as amtsubtotal " +
                     " from( " +
                     " select hdr.datetrx::date as datetrx, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg, " +
-                    " coalesce(categrubro.name, categ.name) as nomcateg, sum(a.st_ivadescuentototal) as impuestos, sum(a.st_preciodescuentototal) as neto " +
+                    " coalesce(categrubro.name, categ.name) as nomcateg, " +
+                    " vr.st_tipocfe, vr.st_seriecfe, vr.st_numerocfe, vr.c_bpartner_id, vr.c_taxgroup_id, vr.c_doctype_id, " +
+                    " sum(a.st_ivadescuentototal) as impuestos, sum(a.st_preciodescuentototal) as neto " +
                     " from z_sisteco_tk_lvta a " +
                     " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
                     " inner join zv_sisteco_vtasrut_tk vr on (hdr.z_sistecointerfacepazos_id = vr.z_sistecointerfacepazos_id AND hdr.st_numeroticket = vr.st_numeroticket) " +
@@ -1171,10 +1196,14 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " and hdr.st_estadoticket ='F' " +
                     " and a.st_lineacancelada =0 " +
-                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, idcateg, nomcateg ";
+                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, " +
+                    " prod.c_taxcategory_id, categ.name, idcateg, nomcateg, " +
+                    " vr.st_tipocfe, vr.st_seriecfe, vr.st_numerocfe, vr.c_bpartner_id, vr.c_taxgroup_id, vr.c_doctype_id ";
 
             sql2 = " select hdr.datetrx::date as datetrx, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, coalesce(rubtax.c_taxcategory_to_id, prod.c_taxcategory_id) as idcateg, " +
-                    " coalesce(categrubro.name, categ.name) as nomcateg, sum(a.st_iva) as impuestos, sum(a.st_precio) as neto " +
+                    " coalesce(categrubro.name, categ.name) as nomcateg, " +
+                    " vr.st_tipocfe, vr.st_seriecfe, vr.st_numerocfe, vr.c_bpartner_id, vr.c_taxgroup_id, vr.c_doctype_id, " +
+                    " sum(a.st_iva) as impuestos, sum(a.st_precio) as neto " +
                     " from z_sisteco_tk_ldev a " +
                     " inner join z_sisteco_tk_cvta hdr on a.z_sisteco_tk_cvta_id = hdr.z_sisteco_tk_cvta_id " +
                     " inner join zv_sisteco_vtasrut_tk vr on (hdr.z_sistecointerfacepazos_id = vr.z_sistecointerfacepazos_id AND hdr.st_numeroticket = vr.st_numeroticket) " +
@@ -1185,9 +1214,10 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " where hdr.z_sistecointerfacepazos_id =" + this.get_ID() +
                     " and hdr.st_estadoticket ='F' " +
                     " and a.st_lineacancelada =0 " +
-                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, idcateg, nomcateg) as info " +
-                    " group by datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg " +
-                    " order by datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg ";
+                    " group by hdr.datetrx::date, vr.st_documentoreceptor, vr.st_nombrereceptor, hdr.Z_Sisteco_TK_CVta_ID, hdr.st_numeroticket, prod.c_taxcategory_id, categ.name, " +
+                    " idcateg, nomcateg, vr.st_tipocfe, vr.st_seriecfe, vr.st_numerocfe, vr.c_bpartner_id, vr.c_taxgroup_id, vr.c_doctype_id) as info " +
+                    " group by datetrx, st_documentoreceptor, st_nombrereceptor, Z_Sisteco_TK_CVta_ID, st_numeroticket, c_taxcategory_id, nomcateg, " +
+                    " st_tipocfe, st_seriecfe, st_numerocfe, c_bpartner_id, c_taxgroup_id, c_doctype_id ";
 
             pstmt = DB.prepareStatement(sql1 + " union " + sql2, get_TrxName());
 
@@ -1209,6 +1239,21 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 taxTKRUT.setST_NumeroTicket(rs.getString("st_numeroticket"));
                 taxTKRUT.setTaxAmt(rs.getBigDecimal("taxamt"));
                 taxTKRUT.setZ_Sisteco_TK_CVta_ID(rs.getInt("Z_Sisteco_TK_CVta_ID"));
+
+                taxTKRUT.setST_TipoCFE(rs.getString("st_tipocfe"));
+                taxTKRUT.setST_SerieCFE(rs.getString("st_seriecfe"));
+                taxTKRUT.setST_NumeroCFE(rs.getString("st_numerocfe"));
+
+                if (rs.getInt("c_bpartner_id") > 0){
+                    taxTKRUT.setC_BPartner_ID(rs.getInt("c_bpartner_id"));
+                }
+                if (rs.getInt("c_doctype_id") > 0){
+                    taxTKRUT.setC_DocType_ID(rs.getInt("c_doctype_id"));
+                }
+                if (rs.getInt("c_taxgroup_id") > 0){
+                    taxTKRUT.setC_TaxGroup_ID(rs.getInt("c_taxgroup_id"));
+                }
+
                 taxTKRUT.saveEx();
             }
         }

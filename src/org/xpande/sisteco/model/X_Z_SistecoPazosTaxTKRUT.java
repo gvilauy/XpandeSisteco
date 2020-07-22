@@ -33,7 +33,7 @@ public class X_Z_SistecoPazosTaxTKRUT extends PO implements I_Z_SistecoPazosTaxT
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20181210L;
+	private static final long serialVersionUID = 20200722L;
 
     /** Standard Constructor */
     public X_Z_SistecoPazosTaxTKRUT (Properties ctx, int Z_SistecoPazosTaxTKRUT_ID, String trxName)
@@ -94,6 +94,62 @@ public class X_Z_SistecoPazosTaxTKRUT extends PO implements I_Z_SistecoPazosTaxT
 		return bd;
 	}
 
+	public I_C_BPartner getC_BPartner() throws RuntimeException
+    {
+		return (I_C_BPartner)MTable.get(getCtx(), I_C_BPartner.Table_Name)
+			.getPO(getC_BPartner_ID(), get_TrxName());	}
+
+	/** Set Business Partner .
+		@param C_BPartner_ID 
+		Identifies a Business Partner
+	  */
+	public void setC_BPartner_ID (int C_BPartner_ID)
+	{
+		if (C_BPartner_ID < 1) 
+			set_Value (COLUMNNAME_C_BPartner_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_BPartner_ID, Integer.valueOf(C_BPartner_ID));
+	}
+
+	/** Get Business Partner .
+		@return Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_DocType getC_DocType() throws RuntimeException
+    {
+		return (I_C_DocType)MTable.get(getCtx(), I_C_DocType.Table_Name)
+			.getPO(getC_DocType_ID(), get_TrxName());	}
+
+	/** Set Document Type.
+		@param C_DocType_ID 
+		Document type or rules
+	  */
+	public void setC_DocType_ID (int C_DocType_ID)
+	{
+		if (C_DocType_ID < 0) 
+			set_Value (COLUMNNAME_C_DocType_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_DocType_ID, Integer.valueOf(C_DocType_ID));
+	}
+
+	/** Get Document Type.
+		@return Document type or rules
+	  */
+	public int getC_DocType_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_DocType_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	public I_C_TaxCategory getC_TaxCategory() throws RuntimeException
     {
 		return (I_C_TaxCategory)MTable.get(getCtx(), I_C_TaxCategory.Table_Name)
@@ -122,6 +178,31 @@ public class X_Z_SistecoPazosTaxTKRUT extends PO implements I_Z_SistecoPazosTaxT
 		return ii.intValue();
 	}
 
+	public org.eevolution.model.I_C_TaxGroup getC_TaxGroup() throws RuntimeException
+    {
+		return (org.eevolution.model.I_C_TaxGroup)MTable.get(getCtx(), org.eevolution.model.I_C_TaxGroup.Table_Name)
+			.getPO(getC_TaxGroup_ID(), get_TrxName());	}
+
+	/** Set Tax Group.
+		@param C_TaxGroup_ID Tax Group	  */
+	public void setC_TaxGroup_ID (int C_TaxGroup_ID)
+	{
+		if (C_TaxGroup_ID < 1) 
+			set_Value (COLUMNNAME_C_TaxGroup_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_TaxGroup_ID, Integer.valueOf(C_TaxGroup_ID));
+	}
+
+	/** Get Tax Group.
+		@return Tax Group	  */
+	public int getC_TaxGroup_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_TaxGroup_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
 	/** Set Transaction Date.
 		@param DateTrx 
 		Transaction Date
@@ -137,6 +218,23 @@ public class X_Z_SistecoPazosTaxTKRUT extends PO implements I_Z_SistecoPazosTaxT
 	public Timestamp getDateTrx () 
 	{
 		return (Timestamp)get_Value(COLUMNNAME_DateTrx);
+	}
+
+	/** Set DocumentNoRef.
+		@param DocumentNoRef 
+		Numero de documento referenciado
+	  */
+	public void setDocumentNoRef (String DocumentNoRef)
+	{
+		set_Value (COLUMNNAME_DocumentNoRef, DocumentNoRef);
+	}
+
+	/** Get DocumentNoRef.
+		@return Numero de documento referenciado
+	  */
+	public String getDocumentNoRef () 
+	{
+		return (String)get_Value(COLUMNNAME_DocumentNoRef);
 	}
 
 	/** Set Name.
@@ -184,6 +282,20 @@ public class X_Z_SistecoPazosTaxTKRUT extends PO implements I_Z_SistecoPazosTaxT
 		return (String)get_Value(COLUMNNAME_ST_NombreReceptor);
 	}
 
+	/** Set ST_NumeroCFE.
+		@param ST_NumeroCFE ST_NumeroCFE	  */
+	public void setST_NumeroCFE (String ST_NumeroCFE)
+	{
+		set_Value (COLUMNNAME_ST_NumeroCFE, ST_NumeroCFE);
+	}
+
+	/** Get ST_NumeroCFE.
+		@return ST_NumeroCFE	  */
+	public String getST_NumeroCFE () 
+	{
+		return (String)get_Value(COLUMNNAME_ST_NumeroCFE);
+	}
+
 	/** Set ST_NumeroTicket.
 		@param ST_NumeroTicket ST_NumeroTicket	  */
 	public void setST_NumeroTicket (String ST_NumeroTicket)
@@ -196,6 +308,34 @@ public class X_Z_SistecoPazosTaxTKRUT extends PO implements I_Z_SistecoPazosTaxT
 	public String getST_NumeroTicket () 
 	{
 		return (String)get_Value(COLUMNNAME_ST_NumeroTicket);
+	}
+
+	/** Set ST_SerieCFE.
+		@param ST_SerieCFE ST_SerieCFE	  */
+	public void setST_SerieCFE (String ST_SerieCFE)
+	{
+		set_Value (COLUMNNAME_ST_SerieCFE, ST_SerieCFE);
+	}
+
+	/** Get ST_SerieCFE.
+		@return ST_SerieCFE	  */
+	public String getST_SerieCFE () 
+	{
+		return (String)get_Value(COLUMNNAME_ST_SerieCFE);
+	}
+
+	/** Set ST_TipoCFE.
+		@param ST_TipoCFE ST_TipoCFE	  */
+	public void setST_TipoCFE (String ST_TipoCFE)
+	{
+		set_Value (COLUMNNAME_ST_TipoCFE, ST_TipoCFE);
+	}
+
+	/** Get ST_TipoCFE.
+		@return ST_TipoCFE	  */
+	public String getST_TipoCFE () 
+	{
+		return (String)get_Value(COLUMNNAME_ST_TipoCFE);
 	}
 
 	/** Set Tax Amount.

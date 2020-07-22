@@ -56,7 +56,7 @@ public interface I_Z_SistecoPazosTKRUT
 	/** Set Organization.
 	  * Organizational entity within client
 	  */
-	public void setAD_Org_ID(int AD_Org_ID);
+	public void setAD_Org_ID (int AD_Org_ID);
 
 	/** Get Organization.
 	  * Organizational entity within client
@@ -69,12 +69,42 @@ public interface I_Z_SistecoPazosTKRUT
 	/** Set AmtSubtotal.
 	  * Subtotales para no mostrar impuestos incluídos
 	  */
-	public void setAmtSubtotal(BigDecimal AmtSubtotal);
+	public void setAmtSubtotal (BigDecimal AmtSubtotal);
 
 	/** Get AmtSubtotal.
 	  * Subtotales para no mostrar impuestos incluídos
 	  */
 	public BigDecimal getAmtSubtotal();
+
+    /** Column name C_BPartner_ID */
+    public static final String COLUMNNAME_C_BPartner_ID = "C_BPartner_ID";
+
+	/** Set Business Partner .
+	  * Identifies a Business Partner
+	  */
+	public void setC_BPartner_ID (int C_BPartner_ID);
+
+	/** Get Business Partner .
+	  * Identifies a Business Partner
+	  */
+	public int getC_BPartner_ID();
+
+	public I_C_BPartner getC_BPartner() throws RuntimeException;
+
+    /** Column name C_DocType_ID */
+    public static final String COLUMNNAME_C_DocType_ID = "C_DocType_ID";
+
+	/** Set Document Type.
+	  * Document type or rules
+	  */
+	public void setC_DocType_ID (int C_DocType_ID);
+
+	/** Get Document Type.
+	  * Document type or rules
+	  */
+	public int getC_DocType_ID();
+
+	public I_C_DocType getC_DocType() throws RuntimeException;
 
     /** Column name Created */
     public static final String COLUMNNAME_Created = "Created";
@@ -92,18 +122,42 @@ public interface I_Z_SistecoPazosTKRUT
 	  */
 	public int getCreatedBy();
 
+    /** Column name C_TaxGroup_ID */
+    public static final String COLUMNNAME_C_TaxGroup_ID = "C_TaxGroup_ID";
+
+	/** Set Tax Group	  */
+	public void setC_TaxGroup_ID (int C_TaxGroup_ID);
+
+	/** Get Tax Group	  */
+	public int getC_TaxGroup_ID();
+
+	public org.eevolution.model.I_C_TaxGroup getC_TaxGroup() throws RuntimeException;
+
     /** Column name DateTrx */
     public static final String COLUMNNAME_DateTrx = "DateTrx";
 
 	/** Set Transaction Date.
 	  * Transaction Date
 	  */
-	public void setDateTrx(Timestamp DateTrx);
+	public void setDateTrx (Timestamp DateTrx);
 
 	/** Get Transaction Date.
 	  * Transaction Date
 	  */
 	public Timestamp getDateTrx();
+
+    /** Column name DocumentNoRef */
+    public static final String COLUMNNAME_DocumentNoRef = "DocumentNoRef";
+
+	/** Set DocumentNoRef.
+	  * Numero de documento referenciado
+	  */
+	public void setDocumentNoRef (String DocumentNoRef);
+
+	/** Get DocumentNoRef.
+	  * Numero de documento referenciado
+	  */
+	public String getDocumentNoRef();
 
     /** Column name IsActive */
     public static final String COLUMNNAME_IsActive = "IsActive";
@@ -111,7 +165,7 @@ public interface I_Z_SistecoPazosTKRUT
 	/** Set Active.
 	  * The record is active in the system
 	  */
-	public void setIsActive(boolean IsActive);
+	public void setIsActive (boolean IsActive);
 
 	/** Get Active.
 	  * The record is active in the system
@@ -124,7 +178,7 @@ public interface I_Z_SistecoPazosTKRUT
 	/** Set Payment amount.
 	  * Amount being paid
 	  */
-	public void setPayAmt(BigDecimal PayAmt);
+	public void setPayAmt (BigDecimal PayAmt);
 
 	/** Get Payment amount.
 	  * Amount being paid
@@ -135,7 +189,7 @@ public interface I_Z_SistecoPazosTKRUT
     public static final String COLUMNNAME_ST_DocumentoReceptor = "ST_DocumentoReceptor";
 
 	/** Set ST_DocumentoReceptor	  */
-	public void setST_DocumentoReceptor(String ST_DocumentoReceptor);
+	public void setST_DocumentoReceptor (String ST_DocumentoReceptor);
 
 	/** Get ST_DocumentoReceptor	  */
 	public String getST_DocumentoReceptor();
@@ -144,19 +198,46 @@ public interface I_Z_SistecoPazosTKRUT
     public static final String COLUMNNAME_ST_NombreReceptor = "ST_NombreReceptor";
 
 	/** Set ST_NombreReceptor	  */
-	public void setST_NombreReceptor(String ST_NombreReceptor);
+	public void setST_NombreReceptor (String ST_NombreReceptor);
 
 	/** Get ST_NombreReceptor	  */
 	public String getST_NombreReceptor();
+
+    /** Column name ST_NumeroCFE */
+    public static final String COLUMNNAME_ST_NumeroCFE = "ST_NumeroCFE";
+
+	/** Set ST_NumeroCFE	  */
+	public void setST_NumeroCFE (String ST_NumeroCFE);
+
+	/** Get ST_NumeroCFE	  */
+	public String getST_NumeroCFE();
 
     /** Column name ST_NumeroTicket */
     public static final String COLUMNNAME_ST_NumeroTicket = "ST_NumeroTicket";
 
 	/** Set ST_NumeroTicket	  */
-	public void setST_NumeroTicket(String ST_NumeroTicket);
+	public void setST_NumeroTicket (String ST_NumeroTicket);
 
 	/** Get ST_NumeroTicket	  */
 	public String getST_NumeroTicket();
+
+    /** Column name ST_SerieCFE */
+    public static final String COLUMNNAME_ST_SerieCFE = "ST_SerieCFE";
+
+	/** Set ST_SerieCFE	  */
+	public void setST_SerieCFE (String ST_SerieCFE);
+
+	/** Get ST_SerieCFE	  */
+	public String getST_SerieCFE();
+
+    /** Column name ST_TipoCFE */
+    public static final String COLUMNNAME_ST_TipoCFE = "ST_TipoCFE";
+
+	/** Set ST_TipoCFE	  */
+	public void setST_TipoCFE (String ST_TipoCFE);
+
+	/** Get ST_TipoCFE	  */
+	public String getST_TipoCFE();
 
     /** Column name TaxAmt */
     public static final String COLUMNNAME_TaxAmt = "TaxAmt";
@@ -164,7 +245,7 @@ public interface I_Z_SistecoPazosTKRUT
 	/** Set Tax Amount.
 	  * Tax Amount for a document
 	  */
-	public void setTaxAmt(BigDecimal TaxAmt);
+	public void setTaxAmt (BigDecimal TaxAmt);
 
 	/** Get Tax Amount.
 	  * Tax Amount for a document
@@ -177,7 +258,7 @@ public interface I_Z_SistecoPazosTKRUT
 	/** Set Total Amount.
 	  * Total Amount
 	  */
-	public void setTotalAmt(BigDecimal TotalAmt);
+	public void setTotalAmt (BigDecimal TotalAmt);
 
 	/** Get Total Amount.
 	  * Total Amount
@@ -204,7 +285,7 @@ public interface I_Z_SistecoPazosTKRUT
     public static final String COLUMNNAME_Z_SistecoInterfacePazos_ID = "Z_SistecoInterfacePazos_ID";
 
 	/** Set Z_SistecoInterfacePazos ID	  */
-	public void setZ_SistecoInterfacePazos_ID(int Z_SistecoInterfacePazos_ID);
+	public void setZ_SistecoInterfacePazos_ID (int Z_SistecoInterfacePazos_ID);
 
 	/** Get Z_SistecoInterfacePazos ID	  */
 	public int getZ_SistecoInterfacePazos_ID();
@@ -215,7 +296,7 @@ public interface I_Z_SistecoPazosTKRUT
     public static final String COLUMNNAME_Z_SistecoPazosTKRUT_ID = "Z_SistecoPazosTKRUT_ID";
 
 	/** Set Z_SistecoPazosTKRUT ID	  */
-	public void setZ_SistecoPazosTKRUT_ID(int Z_SistecoPazosTKRUT_ID);
+	public void setZ_SistecoPazosTKRUT_ID (int Z_SistecoPazosTKRUT_ID);
 
 	/** Get Z_SistecoPazosTKRUT ID	  */
 	public int getZ_SistecoPazosTKRUT_ID();
