@@ -121,6 +121,9 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
             // Obtengo y guardo devoluciones de envases
             this.setVentasDevEnvases();
 
+            // Guardo información de ventas para informes
+            this.setDataInformes();
+
             // Tiempo final de proceso
             this.setEndDate(new Timestamp(System.currentTimeMillis()));
 
@@ -134,6 +137,142 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
         return message;
 
+    }
+
+    private void setDataInformes() {
+
+        String sql, action;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try{
+
+            String insert = " insert into z_bi_invprodday (ad_client_id, ad_org_id, dateinvoiced, c_currency_id, m_product_id, " +
+                    " c_uom_id, qtysold, amtsubtotal, totalamt, qtypurchased, amtsubtotalpo, totalamtpo, z_bi_dia_id) ";
+
+            // Ventas
+            sql = " select a.ad_org_id, a.datetrx, dimday.z_bi_dia_id, 142::numeric(10,0) as c_currency_id, " +
+                    " coalesce(l.m_product_id, upc.m_product_id) as m_product_id, prod.c_uom_id, " +
+                    " sum(l.st_cantidad) as cantidad, sum(l.st_preciodescuentototal) as subtotal, " +
+                    " sum(round(l.st_cantidad * l.st_preciounitarioconiva,2)) as total " +
+                    " from z_sistecointerfacepazos a " +
+                    " inner join z_sisteco_tk_lvta l on a.z_sistecointerfacepazos_id = l.z_sistecointerfacepazos_id " +
+                    " left outer join m_product prod on l.m_product_id = prod.m_product_id " +
+                    " left outer join z_bi_dia dimday on a.datetrx = dimday.datetrx " +
+                    " left outer join z_productoupc upc on l.st_codigoarticulooriginal = upc.upc " +
+                    " where a.ad_org_id =" + this.getAD_Org_ID() +
+                    " and a.datetrx ='" + this.getDateTrx() + "' " +
+                    " and l.st_lineacancelada = 0 " +
+                    " and ((l.st_siesobsequio is null) or (l.st_siesobsequio='0')) " +
+                    " group by 1,2,3,4,5,6 ";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            while(rs.next()){
+
+                // Verifico si no existe un registro para esta clave en la tabla de analisis
+                sql = " select count(*) from z_bi_invprodday " +
+                        " where ad_org_id =" + rs.getInt("ad_org_id") +
+                        " and m_product_id =" + rs.getInt("m_product_id") +
+                        " and c_currency_id =" + rs.getInt("c_currency_id") +
+                        " and dateinvoiced ='" + rs.getTimestamp("datetrx") + "' ";
+                int contador = DB.getSQLValueEx(get_TrxName(), sql);
+
+                // Si no existe aún un registro para esta clave
+                if (contador <= 0){
+
+                    // Insert
+                    action = " values (" + this.getAD_Client_ID() + ", " + rs.getInt("ad_org_id") + ", '" +
+                            rs.getTimestamp("datetrx") + "', " + rs.getInt("c_currency_id") + ", " +
+                            rs.getInt("m_product_id") + ", " + rs.getInt("c_uom_id") + ", " +
+                            rs.getBigDecimal("cantidad") + ", " + rs.getBigDecimal("subtotal") + ", " +
+                            rs.getBigDecimal("total") + ", 0, 0, 0, " + rs.getInt("z_bi_dia_id") + ") ";
+
+                    DB.executeUpdateEx(insert + action, get_TrxName());
+                }
+                else {
+                    // Actualizo
+                    action = " update z_bi_invprodday set " +
+                            " qtysold = qtysold + " + rs.getBigDecimal("cantidad") + ", " +
+                            " amtsubtotal = amtsubtotal + " + rs.getBigDecimal("subtotal") + ", " +
+                            " totalamt = totalamt + " + rs.getBigDecimal("total") +
+                            " where ad_org_id =" + rs.getInt("ad_org_id") +
+                            " and m_product_id =" + rs.getInt("m_product_id") +
+                            " and c_currency_id =" + rs.getInt("c_currency_id") +
+                            " and dateinvoiced ='" + rs.getTimestamp("datetrx") + "' ";
+
+                    DB.executeUpdateEx(action, get_TrxName());
+                }
+
+            }
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+
+            // Devoluciones
+            sql = " select a.ad_org_id, a.datetrx, dimday.z_bi_dia_id, 142::numeric(10,0) as c_currency_id, " +
+                    " l.m_product_id, prod.c_uom_id, " +
+                    " sum(l.st_cantidad * -1) as cantidad, sum(l.st_precio) as subtotal, " +
+                    " sum(round(l.st_iva + l.st_precio,2)) as total " +
+                    " from z_sistecointerfacepazos a " +
+                    " inner join z_sisteco_tk_ldev l on a.z_sistecointerfacepazos_id = l.z_sistecointerfacepazos_id " +
+                    " left outer join m_product prod on l.m_product_id = prod.m_product_id " +
+                    " left outer join z_bi_dia dimday on a.datetrx = dimday.datetrx " +
+                    " where a.ad_org_id =" + this.getAD_Org_ID() +
+                    " and a.datetrx ='" + this.getDateTrx() + "' " +
+                    " and l.st_lineacancelada = 0 " +
+                    " and l.m_product_id is not null " +
+                    " group by 1,2,3,4,5,6 ";
+
+            pstmt = DB.prepareStatement(sql, get_TrxName());
+            rs = pstmt.executeQuery();
+
+            while(rs.next()){
+
+                // Verifico si no existe un registro para esta clave en la tabla de analisis
+                sql = " select count(*) from z_bi_invprodday " +
+                        " where ad_org_id =" + rs.getInt("ad_org_id") +
+                        " and m_product_id =" + rs.getInt("m_product_id") +
+                        " and c_currency_id =" + rs.getInt("c_currency_id") +
+                        " and dateinvoiced ='" + rs.getTimestamp("datetrx") + "' ";
+                int contador = DB.getSQLValueEx(get_TrxName(), sql);
+
+                // Si no existe aún un registro para esta clave
+                if (contador <= 0){
+
+                    // Insert
+                    action = " values (" + this.getAD_Client_ID() + ", " + rs.getInt("ad_org_id") + ", '" +
+                            rs.getTimestamp("datetrx") + "', " + rs.getInt("c_currency_id") + ", " +
+                            rs.getInt("m_product_id") + ", " + rs.getInt("c_uom_id") + ", " +
+                            rs.getBigDecimal("cantidad") + ", " + rs.getBigDecimal("subtotal") + ", " +
+                            rs.getBigDecimal("total") + ", 0, 0, 0, " + rs.getInt("z_bi_dia_id") + ") ";
+
+                    DB.executeUpdateEx(insert + action, get_TrxName());
+                }
+                else {
+                    // Actualizo
+                    action = " update z_bi_invprodday set " +
+                            " qtysold = qtysold + " + rs.getBigDecimal("cantidad") + ", " +
+                            " amtsubtotal = amtsubtotal + " + rs.getBigDecimal("subtotal") + ", " +
+                            " totalamt = totalamt + " + rs.getBigDecimal("total") +
+                            " where ad_org_id =" + rs.getInt("ad_org_id") +
+                            " and m_product_id =" + rs.getInt("m_product_id") +
+                            " and c_currency_id =" + rs.getInt("c_currency_id") +
+                            " and dateinvoiced ='" + rs.getTimestamp("datetrx") + "' ";
+
+                    DB.executeUpdateEx(action, get_TrxName());
+                }
+            }
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
+        catch (Exception e){
+            throw new AdempiereException(e);
+        }
+        finally {
+            DB.close(rs, pstmt);
+            rs = null; pstmt = null;
+        }
     }
 
     /***
