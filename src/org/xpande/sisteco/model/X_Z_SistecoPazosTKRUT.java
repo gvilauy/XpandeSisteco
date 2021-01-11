@@ -33,7 +33,7 @@ public class X_Z_SistecoPazosTKRUT extends PO implements I_Z_SistecoPazosTKRUT, 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200722L;
+	private static final long serialVersionUID = 20210111L;
 
     /** Standard Constructor */
     public X_Z_SistecoPazosTKRUT (Properties ctx, int Z_SistecoPazosTKRUT_ID, String trxName)
@@ -117,6 +117,34 @@ public class X_Z_SistecoPazosTKRUT extends PO implements I_Z_SistecoPazosTKRUT, 
 	public int getC_BPartner_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_BP_Group getC_BP_Group() throws RuntimeException
+    {
+		return (I_C_BP_Group)MTable.get(getCtx(), I_C_BP_Group.Table_Name)
+			.getPO(getC_BP_Group_ID(), get_TrxName());	}
+
+	/** Set Business Partner Group.
+		@param C_BP_Group_ID 
+		Business Partner Group
+	  */
+	public void setC_BP_Group_ID (int C_BP_Group_ID)
+	{
+		if (C_BP_Group_ID < 1) 
+			set_Value (COLUMNNAME_C_BP_Group_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_BP_Group_ID, Integer.valueOf(C_BP_Group_ID));
+	}
+
+	/** Get Business Partner Group.
+		@return Business Partner Group
+	  */
+	public int getC_BP_Group_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BP_Group_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

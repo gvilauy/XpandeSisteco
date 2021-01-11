@@ -33,7 +33,7 @@ public class X_Z_SistecoVtaCtaCte extends PO implements I_Z_SistecoVtaCtaCte, I_
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 20200608L;
+	private static final long serialVersionUID = 20210111L;
 
     /** Standard Constructor */
     public X_Z_SistecoVtaCtaCte (Properties ctx, int Z_SistecoVtaCtaCte_ID, String trxName)
@@ -126,6 +126,34 @@ public class X_Z_SistecoVtaCtaCte extends PO implements I_Z_SistecoVtaCtaCte, I_
 	public int getC_BPartner_Location_ID () 
 	{
 		Integer ii = (Integer)get_Value(COLUMNNAME_C_BPartner_Location_ID);
+		if (ii == null)
+			 return 0;
+		return ii.intValue();
+	}
+
+	public I_C_BP_Group getC_BP_Group() throws RuntimeException
+    {
+		return (I_C_BP_Group)MTable.get(getCtx(), I_C_BP_Group.Table_Name)
+			.getPO(getC_BP_Group_ID(), get_TrxName());	}
+
+	/** Set Business Partner Group.
+		@param C_BP_Group_ID 
+		Business Partner Group
+	  */
+	public void setC_BP_Group_ID (int C_BP_Group_ID)
+	{
+		if (C_BP_Group_ID < 1) 
+			set_Value (COLUMNNAME_C_BP_Group_ID, null);
+		else 
+			set_Value (COLUMNNAME_C_BP_Group_ID, Integer.valueOf(C_BP_Group_ID));
+	}
+
+	/** Get Business Partner Group.
+		@return Business Partner Group
+	  */
+	public int getC_BP_Group_ID () 
+	{
+		Integer ii = (Integer)get_Value(COLUMNNAME_C_BP_Group_ID);
 		if (ii == null)
 			 return 0;
 		return ii.intValue();

@@ -477,6 +477,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                 vtaCtaCte.setAD_Org_ID(invoice.getAD_Org_ID());
                 vtaCtaCte.setC_BPartner_ID(invoice.getC_BPartner_ID());
                 vtaCtaCte.setC_BPartner_Location_ID(invoice.getC_BPartner_Location_ID());
+                vtaCtaCte.setC_BP_Group_ID(partner.getC_BP_Group_ID());
                 vtaCtaCte.setC_DocType_ID(invoice.getC_DocTypeTarget_ID());
 
                 if (invoice.get_ID() > 0){
@@ -1286,6 +1287,10 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
 
                 if (rs.getInt("c_bpartner_id") > 0){
                     tkrut.setC_BPartner_ID(rs.getInt("c_bpartner_id"));
+                    MBPartner partner = new MBPartner(getCtx(), rs.getInt("c_bpartner_id"), null);
+                    if ((partner != null) && (partner.get_ID() > 0)){
+                        tkrut.setC_BP_Group_ID(partner.getC_BP_Group_ID());
+                    }
                 }
                 if (rs.getInt("c_doctype_id") > 0){
                     tkrut.setC_DocType_ID(rs.getInt("c_doctype_id"));
