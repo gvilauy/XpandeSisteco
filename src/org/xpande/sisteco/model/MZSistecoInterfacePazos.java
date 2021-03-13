@@ -160,8 +160,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " left outer join m_product prod on l.m_product_id = prod.m_product_id " +
                     " left outer join z_bi_dia dimday on a.datetrx = dimday.datetrx " +
                     " left outer join z_productoupc upc on l.st_codigoarticulooriginal = upc.upc " +
-                    " where a.ad_org_id =" + this.getAD_Org_ID() +
-                    " and a.datetrx ='" + this.getDateTrx() + "' " +
+                    " where a.z_sistecointerfacepazos =" + this.get_ID() +
                     " and l.st_lineacancelada = 0 " +
                     " and ((l.st_siesobsequio is null) or (l.st_siesobsequio='0')) " +
                     " group by 1,2,3,4,5,6 ";
@@ -218,8 +217,7 @@ public class MZSistecoInterfacePazos extends X_Z_SistecoInterfacePazos {
                     " inner join z_sisteco_tk_ldev l on a.z_sistecointerfacepazos_id = l.z_sistecointerfacepazos_id " +
                     " left outer join m_product prod on l.m_product_id = prod.m_product_id " +
                     " left outer join z_bi_dia dimday on a.datetrx = dimday.datetrx " +
-                    " where a.ad_org_id =" + this.getAD_Org_ID() +
-                    " and a.datetrx ='" + this.getDateTrx() + "' " +
+                    " where a.z_sistecointerfacepazos =" + this.get_ID() +
                     " and l.st_lineacancelada = 0 " +
                     " and l.m_product_id is not null " +
                     " group by 1,2,3,4,5,6 ";
